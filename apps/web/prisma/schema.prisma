@@ -428,3 +428,23 @@ model Notification {
 
   @@index([userId, readAt, createdAt])
 }
+
+model SiteVisit {
+  id              String   @id @default(cuid())
+  visitorKey      String
+  site            String
+  path            String
+  referrer        String?
+  ip              String?
+  countryCity     String?
+  device          String?
+  browserOs       String?
+  userAgent       String?  @db.Text
+  durationSeconds Int      @default(0)
+  startedAt       DateTime @default(now())
+  lastSeenAt      DateTime @default(now())
+
+  @@index([visitorKey])
+  @@index([startedAt])
+  @@index([lastSeenAt])
+}

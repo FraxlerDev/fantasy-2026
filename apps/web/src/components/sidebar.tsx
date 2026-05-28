@@ -25,13 +25,15 @@ export async function Sidebar({ active = "/" }: { active?: string }) {
     <aside className="sidebar">
       <input className="mobile-nav-toggle" id="mobile-nav-toggle" type="checkbox" aria-hidden="true" />
       <div className="brand">
-        <div className="brand-mark brand-photo">
-          <img src="/main-photo.png" alt="" />
-        </div>
-        <div className="brand-text">
-          <div>Fantasy 2026 UA</div>
-          <small className="muted">ЧС-2026 для своїх ліг</small>
-        </div>
+        <Link className="brand-home" href="/" aria-label="На головну">
+          <div className="brand-mark brand-photo">
+            <img src="/main-photo.png" alt="" />
+          </div>
+          <div className="brand-text">
+            <div>Fantasy 2026 UA</div>
+            <small className="muted">ЧС-2026 для своїх ліг</small>
+          </div>
+        </Link>
         <label className="mobile-menu-button" htmlFor="mobile-nav-toggle" aria-label="Відкрити меню">
           <span />
           <span />

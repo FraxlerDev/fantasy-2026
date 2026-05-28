@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "../auth";
 import { DevtoolsVisibility } from "../components/devtools-visibility";
-import { TrackerBodyScript } from "../components/tracker-body-script";
+import { SiteVisitTracker } from "../components/site-visit-tracker";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -21,10 +21,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html lang="uk">
-      <body data-admin={isAdmin ? "true" : "false"}>
+      <body data-admin={isAdmin ? "true" : "false"} suppressHydrationWarning>
         <DevtoolsVisibility isAdmin={isAdmin} />
         {children}
-        <TrackerBodyScript />
+        <SiteVisitTracker />
       </body>
     </html>
   );

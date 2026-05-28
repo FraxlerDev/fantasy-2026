@@ -28,6 +28,24 @@ type FixtureListItem = {
   homeTeam: TeamLabel;
   awayTeam: TeamLabel;
 };
+type SiteVisitRow = {
+  id: string;
+  visitorKey: string;
+  site: string;
+  path: string;
+  referrer: string | null;
+  ip: string | null;
+  countryCity: string | null;
+  device: string | null;
+  browserOs: string | null;
+  durationSeconds: number;
+  startedAt: Date;
+  lastSeenAt: Date;
+};
+
+type AggregatedVisitRow = SiteVisitRow & {
+  visitCount: number;
+};
 
 function teamLabel(team: TeamLabel) {
   return (
@@ -49,6 +67,38 @@ function groupFixtures(fixtures: FixtureListItem[]) {
     groups.set(key, [...(groups.get(key) ?? []), fixture]);
     return groups;
   }, new Map());
+}
+
+function startOfToday() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+function formatAdminDate(date: Date) {
+  return date.toLocaleString("uk-UA", {
+    timeZone: "Europe/Kyiv",
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function formatDuration(totalSeconds: number) {
+  const seconds = Math.max(0, Math.round(totalSeconds));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const restSeconds = seconds % 60;
+
+  if (hours > 0) return `${hours} год ${minutes} хв`;
+  if (minutes > 0) return `${minutes} хв ${restSeconds} с`;
+  return `${restSeconds} с`;
+}
+
+function visitStatus(lastSeenAt: Date) {
+  return Date.now() - lastSeenAt.getTime() < 120_000 ? "Online" : "Offline";
 }
 
 const errorMessages: Record<string, string> = {
@@ -104,7 +154,9 @@ export default async function AdminPage({
 
   const params = await searchParams;
   const selectedGameweek = params?.gw ? Number(params.gw) : undefined;
-  const [teams, players, allFixtures, gameweeks, fantasyTeams] = await Promise.all([
+  const siteVisit = (prisma as unknown as { siteVisit?: any }).siteVisit;
+  const todayStart = startOfToday();
+  const [teams, players, allFixtures, gameweeks, fantasyTeams, todayVisitors, allVisitors, todayDuration, allDuration, recentVisits] = await Promise.all([
     prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }] }),
     prisma.player.findMany({
       include: { nationalTeam: true },
@@ -124,6 +176,24 @@ export default async function AdminPage({
       },
       orderBy: [{ createdAt: "asc" }],
     }),
+    siteVisit?.groupBy({
+      by: ["ip"],
+      where: { startedAt: { gte: todayStart } },
+    }).catch(() => []) ?? Promise.resolve([]),
+    siteVisit?.groupBy({
+      by: ["ip"],
+    }).catch(() => []) ?? Promise.resolve([]),
+    siteVisit?.aggregate({
+      where: { startedAt: { gte: todayStart } },
+      _sum: { durationSeconds: true },
+    }).catch(() => ({ _sum: { durationSeconds: 0 } })) ?? Promise.resolve({ _sum: { durationSeconds: 0 } }),
+    siteVisit?.aggregate({
+      _sum: { durationSeconds: true },
+    }).catch(() => ({ _sum: { durationSeconds: 0 } })) ?? Promise.resolve({ _sum: { durationSeconds: 0 } }),
+    siteVisit?.findMany({
+      orderBy: { startedAt: "desc" },
+      take: 500,
+    }).catch(() => []) ?? Promise.resolve([]),
   ]);
 
   const fixtures = selectedGameweek ? allFixtures.filter((fixture) => fixture.gameweek === selectedGameweek) : allFixtures;
@@ -176,6 +246,24 @@ export default async function AdminPage({
     return groups;
   }, new Map());
 
+  const visitsByIp = (recentVisits as SiteVisitRow[]).reduce<Map<string, AggregatedVisitRow>>((groups, visit) => {
+    const key = visit.ip ?? `visitor:${visit.visitorKey}`;
+    const existing = groups.get(key);
+
+    if (!existing) {
+      groups.set(key, { ...visit, visitCount: 1 });
+      return groups;
+    }
+
+    existing.durationSeconds += visit.durationSeconds;
+    existing.visitCount += 1;
+    if (visit.lastSeenAt > existing.lastSeenAt) {
+      existing.lastSeenAt = visit.lastSeenAt;
+    }
+    return groups;
+  }, new Map());
+  const uniqueVisitRows = [...visitsByIp.values()].sort((a, b) => b.lastSeenAt.getTime() - a.lastSeenAt.getTime()).slice(0, 50);
+
   return (
     <AppShell active="/admin">
       <div className="topbar">
@@ -184,15 +272,19 @@ export default async function AdminPage({
           <h1>Admin Console</h1>
           <p className="muted">Керування матчами, гравцями, ручними очками й рейтингами.</p>
         </div>
-        <form action={refreshRankingsAction}>
+        <div className="toolbar">
+          <a className="button" href="#visits-modal">Статистика</a>
+          <form action={refreshRankingsAction}>
           <button className="button primary" type="submit">
             <Trophy size={18} />
             Оновити рейтинги
           </button>
-        </form>
+          </form>
+        </div>
       </div>
 
       <nav className="admin-tabs">
+        <a href="#visits-modal">Статистика</a>
         <a href="#gameweeks">GW / Snapshot</a>
         <a href="#matches">Матчі</a>
         <a href="#players">Гравці</a>
@@ -213,6 +305,82 @@ export default async function AdminPage({
             : `Snapshot створено: ${params.snapshots ?? "0"}, невалідних складів: ${params.snapshotFailed ?? "0"}${params.snapshotSkipped === "1" ? " (snapshot уже існував)." : "."}`}
         </div>
       ) : null}
+
+      <section className="admin-modal" id="visits-modal" aria-label="Статистика користувачів сайту">
+        <a className="admin-modal-backdrop" href="#" aria-label="Закрити статистику" />
+        <div className="admin-modal-content">
+          <div className="admin-modal-heading">
+            <h2>Статистика користувачів сайту</h2>
+            <a className="button" href="#">Закрити</a>
+          </div>
+          <div className="admin-visits">
+        <div className="visit-stat-grid">
+          <div className="visit-stat-card">
+            <span>Користувачів сьогодні</span>
+            <strong>{todayVisitors.length}</strong>
+          </div>
+          <div className="visit-stat-card">
+            <span>Тривалість сьогодні</span>
+            <strong>{formatDuration(todayDuration._sum.durationSeconds ?? 0)}</strong>
+          </div>
+          <div className="visit-stat-card">
+            <span>Користувачів за весь час</span>
+            <strong>{allVisitors.length}</strong>
+          </div>
+          <div className="visit-stat-card">
+            <span>Тривалість за весь час</span>
+            <strong>{formatDuration(allDuration._sum.durationSeconds ?? 0)}</strong>
+          </div>
+        </div>
+
+        <div className="visit-table-panel">
+          <div className="visit-table-heading">
+            <h2>Статистика користувачів сайту</h2>
+            <span className="muted">Унікальних IP: {uniqueVisitRows.length}</span>
+          </div>
+          <table className="table compact-table visit-table">
+            <thead>
+              <tr>
+                <th>Час входу</th>
+                <th>Статус</th>
+                <th>Сайт</th>
+                <th>IP</th>
+                <th>Країна / місто</th>
+                <th>Пристрій</th>
+                <th>Браузер / ОС</th>
+                <th>Тривалість</th>
+                <th>Сторінка</th>
+                <th>Referrer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {uniqueVisitRows.map((visit) => {
+                const status = visitStatus(visit.lastSeenAt);
+                return (
+                  <tr key={visit.id}>
+                    <td>{formatAdminDate(visit.startedAt)}</td>
+                    <td>
+                      <span className={`visit-status ${status === "Online" ? "online" : "offline"}`}>
+                        {status}
+                      </span>
+                    </td>
+                    <td>{visit.site}</td>
+                    <td>{visit.ip ?? "-"}</td>
+                    <td>{visit.countryCity ?? "-"}</td>
+                    <td>{visit.device ?? "-"}</td>
+                    <td>{visit.browserOs ?? "-"}</td>
+                    <td>{formatDuration(visit.durationSeconds)}</td>
+                    <td>{visit.path}</td>
+                    <td>{visit.referrer ?? "-"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+          </div>
+        </div>
+      </section>
 
       <section className="panel" id="gameweeks" style={{ marginBottom: 16 }}>
         <h2>Gameweeks, дедлайни і трансфери</h2>
