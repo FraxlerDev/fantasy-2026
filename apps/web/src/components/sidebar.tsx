@@ -24,7 +24,9 @@ export async function Sidebar({ active = "/" }: { active?: string }) {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-mark">26</div>
+        <div className="brand-mark brand-photo">
+          <img src="/main-photo.png" alt="" />
+        </div>
         <div>
           <div>Fantasy 2026 UA</div>
           <small className="muted">ЧС-2026 для своїх ліг</small>

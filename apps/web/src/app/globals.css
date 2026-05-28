@@ -82,6 +82,18 @@ select {
   font-weight: 900;
 }
 
+.brand-photo {
+  overflow: hidden;
+  background: transparent;
+}
+
+.brand-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .nav {
   display: grid;
   gap: 6px;
