@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { auth } from "../auth";
 import { DevtoolsVisibility } from "../components/devtools-visibility";
 import "./globals.css";
@@ -24,7 +23,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body data-admin={isAdmin ? "true" : "false"}>
         <DevtoolsVisibility isAdmin={isAdmin} />
         {children}
-        <Script src="https://views.fraxler.site/tracker.js" strategy="afterInteractive" />
+        <script async src="https://views.fraxler.site/tracker.js" />
       </body>
     </html>
   );
