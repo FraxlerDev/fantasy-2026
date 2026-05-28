@@ -18,6 +18,12 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -70,6 +76,19 @@ select {
   gap: 12px;
   font-weight: 800;
   letter-spacing: 0;
+  min-width: 0;
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+.brand-text > div,
+.brand-text small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .brand-mark {
@@ -92,6 +111,19 @@ select {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.mobile-nav-toggle,
+.mobile-menu-button {
+  display: none;
+}
+
+.sidebar-menu {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .nav {
@@ -128,6 +160,8 @@ select {
 .main {
   padding: 24px 32px 40px;
   min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .topbar {
@@ -2179,6 +2213,10 @@ h3 {
 }
 
 @media (max-width: 980px) {
+  body {
+    min-width: 0;
+  }
+
   .app-shell {
     grid-template-columns: 1fr;
   }
@@ -2186,6 +2224,80 @@ h3 {
   .sidebar {
     position: static;
     height: auto;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .brand {
+    width: 100%;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+  }
+
+  .brand-text {
+    flex: 1;
+  }
+
+  .mobile-menu-button {
+    width: 42px;
+    height: 42px;
+    margin-left: auto;
+    display: inline-grid;
+    place-items: center;
+    gap: 4px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+  }
+
+  .mobile-menu-button span {
+    width: 20px;
+    height: 2px;
+    display: block;
+    background: #fff;
+  }
+
+  .sidebar-menu {
+    display: none;
+    gap: 14px;
+  }
+
+  .mobile-nav-toggle:checked ~ .sidebar-menu {
+    display: flex;
+  }
+
+  .nav {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-note {
+    position: static;
+    margin-top: 0;
+  }
+
+  .main {
+    width: 100%;
+    padding: 16px 12px 28px;
+  }
+
+  .topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .panel,
+  .card {
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   .grid.cols-2,
@@ -2195,7 +2307,8 @@ h3 {
   .form-inline,
   .filters,
   .player-edit-form,
-  .petition-row {
+  .petition-row,
+  .snapshot-metrics {
     grid-template-columns: 1fr;
   }
 
@@ -2206,5 +2319,33 @@ h3 {
 
   .chat-panel {
     height: min(580px, calc(100vh - 86px));
+  }
+
+  .fixed-pitch,
+  .fixed-bench,
+  .public-fixed-pitch,
+  .public-fixed-bench {
+    width: 100%;
+  }
+
+  .fixed-pitch {
+    height: 460px;
+    padding: 10px 8px;
+  }
+
+  .fixed-pitch-row {
+    gap: 4px;
+  }
+
+  .fantasy-shirt {
+    width: 64px;
+  }
+
+  .promo-hero {
+    padding: 20px 14px 0;
+  }
+
+  .promo-copy h1 {
+    font-size: 32px;
   }
 }
