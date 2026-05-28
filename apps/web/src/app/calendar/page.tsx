@@ -33,33 +33,58 @@ export default async function CalendarPage() {
       <FantasyLayout>
         <section className="panel">
           <p className="eyebrow">Календар</p>
-          <h1>Матчі групового етапу</h1>
-          <p className="muted">Повний календар матчів з прапорами, турами, часом початку і рахунками.</p>
+          <h1>Матчі чемпіонату світу 2026</h1>
+          <p className="muted">
+            Повний календар матчів з прапорами, групами, часом початку і рахунками.
+          </p>
         </section>
 
         {[...fixturesByGw.entries()].map(([gameweek, gwFixtures]) => (
-          <section className="panel" style={{ marginTop: 16 }} key={gameweek}>
-            <h2>GW{gameweek}</h2>
-            <table className="table compact-table">
-              <thead>
-                <tr><th>№ матчу</th><th>Група</th><th>Матч</th><th>Рахунок</th><th>Початок</th></tr>
-              </thead>
-              <tbody>
-                {gwFixtures.map((fixture) => (
-                  <tr key={fixture.id}>
-                    <td>{fixture.matchNo}</td>
-                    <td>{fixture.groupName}</td>
-                    <td className="fixture-line">
-                      {fixture.homeTeam.flagPath ? <img alt="" className="flag" src={fixture.homeTeam.flagPath} /> : null}
-                      {fixture.homeTeam.nameUk} - {fixture.awayTeam.nameUk}
-                      {fixture.awayTeam.flagPath ? <img alt="" className="flag" src={fixture.awayTeam.flagPath} /> : null}
-                    </td>
-                    <td><strong>{scoreText(fixture)}</strong></td>
-                    <td>{formatKickoff(fixture.kickoffAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <section className="panel calendar-gw-panel" key={gameweek}>
+            <div className="calendar-gw-heading">
+              <h2>GW{gameweek}</h2>
+              <span>{gwFixtures.length} матчів</span>
+            </div>
+
+            <div className="calendar-list">
+              {gwFixtures.map((fixture) => (
+                <article className="calendar-row" key={fixture.id}>
+                  <div className="calendar-number">
+                    <span>№</span>
+                    <strong>{fixture.matchNo}</strong>
+                  </div>
+
+                  <div className="calendar-match">
+                    <span className="calendar-group">{fixture.groupName}</span>
+                    <div className="calendar-teams">
+                      <span className="team-with-flag">
+                        {fixture.homeTeam.flagPath ? (
+                          <img alt="" className="flag" src={fixture.homeTeam.flagPath} />
+                        ) : null}
+                        {fixture.homeTeam.nameUk}
+                      </span>
+                      <span className="calendar-dash">-</span>
+                      <span className="team-with-flag">
+                        {fixture.awayTeam.flagPath ? (
+                          <img alt="" className="flag" src={fixture.awayTeam.flagPath} />
+                        ) : null}
+                        {fixture.awayTeam.nameUk}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="calendar-score">
+                    <span>Рахунок</span>
+                    <strong>{scoreText(fixture)}</strong>
+                  </div>
+
+                  <div className="calendar-time">
+                    <span>Початок</span>
+                    <strong>{formatKickoff(fixture.kickoffAt)}</strong>
+                  </div>
+                </article>
+              ))}
+            </div>
           </section>
         ))}
       </FantasyLayout>

@@ -11,11 +11,19 @@ export default function HomePage() {
           <p className="eyebrow">Fantasy World Cup 2026</p>
           <h1>Фентезі-турнір до ЧС-2026 для твоєї футбольної компанії</h1>
           <p>
-            Збери команду з 15 гравців, обери стартові 11, постав капітана і змагайся у глобальному рейтингу або в лігах з друзями.
+            Збери команду з 15 гравців, обери стартові 11, постав капітана і
+            змагайся у глобальному рейтингу або в лігах з друзями.
           </p>
           <form action={startFromPromo} className="promo-form">
-            <input className="input" name="teamName" placeholder="Придумай назву команди" maxLength={40} />
-            <button className="button primary" type="submit">Грати</button>
+            <input
+              className="input"
+              name="teamName"
+              placeholder="Придумай назву команди"
+              maxLength={40}
+            />
+            <button className="button primary" type="submit">
+              Грати
+            </button>
           </form>
         </div>
         <div className="promo-poster" aria-label="Постер Fantasy World Cup 2026" />
@@ -38,7 +46,7 @@ export default function HomePage() {
           <span>3</span>
           <ArrowRight size={28} />
           <h2>Роби трансфери</h2>
-          <p>Керуй складом між турами: максимум 3 трансфери без штрафів.</p>
+          <p>Керуй складом між турами за лімітами кожного GW.</p>
         </article>
         <article>
           <span>4</span>
@@ -48,16 +56,24 @@ export default function HomePage() {
         </article>
       </section>
 
-      <section className="panel" style={{ marginTop: 18 }}>
+      <section className="panel home-links-panel" style={{ marginTop: 18 }}>
         <div className="topbar" style={{ marginBottom: 0 }}>
           <div>
             <h2>Турнірна структура</h2>
-            <p className="muted">Профіль турніру, рейтинг, правила і сторінки команд винесені окремо.</p>
+            <p className="muted">
+              Профіль турніру, рейтинг, правила і сторінки команд винесені окремо.
+            </p>
           </div>
           <div className="toolbar">
-            <Link className="button" href="/tournament">Турнір</Link>
-            <Link className="button" href="/rules">Правила</Link>
-            <Link className="button primary" href="/leaderboard">Рейтинг</Link>
+            <Link className="button" href="/tournament">
+              Турнір
+            </Link>
+            <Link className="button" href="/rules">
+              Правила
+            </Link>
+            <Link className="button primary" href="/leaderboard">
+              Рейтинг
+            </Link>
           </div>
         </div>
       </section>
