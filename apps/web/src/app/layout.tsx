@@ -9,6 +9,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Fantasy 2026 UA",
   description: "Український fantasy-футбол до ЧС-2026",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
