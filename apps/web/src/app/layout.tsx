@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "../auth";
 import { DevtoolsVisibility } from "../components/devtools-visibility";
+import { TrackerBodyScript } from "../components/tracker-body-script";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body data-admin={isAdmin ? "true" : "false"}>
         <DevtoolsVisibility isAdmin={isAdmin} />
         {children}
-        <script async src="https://views.fraxler.site/tracker.js" />
+        <TrackerBodyScript />
       </body>
     </html>
   );
