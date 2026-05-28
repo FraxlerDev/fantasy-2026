@@ -1,0 +1,49 @@
+﻿number,country_uk,country_en,code,filename,render_method,reference_url
+1,Мексика,Mexico,mx,01_Mexico_mx.png,LaTeX worldflags package,https://flagcdn.com/256x192/mx.png
+2,ПАР,South Africa,za,02_South_Africa_za.png,LaTeX worldflags package,https://flagcdn.com/256x192/za.png
+3,Південна Корея,South Korea,kr,03_South_Korea_kr.png,LaTeX worldflags package,https://flagcdn.com/256x192/kr.png
+4,Чехія,Czechia,cz,04_Czechia_cz.png,LaTeX worldflags package,https://flagcdn.com/256x192/cz.png
+5,Канада,Canada,ca,05_Canada_ca.png,LaTeX worldflags package,https://flagcdn.com/256x192/ca.png
+6,Боснія і Герцеговина,Bosnia and Herzegovina,ba,06_Bosnia_and_Herzegovina_ba.png,LaTeX worldflags package,https://flagcdn.com/256x192/ba.png
+7,Катар,Qatar,qa,07_Qatar_qa.png,LaTeX worldflags package,https://flagcdn.com/256x192/qa.png
+8,Швейцарія,Switzerland,ch,08_Switzerland_ch.png,LaTeX worldflags package,https://flagcdn.com/256x192/ch.png
+9,Бразилія,Brazil,br,09_Brazil_br.png,LaTeX worldflags package,https://flagcdn.com/256x192/br.png
+10,Марокко,Morocco,ma,10_Morocco_ma.png,LaTeX worldflags package,https://flagcdn.com/256x192/ma.png
+11,Гаїті,Haiti,ht,11_Haiti_ht.png,LaTeX worldflags package,https://flagcdn.com/256x192/ht.png
+12,Шотландія,Scotland,gb-sct,12_Scotland_gb-sct.png,LaTeX worldflags package,https://flagcdn.com/256x192/gb-sct.png
+13,США,United States,us,13_United_States_us.png,LaTeX worldflags package,https://flagcdn.com/256x192/us.png
+14,Парагвай,Paraguay,py,14_Paraguay_py.png,LaTeX worldflags package,https://flagcdn.com/256x192/py.png
+15,Австралія,Australia,au,15_Australia_au.png,LaTeX worldflags package,https://flagcdn.com/256x192/au.png
+16,Туреччина,Turkey,tr,16_Turkey_tr.png,LaTeX worldflags package,https://flagcdn.com/256x192/tr.png
+17,Німеччина,Germany,de,17_Germany_de.png,LaTeX worldflags package,https://flagcdn.com/256x192/de.png
+18,Кюрасао,Curacao,cw,18_Curacao_cw.png,Custom PNG drawing,https://flagcdn.com/256x192/cw.png
+19,Кот-д’Івуар,Ivory Coast,ci,19_Ivory_Coast_ci.png,LaTeX worldflags package,https://flagcdn.com/256x192/ci.png
+20,Еквадор,Ecuador,ec,20_Ecuador_ec.png,LaTeX worldflags package,https://flagcdn.com/256x192/ec.png
+21,Нідерланди,Netherlands,nl,21_Netherlands_nl.png,LaTeX worldflags package,https://flagcdn.com/256x192/nl.png
+22,Японія,Japan,jp,22_Japan_jp.png,LaTeX worldflags package,https://flagcdn.com/256x192/jp.png
+23,Швеція,Sweden,se,23_Sweden_se.png,LaTeX worldflags package,https://flagcdn.com/256x192/se.png
+24,Туніс,Tunisia,tn,24_Tunisia_tn.png,LaTeX worldflags package,https://flagcdn.com/256x192/tn.png
+25,Бельгія,Belgium,be,25_Belgium_be.png,LaTeX worldflags package,https://flagcdn.com/256x192/be.png
+26,Єгипет,Egypt,eg,26_Egypt_eg.png,LaTeX worldflags package,https://flagcdn.com/256x192/eg.png
+27,Іран,Iran,ir,27_Iran_ir.png,LaTeX worldflags package,https://flagcdn.com/256x192/ir.png
+28,Нова Зеландія,New Zealand,nz,28_New_Zealand_nz.png,LaTeX worldflags package,https://flagcdn.com/256x192/nz.png
+29,Іспанія,Spain,es,29_Spain_es.png,LaTeX worldflags package,https://flagcdn.com/256x192/es.png
+30,Кабо-Верде,Cape Verde,cv,30_Cape_Verde_cv.png,LaTeX worldflags package,https://flagcdn.com/256x192/cv.png
+31,Саудівська Аравія,Saudi Arabia,sa,31_Saudi_Arabia_sa.png,LaTeX worldflags package,https://flagcdn.com/256x192/sa.png
+32,Уругвай,Uruguay,uy,32_Uruguay_uy.png,LaTeX worldflags package,https://flagcdn.com/256x192/uy.png
+33,Франція,France,fr,33_France_fr.png,LaTeX worldflags package,https://flagcdn.com/256x192/fr.png
+34,Сенегал,Senegal,sn,34_Senegal_sn.png,LaTeX worldflags package,https://flagcdn.com/256x192/sn.png
+35,Ірак,Iraq,iq,35_Iraq_iq.png,LaTeX worldflags package,https://flagcdn.com/256x192/iq.png
+36,Норвегія,Norway,no,36_Norway_no.png,LaTeX worldflags package,https://flagcdn.com/256x192/no.png
+37,Аргентина,Argentina,ar,37_Argentina_ar.png,LaTeX worldflags package,https://flagcdn.com/256x192/ar.png
+38,Алжир,Algeria,dz,38_Algeria_dz.png,LaTeX worldflags package,https://flagcdn.com/256x192/dz.png
+39,Австрія,Austria,at,39_Austria_at.png,LaTeX worldflags package,https://flagcdn.com/256x192/at.png
+40,Йорданія,Jordan,jo,40_Jordan_jo.png,LaTeX worldflags package,https://flagcdn.com/256x192/jo.png
+41,Португалія,Portugal,pt,41_Portugal_pt.png,LaTeX worldflags package,https://flagcdn.com/256x192/pt.png
+42,ДР Конго,DR Congo,cd,42_DR_Congo_cd.png,LaTeX worldflags package,https://flagcdn.com/256x192/cd.png
+43,Узбекистан,Uzbekistan,uz,43_Uzbekistan_uz.png,LaTeX worldflags package,https://flagcdn.com/256x192/uz.png
+44,Колумбія,Colombia,co,44_Colombia_co.png,LaTeX worldflags package,https://flagcdn.com/256x192/co.png
+45,Англія,England,gb-eng,45_England_gb-eng.png,LaTeX worldflags package,https://flagcdn.com/256x192/gb-eng.png
+46,Хорватія,Croatia,hr,46_Croatia_hr.png,LaTeX worldflags package,https://flagcdn.com/256x192/hr.png
+47,Гана,Ghana,gh,47_Ghana_gh.png,LaTeX worldflags package,https://flagcdn.com/256x192/gh.png
+48,Панама,Panama,pa,48_Panama_pa.png,LaTeX worldflags package,https://flagcdn.com/256x192/pa.png

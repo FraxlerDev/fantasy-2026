@@ -1,0 +1,430 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum PlayerPosition {
+  GK
+  DEF
+  MID
+  FWD
+}
+
+enum PlayerStatus {
+  AVAILABLE
+  DOUBTFUL
+  OUT
+  ELIMINATED
+}
+
+enum RosterSlot {
+  STARTER
+  BENCH
+}
+
+enum FixtureStatus {
+  SCHEDULED
+  POINTS_SAVED
+  RANKINGS_UPDATED
+}
+
+enum GameweekStatus {
+  UPCOMING
+  OPEN
+  SNAPSHOTTING
+  LOCKED
+  SCORING
+  FINISHED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  username      String?   @unique
+  country       String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  fantasyTeam FantasyTeam?
+  ownedLeague League?
+  petitions   Petition[]
+  petitionVotes PetitionVote[]
+  notifications Notification[]
+  auditLogs   AuditLog[] @relation("AuditActor")
+  chatMessages ChatMessage[] @relation("ChatMessageAuthor")
+  chatBans ChatBan[] @relation("ChatBannedUser")
+  createdChatBans ChatBan[] @relation("ChatBanCreator")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  authorId  String
+  replyToId String?
+  body      String   @db.VarChar(500)
+  isDeleted Boolean  @default(false)
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User @relation("ChatMessageAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo ChatMessage? @relation("ChatMessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies ChatMessage[] @relation("ChatMessageReplies")
+
+  @@index([createdAt])
+  @@index([authorId])
+  @@index([replyToId])
+}
+
+model ChatBan {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  reason      String?  @db.VarChar(240)
+  createdById String
+  createdAt   DateTime @default(now())
+
+  user      User @relation("ChatBannedUser", fields: [userId], references: [id], onDelete: Cascade)
+  createdBy User @relation("ChatBanCreator", fields: [createdById], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model NationalTeam {
+  id       String  @id @default(cuid())
+  code     String  @unique
+  nameUk   String
+  groupKey String?
+  flagPath String?
+  status   String  @default("ACTIVE")
+  squadStatus String @default("UNKNOWN")
+
+  players Player[]
+  homeFixtures Fixture[] @relation("HomeFixtures")
+  awayFixtures Fixture[] @relation("AwayFixtures")
+}
+
+model Player {
+  id             String         @id @default(cuid())
+  nationalTeamId String
+  name           String
+  nameOriginal   String?
+  position       PlayerPosition
+  club           String?
+  clubOriginal   String?
+  photoUrl       String?
+  unavailableReason String?
+  squadStatus    String         @default("TEST")
+  price          Decimal        @db.Decimal(5, 1)
+  status         PlayerStatus   @default(AVAILABLE)
+  createdAt      DateTime       @default(now())
+
+  nationalTeam  NationalTeam  @relation(fields: [nationalTeamId], references: [id], onDelete: Cascade)
+  rosterEntries RosterEntry[]
+  lineupSnapshotEntries LineupSnapshotEntry[]
+  matchPoints   MatchPlayerPoint[]
+
+  @@index([position])
+  @@index([nationalTeamId])
+}
+
+model FantasyTeam {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  name        String
+  formation   String   @default("4-3-3")
+  budget      Decimal  @default(100.0) @db.Decimal(5, 1)
+  totalPoints Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rosterEntries RosterEntry[]
+  lineupSnapshots LineupSnapshot[]
+  snapshotFailures LineupSnapshotFailure[]
+  nameHistory   TeamNameHistory[]
+  leagueMembers LeagueMember[]
+  matchPoints    MatchPlayerPoint[]
+  leaderboardRows LeaderboardRow[]
+}
+
+model RosterEntry {
+  id            String     @id @default(cuid())
+  fantasyTeamId String
+  playerId      String
+  slot          RosterSlot @default(BENCH)
+  benchOrder    Int?
+  isCaptain     Boolean    @default(false)
+  isViceCaptain Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([fantasyTeamId, playerId])
+  @@index([fantasyTeamId])
+}
+
+model LineupSnapshot {
+  id            String   @id @default(cuid())
+  fantasyTeamId String
+  gameweek      Int
+  formation     String   @default("4-3-3")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+  entries     LineupSnapshotEntry[]
+
+  @@unique([fantasyTeamId, gameweek])
+  @@index([gameweek])
+}
+
+model LineupSnapshotFailure {
+  id            String   @id @default(cuid())
+  fantasyTeamId String
+  gameweek      Int
+  reason        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+
+  @@unique([fantasyTeamId, gameweek])
+  @@index([gameweek])
+}
+
+model LineupSnapshotEntry {
+  id            String     @id @default(cuid())
+  snapshotId    String
+  playerId      String
+  slot          RosterSlot @default(BENCH)
+  benchOrder    Int?
+  isCaptain     Boolean    @default(false)
+  isViceCaptain Boolean    @default(false)
+
+  snapshot LineupSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  player   Player         @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([snapshotId, playerId])
+  @@index([playerId])
+}
+
+model TeamNameHistory {
+  id            String   @id @default(cuid())
+  fantasyTeamId String
+  oldName       String?
+  newName       String
+  changedById   String?
+  createdAt     DateTime @default(now())
+
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  beforeJson Json?
+  afterJson  Json?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+}
+
+model League {
+  id        String   @id @default(cuid())
+  ownerId   String   @unique
+  name      String
+  inviteCode String  @unique
+  isOpen    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members LeagueMember[]
+}
+
+model LeagueMember {
+  id            String   @id @default(cuid())
+  leagueId      String
+  fantasyTeamId String
+  joinedAt      DateTime @default(now())
+
+  league      League      @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+
+  @@unique([leagueId, fantasyTeamId])
+  @@index([fantasyTeamId])
+}
+
+model Fixture {
+  id          String        @id @default(cuid())
+  matchNo     Int?          @unique
+  homeTeamId  String
+  awayTeamId  String
+  gameweek    Int
+  gameweekId  String?
+  groupName   String?
+  kickoffAt   DateTime
+  homeScore   Int?
+  awayScore   Int?
+  status      FixtureStatus @default(SCHEDULED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  homeTeam NationalTeam @relation("HomeFixtures", fields: [homeTeamId], references: [id], onDelete: Cascade)
+  awayTeam NationalTeam @relation("AwayFixtures", fields: [awayTeamId], references: [id], onDelete: Cascade)
+  gameweekRef Gameweek? @relation(fields: [gameweekId], references: [id], onDelete: SetNull)
+  playerPoints MatchPlayerPoint[]
+
+  @@index([gameweek])
+  @@index([gameweekId])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
+}
+
+model Gameweek {
+  id                 String         @id @default(cuid())
+  number             Int            @unique
+  name               String
+  stage              String?
+  startAt            DateTime       @default(now())
+  deadlineAt         DateTime
+  transferLimit      Int?
+  transfersOpen      Boolean        @default(false)
+  status             GameweekStatus @default(UPCOMING)
+  snapshotsCreatedAt DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  fixtures Fixture[]
+}
+
+model MatchPlayerPoint {
+  id            String   @id @default(cuid())
+  fixtureId     String
+  playerId      String
+  fantasyTeamId String?
+  points        Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  fixture     Fixture      @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  player      Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  fantasyTeam FantasyTeam? @relation(fields: [fantasyTeamId], references: [id], onDelete: SetNull)
+
+  @@unique([fixtureId, playerId])
+  @@index([playerId])
+}
+
+model LeaderboardRow {
+  id            String   @id @default(cuid())
+  scope         String
+  leagueId      String?
+  fantasyTeamId String
+  rank          Int
+  totalPoints   Int
+  refreshedAt   DateTime @default(now())
+
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+
+  @@unique([scope, leagueId, fantasyTeamId])
+  @@index([scope, leagueId, rank])
+}
+
+model Petition {
+  id           String   @id @default(cuid())
+  authorId     String
+  title        String
+  body         String
+  category     String
+  reviewed     Boolean  @default(false)
+  adminComment String?
+  reviewedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  votes  PetitionVote[]
+
+  @@index([createdAt])
+  @@index([reviewed])
+}
+
+model PetitionVote {
+  id         String   @id @default(cuid())
+  petitionId String
+  userId     String
+  value      Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  petition Petition @relation(fields: [petitionId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([petitionId, userId])
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  message   String
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}

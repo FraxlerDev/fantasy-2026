@@ -1,0 +1,4615 @@
+{
+  "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+  "fetchedAt": "2026-05-26T07:38:46.987Z",
+  "status": "FINAL_ONLY",
+  "squads": [
+    {
+      "countryEn": "South Korea",
+      "countryUk": "Південна Корея",
+      "code": "KR",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Hong Myung-bo South Korea announced their final squad on May 16.",
+      "players": [
+        {
+          "name": "Кім Сеунг-Гю",
+          "nameOriginal": "Kim Seung-gyu",
+          "position": "GK",
+          "club": "Токіо",
+          "clubOriginal": "FC Tokyo"
+        },
+        {
+          "name": "Йо Гєон-Воо",
+          "nameOriginal": "Jo Hyeon-woo",
+          "position": "GK",
+          "club": "Ульсан HD",
+          "clubOriginal": "Ulsan HD"
+        },
+        {
+          "name": "Сонг Бум-Кеун",
+          "nameOriginal": "Song Bum-keun",
+          "position": "GK",
+          "club": "Чонбук Хьонде Моторс",
+          "clubOriginal": "Jeonbuk Hyundai Motors"
+        },
+        {
+          "name": "Кім Мін-Джае",
+          "nameOriginal": "Kim Min-jae",
+          "position": "DEF",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Кім Моон-Гван",
+          "nameOriginal": "Kim Moon-hwan",
+          "position": "DEF",
+          "club": "Теджон Хана Сітізен",
+          "clubOriginal": "Daejeon Hana Citizen"
+        },
+        {
+          "name": "Сеол Йоунг-Воо",
+          "nameOriginal": "Seol Young-woo",
+          "position": "DEF",
+          "club": "Црвена Звезда",
+          "clubOriginal": "Red Star Belgrade"
+        },
+        {
+          "name": "Чо Ю-Мін",
+          "nameOriginal": "Cho Yu-min",
+          "position": "DEF",
+          "club": "Шарджа",
+          "clubOriginal": "Sharjah"
+        },
+        {
+          "name": "Лее Тае-Сеок",
+          "nameOriginal": "Lee Tae-seok",
+          "position": "DEF",
+          "club": "Аустріа Віен",
+          "clubOriginal": "Austria Wien"
+        },
+        {
+          "name": "Парк Джін-Сеоб",
+          "nameOriginal": "Park Jin-seob",
+          "position": "DEF",
+          "club": "Чжецзян",
+          "clubOriginal": "Zhejiang FC"
+        },
+        {
+          "name": "Кім Тае-Гєон",
+          "nameOriginal": "Kim Tae-hyeon",
+          "position": "DEF",
+          "club": "Касіма Антлерс",
+          "clubOriginal": "Kashima Antlers"
+        },
+        {
+          "name": "Лее Ган-Беом",
+          "nameOriginal": "Lee Han-beom",
+          "position": "DEF",
+          "club": "Мідтьюлланн",
+          "clubOriginal": "Midtjylland"
+        },
+        {
+          "name": "Дженс Кастроп",
+          "nameOriginal": "Jens Castrop",
+          "position": "DEF",
+          "club": "Боруссія Менхенгладбах",
+          "clubOriginal": "Borussia Mönchengladbach"
+        },
+        {
+          "name": "Лее Кі-Гюк",
+          "nameOriginal": "Lee Ki-hyuk",
+          "position": "DEF",
+          "club": "Канвон",
+          "clubOriginal": "Gangwon FC"
+        },
+        {
+          "name": "Лее Джае-Сунг",
+          "nameOriginal": "Lee Jae-sung",
+          "position": "MID",
+          "club": "Майнц 05",
+          "clubOriginal": "Mainz 05"
+        },
+        {
+          "name": "Гванг Гее-Чан",
+          "nameOriginal": "Hwang Hee-chan",
+          "position": "MID",
+          "club": "Вулвергемптон",
+          "clubOriginal": "Wolverhampton Wanderers"
+        },
+        {
+          "name": "Гванг Ін-Беом",
+          "nameOriginal": "Hwang In-beom",
+          "position": "MID",
+          "club": "Феєнорд",
+          "clubOriginal": "Feyenoord"
+        },
+        {
+          "name": "Лее Канг-Ін",
+          "nameOriginal": "Lee Kang-in",
+          "position": "MID",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Паік Сеунг-Го",
+          "nameOriginal": "Paik Seung-ho",
+          "position": "MID",
+          "club": "Бірмінгем Сіті",
+          "clubOriginal": "Birmingham City"
+        },
+        {
+          "name": "Кім Джін-Гю",
+          "nameOriginal": "Kim Jin-gyu",
+          "position": "MID",
+          "club": "Чонбук Хьонде Моторс",
+          "clubOriginal": "Jeonbuk Hyundai Motors"
+        },
+        {
+          "name": "Лее Донг-Гєонг",
+          "nameOriginal": "Lee Dong-gyeong",
+          "position": "MID",
+          "club": "Ульсан HD",
+          "clubOriginal": "Ulsan HD"
+        },
+        {
+          "name": "Бае Джун-Го",
+          "nameOriginal": "Bae Jun-ho",
+          "position": "MID",
+          "club": "Стоке Кітй",
+          "clubOriginal": "Stoke City"
+        },
+        {
+          "name": "Еом Джі-Сунг",
+          "nameOriginal": "Eom Ji-sung",
+          "position": "MID",
+          "club": "Свонсі Сіті",
+          "clubOriginal": "Swansea City"
+        },
+        {
+          "name": "Янг Гюн-Джун",
+          "nameOriginal": "Yang Hyun-jun",
+          "position": "MID",
+          "club": "Селтік",
+          "clubOriginal": "Celtic"
+        },
+        {
+          "name": "Сон Геунг-Мін",
+          "nameOriginal": "Son Heung-min",
+          "position": "FWD",
+          "club": "Лос-Анджелес",
+          "clubOriginal": "Los Angeles FC"
+        },
+        {
+          "name": "Чо Гуе-Сунг",
+          "nameOriginal": "Cho Gue-sung",
+          "position": "FWD",
+          "club": "Мідтьюлланн",
+          "clubOriginal": "Midtjylland"
+        },
+        {
+          "name": "Ог Гєон-Гю",
+          "nameOriginal": "Oh Hyeon-gyu",
+          "position": "FWD",
+          "club": "Бешикташ",
+          "clubOriginal": "Beşiktaş"
+        }
+      ]
+    },
+    {
+      "countryEn": "Bosnia and Herzegovina",
+      "countryUk": "Боснія і Герцеговина",
+      "code": "BA",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Sergej Barbarez Bosnia and Herzegovina announced their final squad on May 11.",
+      "players": [
+        {
+          "name": "Нікола Васілдж",
+          "nameOriginal": "Nikola Vasilj",
+          "position": "GK",
+          "club": "Санкт-Паулі",
+          "clubOriginal": "FC St. Pauli"
+        },
+        {
+          "name": "Мартін Зломіслік",
+          "nameOriginal": "Martin Zlomislić",
+          "position": "GK",
+          "club": "Рієка",
+          "clubOriginal": "Rijeka"
+        },
+        {
+          "name": "Осман Гадзікік",
+          "nameOriginal": "Osman Hadžikić",
+          "position": "GK",
+          "club": "Славен Белупо",
+          "clubOriginal": "Slaven Belupo"
+        },
+        {
+          "name": "Сеад Коласінак",
+          "nameOriginal": "Sead Kolašinac",
+          "position": "DEF",
+          "club": "Аталанта",
+          "clubOriginal": "Atalanta"
+        },
+        {
+          "name": "Денніс Гадзікадунік",
+          "nameOriginal": "Dennis Hadžikadunić",
+          "position": "DEF",
+          "club": "Сампдорія",
+          "clubOriginal": "Sampdoria"
+        },
+        {
+          "name": "Амар Дедік",
+          "nameOriginal": "Amar Dedić",
+          "position": "DEF",
+          "club": "Бенфіка",
+          "clubOriginal": "Benfica"
+        },
+        {
+          "name": "Нікола Катік",
+          "nameOriginal": "Nikola Katić",
+          "position": "DEF",
+          "club": "Шальке 04",
+          "clubOriginal": "Schalke 04"
+        },
+        {
+          "name": "Тарік Мугаремовік",
+          "nameOriginal": "Tarik Muharemović",
+          "position": "DEF",
+          "club": "Сассуоло",
+          "clubOriginal": "Sassuolo"
+        },
+        {
+          "name": "Нігад Муджакік",
+          "nameOriginal": "Nihad Mujakić",
+          "position": "DEF",
+          "club": "Газіантеп",
+          "clubOriginal": "Gaziantep"
+        },
+        {
+          "name": "Стджепан Раделджік",
+          "nameOriginal": "Stjepan Radeljić",
+          "position": "DEF",
+          "club": "Рієка",
+          "clubOriginal": "Rijeka"
+        },
+        {
+          "name": "Нідал Келік",
+          "nameOriginal": "Nidal Čelik",
+          "position": "DEF",
+          "club": "Ланс",
+          "clubOriginal": "Lens"
+        },
+        {
+          "name": "Амір Гадзіагметовік",
+          "nameOriginal": "Amir Hadžiahmetović",
+          "position": "MID",
+          "club": "Гулл Кітй",
+          "clubOriginal": "Hull City"
+        },
+        {
+          "name": "Бенджамін Тагіровік",
+          "nameOriginal": "Benjamin Tahirović",
+          "position": "MID",
+          "club": "Брондбю",
+          "clubOriginal": "Brøndby"
+        },
+        {
+          "name": "Армін Гіговік",
+          "nameOriginal": "Armin Gigović",
+          "position": "MID",
+          "club": "Янг Бойз",
+          "clubOriginal": "Young Boys"
+        },
+        {
+          "name": "Дзеніс Бурнік",
+          "nameOriginal": "Dženis Burnić",
+          "position": "MID",
+          "club": "Карлсруе",
+          "clubOriginal": "Karlsruher SC"
+        },
+        {
+          "name": "Іван Басік",
+          "nameOriginal": "Ivan Bašić",
+          "position": "MID",
+          "club": "Астана",
+          "clubOriginal": "Astana"
+        },
+        {
+          "name": "Есмір Баджрактаревік",
+          "nameOriginal": "Esmir Bajraktarević",
+          "position": "MID",
+          "club": "ПСВ Ейндговен",
+          "clubOriginal": "PSV Eindhoven"
+        },
+        {
+          "name": "Амар Мемік",
+          "nameOriginal": "Amar Memić",
+          "position": "MID",
+          "club": "Вікторія Пльзень",
+          "clubOriginal": "Viktoria Plzeň"
+        },
+        {
+          "name": "Іван Сунджік",
+          "nameOriginal": "Ivan Šunjić",
+          "position": "MID",
+          "club": "Пафос",
+          "clubOriginal": "Pafos"
+        },
+        {
+          "name": "Керім Аладжбеговік",
+          "nameOriginal": "Kerim Alajbegović",
+          "position": "MID",
+          "club": "Ред Булл Салзбург",
+          "clubOriginal": "Red Bull Salzburg"
+        },
+        {
+          "name": "Ермін Магмік",
+          "nameOriginal": "Ermin Mahmić",
+          "position": "MID",
+          "club": "Слован Ліберець",
+          "clubOriginal": "Slovan Liberec"
+        },
+        {
+          "name": "Едін Дзеко",
+          "nameOriginal": "Edin Džeko",
+          "position": "FWD",
+          "club": "Шальке 04",
+          "clubOriginal": "Schalke 04"
+        },
+        {
+          "name": "Ермедін Деміровік",
+          "nameOriginal": "Ermedin Demirović",
+          "position": "FWD",
+          "club": "Штутгарт",
+          "clubOriginal": "VfB Stuttgart"
+        },
+        {
+          "name": "Самед Баздар",
+          "nameOriginal": "Samed Baždar",
+          "position": "FWD",
+          "club": "Ягеллонія Білосток",
+          "clubOriginal": "Jagiellonia Białystok"
+        },
+        {
+          "name": "Гаріс Табаковік",
+          "nameOriginal": "Haris Tabaković",
+          "position": "FWD",
+          "club": "Боруссія Менхенгладбах",
+          "clubOriginal": "Borussia Mönchengladbach"
+        },
+        {
+          "name": "Йово Лукік",
+          "nameOriginal": "Jovo Lukić",
+          "position": "FWD",
+          "club": "Універсітатеа Клудж",
+          "clubOriginal": "Universitatea Cluj"
+        }
+      ]
+    },
+    {
+      "countryEn": "Switzerland",
+      "countryUk": "Швейцарія",
+      "code": "CH",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Murat Yakin Switzerland announced their final squad through a social media campaign on May 18 and 19, which was officially confirmed on May 20.",
+      "players": [
+        {
+          "name": "Грегор Кобел",
+          "nameOriginal": "Gregor Kobel",
+          "position": "GK",
+          "club": "Боруссія Дортмунд",
+          "clubOriginal": "Borussia Dortmund"
+        },
+        {
+          "name": "Міро Мугеім",
+          "nameOriginal": "Miro Muheim",
+          "position": "DEF",
+          "club": "Гамбург",
+          "clubOriginal": "Hamburger SV"
+        },
+        {
+          "name": "Сілван Відмер",
+          "nameOriginal": "Silvan Widmer",
+          "position": "DEF",
+          "club": "Майнц 05",
+          "clubOriginal": "Mainz 05"
+        },
+        {
+          "name": "Ніко Елведі",
+          "nameOriginal": "Nico Elvedi",
+          "position": "DEF",
+          "club": "Боруссія Менхенгладбах",
+          "clubOriginal": "Borussia Mönchengladbach"
+        },
+        {
+          "name": "Мануел Аканджі",
+          "nameOriginal": "Manuel Akanji",
+          "position": "DEF",
+          "club": "Інтер",
+          "clubOriginal": "Inter Milan"
+        },
+        {
+          "name": "Деніс Закаріа",
+          "nameOriginal": "Denis Zakaria",
+          "position": "MID",
+          "club": "Монако",
+          "clubOriginal": "Monaco"
+        },
+        {
+          "name": "Бреел Емболо",
+          "nameOriginal": "Breel Embolo",
+          "position": "FWD",
+          "club": "Ренн",
+          "clubOriginal": "Rennes"
+        },
+        {
+          "name": "Ремо Фреулер",
+          "nameOriginal": "Remo Freuler",
+          "position": "MID",
+          "club": "Болонья",
+          "clubOriginal": "Bologna"
+        },
+        {
+          "name": "Йоган Манзамбі",
+          "nameOriginal": "Johan Manzambi",
+          "position": "MID",
+          "club": "Фрайбург",
+          "clubOriginal": "SC Freiburg"
+        },
+        {
+          "name": "Граніт Ксгака",
+          "nameOriginal": "Granit Xhaka",
+          "position": "MID",
+          "club": "Сандерленд",
+          "clubOriginal": "Sunderland"
+        },
+        {
+          "name": "Дан Ндоє",
+          "nameOriginal": "Dan Ndoye",
+          "position": "FWD",
+          "club": "Ноттінгем Форест",
+          "clubOriginal": "Nottingham Forest"
+        },
+        {
+          "name": "Йвон Мвого",
+          "nameOriginal": "Yvon Mvogo",
+          "position": "GK",
+          "club": "Лор'ян",
+          "clubOriginal": "Lorient"
+        },
+        {
+          "name": "Рікардо Родрігуез",
+          "nameOriginal": "Ricardo Rodriguez",
+          "position": "DEF",
+          "club": "Реал Бетіс",
+          "clubOriginal": "Real Betis"
+        },
+        {
+          "name": "Ардон Джашарі",
+          "nameOriginal": "Ardon Jashari",
+          "position": "MID",
+          "club": "Мілан",
+          "clubOriginal": "Milan"
+        },
+        {
+          "name": "Дджібріл Сов",
+          "nameOriginal": "Djibril Sow",
+          "position": "MID",
+          "club": "Севілья",
+          "clubOriginal": "Sevilla"
+        },
+        {
+          "name": "Чрістіан Фассначт",
+          "nameOriginal": "Christian Fassnacht",
+          "position": "MID",
+          "club": "Янг Бойз",
+          "clubOriginal": "Young Boys"
+        },
+        {
+          "name": "Рубен Варгас",
+          "nameOriginal": "Rubén Vargas",
+          "position": "FWD",
+          "club": "Севілья",
+          "clubOriginal": "Sevilla"
+        },
+        {
+          "name": "Ерай Комерт",
+          "nameOriginal": "Eray Cömert",
+          "position": "DEF",
+          "club": "Валенсія",
+          "clubOriginal": "Valencia"
+        },
+        {
+          "name": "Ноаг Окафор",
+          "nameOriginal": "Noah Okafor",
+          "position": "FWD",
+          "club": "Лідс Юнайтед",
+          "clubOriginal": "Leeds United"
+        },
+        {
+          "name": "Мічел Аебіщер",
+          "nameOriginal": "Michel Aebischer",
+          "position": "MID",
+          "club": "Піза",
+          "clubOriginal": "Pisa"
+        },
+        {
+          "name": "Марвін Келлер",
+          "nameOriginal": "Marvin Keller",
+          "position": "GK",
+          "club": "Янг Бойз",
+          "clubOriginal": "Young Boys"
+        },
+        {
+          "name": "Фабіан Ріедер",
+          "nameOriginal": "Fabian Rieder",
+          "position": "MID",
+          "club": "Аугсбург",
+          "clubOriginal": "FC Augsburg"
+        },
+        {
+          "name": "Зекі Амдоуні",
+          "nameOriginal": "Zeki Amdouni",
+          "position": "FWD",
+          "club": "Бернлі",
+          "clubOriginal": "Burnley"
+        },
+        {
+          "name": "Ауреле Аменда",
+          "nameOriginal": "Aurèle Amenda",
+          "position": "DEF",
+          "club": "Айнтрахт Франкфурт",
+          "clubOriginal": "Eintracht Frankfurt"
+        },
+        {
+          "name": "Лука Джаквез",
+          "nameOriginal": "Luca Jaquez",
+          "position": "DEF",
+          "club": "Штутгарт",
+          "clubOriginal": "VfB Stuttgart"
+        },
+        {
+          "name": "Кедрік Іттен",
+          "nameOriginal": "Cedric Itten",
+          "position": "FWD",
+          "club": "Фортуна Дюссельдорф",
+          "clubOriginal": "Fortuna Düsseldorf"
+        }
+      ]
+    },
+    {
+      "countryEn": "Brazil",
+      "countryUk": "Бразилія",
+      "code": "BR",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Carlo Ancelotti Brazil announced a 55-man preliminary squad on May 12. Their final squad was announced on May 18.",
+      "players": [
+        {
+          "name": "Аліссон",
+          "nameOriginal": "Alisson",
+          "position": "GK",
+          "club": "Ліверпуль",
+          "clubOriginal": "Liverpool"
+        },
+        {
+          "name": "Едерсон",
+          "nameOriginal": "Ederson",
+          "position": "GK",
+          "club": "Фенербахче",
+          "clubOriginal": "Fenerbahçe"
+        },
+        {
+          "name": "Вевертон",
+          "nameOriginal": "Weverton",
+          "position": "GK",
+          "club": "Греміо",
+          "clubOriginal": "Grêmio"
+        },
+        {
+          "name": "Марквінгос",
+          "nameOriginal": "Marquinhos",
+          "position": "DEF",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Даніло Луіз",
+          "nameOriginal": "Danilo Luiz",
+          "position": "DEF",
+          "club": "Фламенго",
+          "clubOriginal": "Flamengo"
+        },
+        {
+          "name": "Алекс Сандро",
+          "nameOriginal": "Alex Sandro",
+          "position": "DEF",
+          "club": "Фламенго",
+          "clubOriginal": "Flamengo"
+        },
+        {
+          "name": "Габріел Магалгаес",
+          "nameOriginal": "Gabriel Magalhães",
+          "position": "DEF",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Бремер",
+          "nameOriginal": "Bremer",
+          "position": "DEF",
+          "club": "Ювентус",
+          "clubOriginal": "Juventus"
+        },
+        {
+          "name": "Веслей",
+          "nameOriginal": "Wesley",
+          "position": "DEF",
+          "club": "Рома",
+          "clubOriginal": "Roma"
+        },
+        {
+          "name": "Рогер Ібанез",
+          "nameOriginal": "Roger Ibañez",
+          "position": "DEF",
+          "club": "Аль-Аглі",
+          "clubOriginal": "Al-Ahli"
+        },
+        {
+          "name": "Доуглас Сантос",
+          "nameOriginal": "Douglas Santos",
+          "position": "DEF",
+          "club": "Зеніт Санкт-Петербург",
+          "clubOriginal": "Zenit Saint Petersburg"
+        },
+        {
+          "name": "Лео Переіра",
+          "nameOriginal": "Léo Pereira",
+          "position": "DEF",
+          "club": "Фламенго",
+          "clubOriginal": "Flamengo"
+        },
+        {
+          "name": "Касеміро",
+          "nameOriginal": "Casemiro",
+          "position": "MID",
+          "club": "Манчестер Юнайтед",
+          "clubOriginal": "Manchester United"
+        },
+        {
+          "name": "Лукас Паквета",
+          "nameOriginal": "Lucas Paquetá",
+          "position": "MID",
+          "club": "Фламенго",
+          "clubOriginal": "Flamengo"
+        },
+        {
+          "name": "Бруно Гуімараес",
+          "nameOriginal": "Bruno Guimarães",
+          "position": "MID",
+          "club": "Ньюкасл Юнайтед",
+          "clubOriginal": "Newcastle United"
+        },
+        {
+          "name": "Фабінго",
+          "nameOriginal": "Fabinho",
+          "position": "MID",
+          "club": "Аль-Іттіхад",
+          "clubOriginal": "Al-Ittihad"
+        },
+        {
+          "name": "Даніло Сантос",
+          "nameOriginal": "Danilo Santos",
+          "position": "MID",
+          "club": "Ботафого",
+          "clubOriginal": "Botafogo"
+        },
+        {
+          "name": "Неймар",
+          "nameOriginal": "Neymar",
+          "position": "FWD",
+          "club": "Сантос",
+          "clubOriginal": "Santos"
+        },
+        {
+          "name": "Вінісіус Жуніор",
+          "nameOriginal": "Vinícius Júnior",
+          "position": "FWD",
+          "club": "Реал Мадрид",
+          "clubOriginal": "Real Madrid"
+        },
+        {
+          "name": "Рафінга",
+          "nameOriginal": "Raphinha",
+          "position": "FWD",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Габріел Мартінеллі",
+          "nameOriginal": "Gabriel Martinelli",
+          "position": "FWD",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Матеус Кунга",
+          "nameOriginal": "Matheus Cunha",
+          "position": "FWD",
+          "club": "Манчестер Юнайтед",
+          "clubOriginal": "Manchester United"
+        },
+        {
+          "name": "Ендрік",
+          "nameOriginal": "Endrick",
+          "position": "FWD",
+          "club": "Ліон",
+          "clubOriginal": "Lyon"
+        },
+        {
+          "name": "Луіз Генрікве",
+          "nameOriginal": "Luiz Henrique",
+          "position": "FWD",
+          "club": "Зеніт Санкт-Петербург",
+          "clubOriginal": "Zenit Saint Petersburg"
+        },
+        {
+          "name": "Ігор Тіаго",
+          "nameOriginal": "Igor Thiago",
+          "position": "FWD",
+          "club": "Брентфорд",
+          "clubOriginal": "Brentford"
+        },
+        {
+          "name": "Раян",
+          "nameOriginal": "Rayan",
+          "position": "FWD",
+          "club": "Борнмут",
+          "clubOriginal": "Bournemouth"
+        }
+      ]
+    },
+    {
+      "countryEn": "Haiti",
+      "countryUk": "Гаїті",
+      "code": "HT",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Sébastien Migné Haiti announced their final squad on May 15.",
+      "players": [
+        {
+          "name": "Йогнй Плакіде",
+          "nameOriginal": "Johny Placide",
+          "position": "GK",
+          "club": "Бастія",
+          "clubOriginal": "Bastia"
+        },
+        {
+          "name": "Александре Піерре",
+          "nameOriginal": "Alexandre Pierre",
+          "position": "GK",
+          "club": "Сошо",
+          "clubOriginal": "Sochaux"
+        },
+        {
+          "name": "Йосуе Дувергер",
+          "nameOriginal": "Josué Duverger",
+          "position": "GK",
+          "club": "Космос Кобленз",
+          "clubOriginal": "Cosmos Koblenz"
+        },
+        {
+          "name": "Рікардо Аде",
+          "nameOriginal": "Ricardo Adé",
+          "position": "DEF",
+          "club": "LDU Квіто",
+          "clubOriginal": "LDU Quito"
+        },
+        {
+          "name": "Карленс Аркус",
+          "nameOriginal": "Carlens Arcus",
+          "position": "DEF",
+          "club": "Анже",
+          "clubOriginal": "Angers"
+        },
+        {
+          "name": "Мартін Експеріенке",
+          "nameOriginal": "Martin Expérience",
+          "position": "DEF",
+          "club": "Нанкй",
+          "clubOriginal": "Nancy"
+        },
+        {
+          "name": "Джеан-Кевін Дуверне",
+          "nameOriginal": "Jean-Kévin Duverne",
+          "position": "DEF",
+          "club": "Гент",
+          "clubOriginal": "Gent"
+        },
+        {
+          "name": "Дуке Лакроікс",
+          "nameOriginal": "Duke Lacroix",
+          "position": "DEF",
+          "club": "Колорадо Спрінгс Світчбакс",
+          "clubOriginal": "Colorado Springs Switchbacks"
+        },
+        {
+          "name": "Вілгуенс Паугаін",
+          "nameOriginal": "Wilguens Paugain",
+          "position": "DEF",
+          "club": "Зулте Варегем",
+          "clubOriginal": "Zulte Waregem"
+        },
+        {
+          "name": "Ганнес Делкроікс",
+          "nameOriginal": "Hannes Delcroix",
+          "position": "DEF",
+          "club": "Лугано",
+          "clubOriginal": "Lugano"
+        },
+        {
+          "name": "Кеето Термонкй",
+          "nameOriginal": "Keeto Thermoncy",
+          "position": "DEF",
+          "club": "Янг Бойз",
+          "clubOriginal": "Young Boys"
+        },
+        {
+          "name": "Левертон Піерре",
+          "nameOriginal": "Leverton Pierre",
+          "position": "MID",
+          "club": "Візела",
+          "clubOriginal": "Vizela"
+        },
+        {
+          "name": "Данлей Джеан Джакквес",
+          "nameOriginal": "Danley Jean Jacques",
+          "position": "MID",
+          "club": "Філадельфія Юніон",
+          "clubOriginal": "Philadelphia Union"
+        },
+        {
+          "name": "Карл Саінте",
+          "nameOriginal": "Carl Sainté",
+          "position": "MID",
+          "club": "Ел Пасо Локомотіве FC",
+          "clubOriginal": "El Paso Locomotive FC"
+        },
+        {
+          "name": "Джеан-Рікнер Беллегарде",
+          "nameOriginal": "Jean-Ricner Bellegarde",
+          "position": "MID",
+          "club": "Вулвергемптон",
+          "clubOriginal": "Wolverhampton Wanderers"
+        },
+        {
+          "name": "Вооденскй Піерре",
+          "nameOriginal": "Woodensky Pierre",
+          "position": "MID",
+          "club": "Віолетте",
+          "clubOriginal": "Violette"
+        },
+        {
+          "name": "Домінікве Сімон",
+          "nameOriginal": "Dominique Simon",
+          "position": "MID",
+          "club": "Татран Пресов",
+          "clubOriginal": "Tatran Prešov"
+        },
+        {
+          "name": "Дукенс Назон",
+          "nameOriginal": "Duckens Nazon",
+          "position": "FWD",
+          "club": "Естегглал",
+          "clubOriginal": "Esteghlal"
+        },
+        {
+          "name": "Франтздй Піеррот",
+          "nameOriginal": "Frantzdy Pierrot",
+          "position": "FWD",
+          "club": "Різеспор",
+          "clubOriginal": "Çaykur Rizespor"
+        },
+        {
+          "name": "Деррік Етіенне Джр.",
+          "nameOriginal": "Derrick Etienne Jr.",
+          "position": "FWD",
+          "club": "Торонто",
+          "clubOriginal": "Toronto FC"
+        },
+        {
+          "name": "Лоуікіус Деедсон",
+          "nameOriginal": "Louicius Deedson",
+          "position": "FWD",
+          "club": "Даллас",
+          "clubOriginal": "FC Dallas"
+        },
+        {
+          "name": "Рубен Провіденке",
+          "nameOriginal": "Ruben Providence",
+          "position": "FWD",
+          "club": "Алмере Кітй",
+          "clubOriginal": "Almere City"
+        },
+        {
+          "name": "Йосуе Касімір",
+          "nameOriginal": "Josué Casimir",
+          "position": "FWD",
+          "club": "Осер",
+          "clubOriginal": "Auxerre"
+        },
+        {
+          "name": "Яссін Фортуне",
+          "nameOriginal": "Yassin Fortuné",
+          "position": "FWD",
+          "club": "Візела",
+          "clubOriginal": "Vizela"
+        },
+        {
+          "name": "Вілсон Ісідор",
+          "nameOriginal": "Wilson Isidor",
+          "position": "FWD",
+          "club": "Сандерленд",
+          "clubOriginal": "Sunderland"
+        },
+        {
+          "name": "Леннй Йосеф",
+          "nameOriginal": "Lenny Joseph",
+          "position": "FWD",
+          "club": "Ференцварош",
+          "clubOriginal": "Ferencváros"
+        }
+      ]
+    },
+    {
+      "countryEn": "Scotland",
+      "countryUk": "Шотландія",
+      "code": "GB-SCT",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Steve Clarke Scotland announced their final squad on May 19.",
+      "players": [
+        {
+          "name": "Краіг Гордон",
+          "nameOriginal": "Craig Gordon",
+          "position": "GK",
+          "club": "Гарт оф Мідлотіан",
+          "clubOriginal": "Heart of Midlothian"
+        },
+        {
+          "name": "Ангус Гунн",
+          "nameOriginal": "Angus Gunn",
+          "position": "GK",
+          "club": "Ноттінгем Форест",
+          "clubOriginal": "Nottingham Forest"
+        },
+        {
+          "name": "Ліам Келлй",
+          "nameOriginal": "Liam Kelly",
+          "position": "GK",
+          "club": "Рейнджерс",
+          "clubOriginal": "Rangers"
+        },
+        {
+          "name": "Андй Роберцон",
+          "nameOriginal": "Andy Robertson",
+          "position": "DEF",
+          "club": "Ліверпуль",
+          "clubOriginal": "Liverpool"
+        },
+        {
+          "name": "Грант Ганлей",
+          "nameOriginal": "Grant Hanley",
+          "position": "DEF",
+          "club": "Гіберніан",
+          "clubOriginal": "Hibernian"
+        },
+        {
+          "name": "Кіеран Тіерней",
+          "nameOriginal": "Kieran Tierney",
+          "position": "DEF",
+          "club": "Селтік",
+          "clubOriginal": "Celtic"
+        },
+        {
+          "name": "Скотт Мкенна",
+          "nameOriginal": "Scott McKenna",
+          "position": "DEF",
+          "club": "Динамо Загреб",
+          "clubOriginal": "Dinamo Zagreb"
+        },
+        {
+          "name": "Джак Гендрй",
+          "nameOriginal": "Jack Hendry",
+          "position": "DEF",
+          "club": "Аль-Іттіфак",
+          "clubOriginal": "Al-Ettifaq"
+        },
+        {
+          "name": "Натан Паттерсон",
+          "nameOriginal": "Nathan Patterson",
+          "position": "DEF",
+          "club": "Евертон",
+          "clubOriginal": "Everton"
+        },
+        {
+          "name": "Антонй Ралстон",
+          "nameOriginal": "Anthony Ralston",
+          "position": "DEF",
+          "club": "Селтік",
+          "clubOriginal": "Celtic"
+        },
+        {
+          "name": "Йогн Соуттар",
+          "nameOriginal": "John Souttar",
+          "position": "DEF",
+          "club": "Рейнджерс",
+          "clubOriginal": "Rangers"
+        },
+        {
+          "name": "Аарон Гікей",
+          "nameOriginal": "Aaron Hickey",
+          "position": "DEF",
+          "club": "Брентфорд",
+          "clubOriginal": "Brentford"
+        },
+        {
+          "name": "Домінік Гям",
+          "nameOriginal": "Dominic Hyam",
+          "position": "DEF",
+          "club": "Рексем",
+          "clubOriginal": "Wrexham"
+        },
+        {
+          "name": "Йогн Мкгінн",
+          "nameOriginal": "John McGinn",
+          "position": "MID",
+          "club": "Астон Вілла",
+          "clubOriginal": "Aston Villa"
+        },
+        {
+          "name": "Скотт Мктомінай",
+          "nameOriginal": "Scott McTominay",
+          "position": "MID",
+          "club": "Наполі",
+          "clubOriginal": "Napoli"
+        },
+        {
+          "name": "Рян Чрістіе",
+          "nameOriginal": "Ryan Christie",
+          "position": "MID",
+          "club": "Борнмут",
+          "clubOriginal": "Bournemouth"
+        },
+        {
+          "name": "Кеннй Мклеан",
+          "nameOriginal": "Kenny McLean",
+          "position": "MID",
+          "club": "Норвіч Сіті",
+          "clubOriginal": "Norwich City"
+        },
+        {
+          "name": "Біллй Гілмоур",
+          "nameOriginal": "Billy Gilmour",
+          "position": "MID",
+          "club": "Наполі",
+          "clubOriginal": "Napoli"
+        },
+        {
+          "name": "Левіс Фергусон",
+          "nameOriginal": "Lewis Ferguson",
+          "position": "MID",
+          "club": "Болонья",
+          "clubOriginal": "Bologna"
+        },
+        {
+          "name": "Бен Ганнон-Доак",
+          "nameOriginal": "Ben Gannon-Doak",
+          "position": "MID",
+          "club": "Борнмут",
+          "clubOriginal": "Bournemouth"
+        },
+        {
+          "name": "Фіндлай Куртіс",
+          "nameOriginal": "Findlay Curtis",
+          "position": "MID",
+          "club": "Кілмарнок",
+          "clubOriginal": "Kilmarnock"
+        },
+        {
+          "name": "Лйндон Дйкес",
+          "nameOriginal": "Lyndon Dykes",
+          "position": "FWD",
+          "club": "Чарлтон Атлетік",
+          "clubOriginal": "Charlton Athletic"
+        },
+        {
+          "name": "Че Адамс",
+          "nameOriginal": "Ché Adams",
+          "position": "FWD",
+          "club": "Торіно",
+          "clubOriginal": "Torino"
+        },
+        {
+          "name": "Лавренке Шанкланд",
+          "nameOriginal": "Lawrence Shankland",
+          "position": "FWD",
+          "club": "Гарт оф Мідлотіан",
+          "clubOriginal": "Heart of Midlothian"
+        },
+        {
+          "name": "Георге Гірст",
+          "nameOriginal": "George Hirst",
+          "position": "FWD",
+          "club": "Іпсвіч Товн",
+          "clubOriginal": "Ipswich Town"
+        },
+        {
+          "name": "Росс Стеварт",
+          "nameOriginal": "Ross Stewart",
+          "position": "FWD",
+          "club": "Саутгемптон",
+          "clubOriginal": "Southampton"
+        }
+      ]
+    },
+    {
+      "countryEn": "Curaçao",
+      "countryUk": "Кюрасао",
+      "code": "CW",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Dick Advocaat Curaçao announced their final squad on May 18.",
+      "players": [
+        {
+          "name": "Елой Роом",
+          "nameOriginal": "Eloy Room",
+          "position": "GK",
+          "club": "Міамі FC",
+          "clubOriginal": "Miami FC"
+        },
+        {
+          "name": "Тревор Доорнбущ",
+          "nameOriginal": "Trevor Doornbusch",
+          "position": "GK",
+          "club": "VVV-Венло",
+          "clubOriginal": "VVV-Venlo"
+        },
+        {
+          "name": "Тйрік Бодак",
+          "nameOriginal": "Tyrick Bodak",
+          "position": "GK",
+          "club": "Телстар",
+          "clubOriginal": "Telstar"
+        },
+        {
+          "name": "Джуріен Гаарі",
+          "nameOriginal": "Juriën Gaari",
+          "position": "DEF",
+          "club": "Абга",
+          "clubOriginal": "Abha"
+        },
+        {
+          "name": "Рошон Ван Еіджма",
+          "nameOriginal": "Roshon van Eijma",
+          "position": "DEF",
+          "club": "RKC Ваалвіджк",
+          "clubOriginal": "RKC Waalwijk"
+        },
+        {
+          "name": "Шерел Флоранус",
+          "nameOriginal": "Sherel Floranus",
+          "position": "DEF",
+          "club": "PEC Зволле",
+          "clubOriginal": "PEC Zwolle"
+        },
+        {
+          "name": "Йошуа Бренет",
+          "nameOriginal": "Joshua Brenet",
+          "position": "DEF",
+          "club": "Кайсеріспор",
+          "clubOriginal": "Kayserispor"
+        },
+        {
+          "name": "Шурандй Самбо",
+          "nameOriginal": "Shurandy Sambo",
+          "position": "DEF",
+          "club": "Спарта Роттердам",
+          "clubOriginal": "Sparta Rotterdam"
+        },
+        {
+          "name": "Армандо Обіспо",
+          "nameOriginal": "Armando Obispo",
+          "position": "DEF",
+          "club": "ПСВ Ейндговен",
+          "clubOriginal": "PSV Eindhoven"
+        },
+        {
+          "name": "Ріечедлй Базоер",
+          "nameOriginal": "Riechedly Bazoer",
+          "position": "DEF",
+          "club": "Коньяспор",
+          "clubOriginal": "Konyaspor"
+        },
+        {
+          "name": "Деверон Фонвілле",
+          "nameOriginal": "Deveron Fonville",
+          "position": "DEF",
+          "club": "NEC",
+          "clubOriginal": "NEC"
+        },
+        {
+          "name": "Леандро Бакуна",
+          "nameOriginal": "Leandro Bacuna",
+          "position": "MID",
+          "club": "Игдир",
+          "clubOriginal": "Iğdır"
+        },
+        {
+          "name": "Джунінго Бакуна",
+          "nameOriginal": "Juninho Bacuna",
+          "position": "MID",
+          "club": "Волендам",
+          "clubOriginal": "Volendam"
+        },
+        {
+          "name": "Годфріед Роемератое",
+          "nameOriginal": "Godfried Roemeratoe",
+          "position": "MID",
+          "club": "RKC Ваалвіджк",
+          "clubOriginal": "RKC Waalwijk"
+        },
+        {
+          "name": "Кевін Феліда",
+          "nameOriginal": "Kevin Felida",
+          "position": "MID",
+          "club": "Ден Бощ",
+          "clubOriginal": "Den Bosch"
+        },
+        {
+          "name": "Лівано Комененкіа",
+          "nameOriginal": "Livano Comenencia",
+          "position": "MID",
+          "club": "Цюрих",
+          "clubOriginal": "Zürich"
+        },
+        {
+          "name": "Ар'Джанй Марта",
+          "nameOriginal": "Ar'jany Martha",
+          "position": "MID",
+          "club": "Ротергам Унітед",
+          "clubOriginal": "Rotherham United"
+        },
+        {
+          "name": "Тйресе Нослін",
+          "nameOriginal": "Tyrese Noslin",
+          "position": "MID",
+          "club": "Телстар",
+          "clubOriginal": "Telstar"
+        },
+        {
+          "name": "Кенджі Горре",
+          "nameOriginal": "Kenji Gorré",
+          "position": "FWD",
+          "club": "Маккабі Хайфа",
+          "clubOriginal": "Maccabi Haifa"
+        },
+        {
+          "name": "Брандлей Кувас",
+          "nameOriginal": "Brandley Kuwas",
+          "position": "FWD",
+          "club": "Волендам",
+          "clubOriginal": "Volendam"
+        },
+        {
+          "name": "Герване Кастанеер",
+          "nameOriginal": "Gervane Kastaneer",
+          "position": "FWD",
+          "club": "Теренггану",
+          "clubOriginal": "Terengganu"
+        },
+        {
+          "name": "Джеремй Антоніссе",
+          "nameOriginal": "Jeremy Antonisse",
+          "position": "FWD",
+          "club": "Кіфісіа",
+          "clubOriginal": "Kifisia"
+        },
+        {
+          "name": "Джеарл Маргаріта",
+          "nameOriginal": "Jearl Margaritha",
+          "position": "FWD",
+          "club": "Беверен",
+          "clubOriginal": "Beveren"
+        },
+        {
+          "name": "Джурген Локадіа",
+          "nameOriginal": "Jürgen Locadia",
+          "position": "FWD",
+          "club": "Міамі FC",
+          "clubOriginal": "Miami FC"
+        },
+        {
+          "name": "Сонтдже Гансен",
+          "nameOriginal": "Sontje Hansen",
+          "position": "FWD",
+          "club": "Міддлесброугг",
+          "clubOriginal": "Middlesbrough"
+        },
+        {
+          "name": "Тагіт Чонг",
+          "nameOriginal": "Tahith Chong",
+          "position": "FWD",
+          "club": "Шеффілд Юнайтед",
+          "clubOriginal": "Sheffield United"
+        }
+      ]
+    },
+    {
+      "countryEn": "Germany",
+      "countryUk": "Німеччина",
+      "code": "DE",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Julian Nagelsmann Germany announced their final squad on May 21.",
+      "players": [
+        {
+          "name": "Мануель Ноєр",
+          "nameOriginal": "Manuel Neuer",
+          "position": "GK",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Олівер Бауманн",
+          "nameOriginal": "Oliver Baumann",
+          "position": "GK",
+          "club": "Гоффенгайм",
+          "clubOriginal": "TSG Hoffenheim"
+        },
+        {
+          "name": "Александер Нубел",
+          "nameOriginal": "Alexander Nübel",
+          "position": "GK",
+          "club": "Штутгарт",
+          "clubOriginal": "VfB Stuttgart"
+        },
+        {
+          "name": "Антоніо Рудігер",
+          "nameOriginal": "Antonio Rüdiger",
+          "position": "DEF",
+          "club": "Реал Мадрид",
+          "clubOriginal": "Real Madrid"
+        },
+        {
+          "name": "Йонатан Таг",
+          "nameOriginal": "Jonathan Tah",
+          "position": "DEF",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Давід Раум",
+          "nameOriginal": "David Raum",
+          "position": "DEF",
+          "club": "РБ Лейпциг",
+          "clubOriginal": "RB Leipzig"
+        },
+        {
+          "name": "Ніко Щлоттербек",
+          "nameOriginal": "Nico Schlotterbeck",
+          "position": "DEF",
+          "club": "Боруссія Дортмунд",
+          "clubOriginal": "Borussia Dortmund"
+        },
+        {
+          "name": "Валдемар Антон",
+          "nameOriginal": "Waldemar Anton",
+          "position": "DEF",
+          "club": "Боруссія Дортмунд",
+          "clubOriginal": "Borussia Dortmund"
+        },
+        {
+          "name": "Малік Тіав",
+          "nameOriginal": "Malick Thiaw",
+          "position": "DEF",
+          "club": "Ньюкасл Юнайтед",
+          "clubOriginal": "Newcastle United"
+        },
+        {
+          "name": "Натаніел Бровн",
+          "nameOriginal": "Nathaniel Brown",
+          "position": "DEF",
+          "club": "Айнтрахт Франкфурт",
+          "clubOriginal": "Eintracht Frankfurt"
+        },
+        {
+          "name": "Йозуа Кімміх",
+          "nameOriginal": "Joshua Kimmich",
+          "position": "MID",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Лерой Сане",
+          "nameOriginal": "Leroy Sané",
+          "position": "MID",
+          "club": "Галатасарай",
+          "clubOriginal": "Galatasaray"
+        },
+        {
+          "name": "Леон Горетзка",
+          "nameOriginal": "Leon Goretzka",
+          "position": "MID",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Джамал Мусіала",
+          "nameOriginal": "Jamal Musiala",
+          "position": "MID",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Флоріан Вірц",
+          "nameOriginal": "Florian Wirtz",
+          "position": "MID",
+          "club": "Ліверпуль",
+          "clubOriginal": "Liverpool"
+        },
+        {
+          "name": "Паскал Гроß",
+          "nameOriginal": "Pascal Groß",
+          "position": "MID",
+          "club": "Брайтон енд Гоув Альбіон",
+          "clubOriginal": "Brighton & Hove Albion"
+        },
+        {
+          "name": "Надіем Амірі",
+          "nameOriginal": "Nadiem Amiri",
+          "position": "MID",
+          "club": "Майнц 05",
+          "clubOriginal": "Mainz 05"
+        },
+        {
+          "name": "Александар Павловік",
+          "nameOriginal": "Aleksandar Pavlović",
+          "position": "MID",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Ангело Стіллер",
+          "nameOriginal": "Angelo Stiller",
+          "position": "MID",
+          "club": "Штутгарт",
+          "clubOriginal": "VfB Stuttgart"
+        },
+        {
+          "name": "Фелікс Нмеча",
+          "nameOriginal": "Felix Nmecha",
+          "position": "MID",
+          "club": "Боруссія Дортмунд",
+          "clubOriginal": "Borussia Dortmund"
+        },
+        {
+          "name": "Джаміе Левелінг",
+          "nameOriginal": "Jamie Leweling",
+          "position": "MID",
+          "club": "Штутгарт",
+          "clubOriginal": "VfB Stuttgart"
+        },
+        {
+          "name": "Леннарт Карл",
+          "nameOriginal": "Lennart Karl",
+          "position": "MID",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Каі Гавертз",
+          "nameOriginal": "Kai Havertz",
+          "position": "FWD",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Нік Волтемаде",
+          "nameOriginal": "Nick Woltemade",
+          "position": "FWD",
+          "club": "Ньюкасл Юнайтед",
+          "clubOriginal": "Newcastle United"
+        },
+        {
+          "name": "Деніз Ундав",
+          "nameOriginal": "Deniz Undav",
+          "position": "FWD",
+          "club": "Штутгарт",
+          "clubOriginal": "VfB Stuttgart"
+        },
+        {
+          "name": "Максіміліан Беіер",
+          "nameOriginal": "Maximilian Beier",
+          "position": "FWD",
+          "club": "Боруссія Дортмунд",
+          "clubOriginal": "Borussia Dortmund"
+        }
+      ]
+    },
+    {
+      "countryEn": "Ivory Coast",
+      "countryUk": "Кот-д’Івуар",
+      "code": "CI",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Emerse Faé Ivory Coast announced their final squad on May 15.",
+      "players": [
+        {
+          "name": "Ягіа Фофана",
+          "nameOriginal": "Yahia Fofana",
+          "position": "GK",
+          "club": "Різеспор",
+          "clubOriginal": "Çaykur Rizespor"
+        },
+        {
+          "name": "Албан Лафонт",
+          "nameOriginal": "Alban Lafont",
+          "position": "GK",
+          "club": "Панатінаікос",
+          "clubOriginal": "Panathinaikos"
+        },
+        {
+          "name": "Могамед Коне",
+          "nameOriginal": "Mohamed Koné",
+          "position": "GK",
+          "club": "Шарлеруа",
+          "clubOriginal": "Charleroi"
+        },
+        {
+          "name": "Ггіслаін Конан",
+          "nameOriginal": "Ghislain Konan",
+          "position": "DEF",
+          "club": "Гіл Вікенте",
+          "clubOriginal": "Gil Vicente"
+        },
+        {
+          "name": "Оділон Коссоуноу",
+          "nameOriginal": "Odilon Kossounou",
+          "position": "DEF",
+          "club": "Аталанта",
+          "clubOriginal": "Atalanta"
+        },
+        {
+          "name": "Вілфріед Сінго",
+          "nameOriginal": "Wilfried Singo",
+          "position": "DEF",
+          "club": "Галатасарай",
+          "clubOriginal": "Galatasaray"
+        },
+        {
+          "name": "Еван Ндіка",
+          "nameOriginal": "Evan Ndicka",
+          "position": "DEF",
+          "club": "Рома",
+          "clubOriginal": "Roma"
+        },
+        {
+          "name": "Еммануел Агбадоу",
+          "nameOriginal": "Emmanuel Agbadou",
+          "position": "DEF",
+          "club": "Бешикташ",
+          "clubOriginal": "Beşiktaş"
+        },
+        {
+          "name": "Гуела Доуе",
+          "nameOriginal": "Guéla Doué",
+          "position": "DEF",
+          "club": "Страсбур",
+          "clubOriginal": "Strasbourg"
+        },
+        {
+          "name": "Оусмане Діоманде",
+          "nameOriginal": "Ousmane Diomande",
+          "position": "DEF",
+          "club": "Спортінг",
+          "clubOriginal": "Sporting CP"
+        },
+        {
+          "name": "Клемент Акпа",
+          "nameOriginal": "Clément Akpa",
+          "position": "DEF",
+          "club": "Осер",
+          "clubOriginal": "Auxerre"
+        },
+        {
+          "name": "Франк Кессіе",
+          "nameOriginal": "Franck Kessié",
+          "position": "MID",
+          "club": "Аль-Аглі",
+          "clubOriginal": "Al-Ahli"
+        },
+        {
+          "name": "Джеан Мічаел Сері",
+          "nameOriginal": "Jean Michaël Seri",
+          "position": "MID",
+          "club": "Марибор",
+          "clubOriginal": "Maribor"
+        },
+        {
+          "name": "Ібрагім Сангаре",
+          "nameOriginal": "Ibrahim Sangaré",
+          "position": "MID",
+          "club": "Ноттінгем Форест",
+          "clubOriginal": "Nottingham Forest"
+        },
+        {
+          "name": "Секо Фофана",
+          "nameOriginal": "Seko Fofana",
+          "position": "MID",
+          "club": "Порту",
+          "clubOriginal": "Porto"
+        },
+        {
+          "name": "Чріст Інао Оулаі",
+          "nameOriginal": "Christ Inao Oulaï",
+          "position": "MID",
+          "club": "Трабзонспор",
+          "clubOriginal": "Trabzonspor"
+        },
+        {
+          "name": "Парфаіт Гуіагон",
+          "nameOriginal": "Parfait Guiagon",
+          "position": "MID",
+          "club": "Шарлеруа",
+          "clubOriginal": "Charleroi"
+        },
+        {
+          "name": "Ніколас Пепе",
+          "nameOriginal": "Nicolas Pépé",
+          "position": "FWD",
+          "club": "Вільярреал",
+          "clubOriginal": "Villarreal"
+        },
+        {
+          "name": "Оумар Діакіте",
+          "nameOriginal": "Oumar Diakité",
+          "position": "FWD",
+          "club": "Серкль Брюгге",
+          "clubOriginal": "Cercle Brugge"
+        },
+        {
+          "name": "Сімон Адінгра",
+          "nameOriginal": "Simon Adingra",
+          "position": "FWD",
+          "club": "Монако",
+          "clubOriginal": "Monaco"
+        },
+        {
+          "name": "Еванн Гуессанд",
+          "nameOriginal": "Evann Guessand",
+          "position": "FWD",
+          "club": "Крістал Пелес",
+          "clubOriginal": "Crystal Palace"
+        },
+        {
+          "name": "Амад Діалло",
+          "nameOriginal": "Amad Diallo",
+          "position": "FWD",
+          "club": "Манчестер Юнайтед",
+          "clubOriginal": "Manchester United"
+        },
+        {
+          "name": "Ян Діоманде",
+          "nameOriginal": "Yan Diomande",
+          "position": "FWD",
+          "club": "РБ Лейпциг",
+          "clubOriginal": "RB Leipzig"
+        },
+        {
+          "name": "Базоумана Тоуре",
+          "nameOriginal": "Bazoumana Touré",
+          "position": "FWD",
+          "club": "Гоффенгайм",
+          "clubOriginal": "TSG Hoffenheim"
+        },
+        {
+          "name": "Елє Вагі",
+          "nameOriginal": "Elye Wahi",
+          "position": "FWD",
+          "club": "Ніцца",
+          "clubOriginal": "Nice"
+        },
+        {
+          "name": "Анге-Йоан Боннй",
+          "nameOriginal": "Ange-Yoan Bonny",
+          "position": "FWD",
+          "club": "Інтер",
+          "clubOriginal": "Inter Milan"
+        }
+      ]
+    },
+    {
+      "countryEn": "Japan",
+      "countryUk": "Японія",
+      "code": "JP",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Hajime Moriyasu Japan announced their final squad on May 15.",
+      "players": [
+        {
+          "name": "Зіон Сузукі",
+          "nameOriginal": "Zion Suzuki",
+          "position": "GK",
+          "club": "Парма",
+          "clubOriginal": "Parma"
+        },
+        {
+          "name": "Кеісуке Осако",
+          "nameOriginal": "Keisuke Ōsako",
+          "position": "GK",
+          "club": "Санфречче Хіросіма",
+          "clubOriginal": "Sanfrecce Hiroshima"
+        },
+        {
+          "name": "Томокі Гаякава",
+          "nameOriginal": "Tomoki Hayakawa",
+          "position": "GK",
+          "club": "Касіма Антлерс",
+          "clubOriginal": "Kashima Antlers"
+        },
+        {
+          "name": "Юто Нагатомо",
+          "nameOriginal": "Yūto Nagatomo",
+          "position": "DEF",
+          "club": "Токіо",
+          "clubOriginal": "FC Tokyo"
+        },
+        {
+          "name": "Такегіро Томіясу",
+          "nameOriginal": "Takehiro Tomiyasu",
+          "position": "DEF",
+          "club": "Аякс",
+          "clubOriginal": "Ajax"
+        },
+        {
+          "name": "Ко Ітакура",
+          "nameOriginal": "Kō Itakura",
+          "position": "DEF",
+          "club": "Аякс",
+          "clubOriginal": "Ajax"
+        },
+        {
+          "name": "Шого Танігучі",
+          "nameOriginal": "Shōgo Taniguchi",
+          "position": "DEF",
+          "club": "Сінт-Труіден",
+          "clubOriginal": "Sint-Truiden"
+        },
+        {
+          "name": "Гірокі Іто",
+          "nameOriginal": "Hiroki Itō",
+          "position": "DEF",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Юкінарі Сугавара",
+          "nameOriginal": "Yukinari Sugawara",
+          "position": "DEF",
+          "club": "Вердер",
+          "clubOriginal": "Werder Bremen"
+        },
+        {
+          "name": "Аюму Секо",
+          "nameOriginal": "Ayumu Seko",
+          "position": "DEF",
+          "club": "Гавр",
+          "clubOriginal": "Le Havre"
+        },
+        {
+          "name": "Цуйоші Ватанабе",
+          "nameOriginal": "Tsuyoshi Watanabe",
+          "position": "DEF",
+          "club": "Феєнорд",
+          "clubOriginal": "Feyenoord"
+        },
+        {
+          "name": "Джунносуке Сузукі",
+          "nameOriginal": "Junnosuke Suzuki",
+          "position": "DEF",
+          "club": "Копенгаген",
+          "clubOriginal": "Copenhagen"
+        },
+        {
+          "name": "Ватару Ендо",
+          "nameOriginal": "Wataru Endo",
+          "position": "MID",
+          "club": "Ліверпуль",
+          "clubOriginal": "Liverpool"
+        },
+        {
+          "name": "Джуня Іто",
+          "nameOriginal": "Junya Itō",
+          "position": "MID",
+          "club": "Генк",
+          "clubOriginal": "Genk"
+        },
+        {
+          "name": "Ріцу Доан",
+          "nameOriginal": "Ritsu Dōan",
+          "position": "MID",
+          "club": "Айнтрахт Франкфурт",
+          "clubOriginal": "Eintracht Frankfurt"
+        },
+        {
+          "name": "Даічі Камада",
+          "nameOriginal": "Daichi Kamada",
+          "position": "MID",
+          "club": "Крістал Пелес",
+          "clubOriginal": "Crystal Palace"
+        },
+        {
+          "name": "Такефуса Кубо",
+          "nameOriginal": "Takefusa Kubo",
+          "position": "MID",
+          "club": "Реал Сосьєдад",
+          "clubOriginal": "Real Sociedad"
+        },
+        {
+          "name": "Ао Танака",
+          "nameOriginal": "Ao Tanaka",
+          "position": "MID",
+          "club": "Лідс Юнайтед",
+          "clubOriginal": "Leeds United"
+        },
+        {
+          "name": "Кеіто Накамура",
+          "nameOriginal": "Keito Nakamura",
+          "position": "MID",
+          "club": "Реймс",
+          "clubOriginal": "Reims"
+        },
+        {
+          "name": "Каішу Сано",
+          "nameOriginal": "Kaishū Sano",
+          "position": "MID",
+          "club": "Майнц 05",
+          "clubOriginal": "Mainz 05"
+        },
+        {
+          "name": "Аясе Уеда",
+          "nameOriginal": "Ayase Ueda",
+          "position": "FWD",
+          "club": "Феєнорд",
+          "clubOriginal": "Feyenoord"
+        },
+        {
+          "name": "Даізен Маеда",
+          "nameOriginal": "Daizen Maeda",
+          "position": "FWD",
+          "club": "Селтік",
+          "clubOriginal": "Celtic"
+        },
+        {
+          "name": "Кокі Огава",
+          "nameOriginal": "Kōki Ogawa",
+          "position": "FWD",
+          "club": "NEC",
+          "clubOriginal": "NEC"
+        },
+        {
+          "name": "Юіто Сузукі",
+          "nameOriginal": "Yuito Suzuki",
+          "position": "FWD",
+          "club": "Фрайбург",
+          "clubOriginal": "SC Freiburg"
+        },
+        {
+          "name": "Кеісуке Гото",
+          "nameOriginal": "Keisuke Gotō",
+          "position": "FWD",
+          "club": "Сінт-Труіден",
+          "clubOriginal": "Sint-Truiden"
+        },
+        {
+          "name": "Кенто Шіогаі",
+          "nameOriginal": "Kento Shiogai",
+          "position": "FWD",
+          "club": "Вольфсбург",
+          "clubOriginal": "VfL Wolfsburg"
+        }
+      ]
+    },
+    {
+      "countryEn": "Sweden",
+      "countryUk": "Швеція",
+      "code": "SE",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Graham Potter Sweden announced their final squad on May 12.",
+      "players": [
+        {
+          "name": "Джакоб Віделл Зеттерстром",
+          "nameOriginal": "Jacob Widell Zetterström",
+          "position": "GK",
+          "club": "Дербй Коунтй",
+          "clubOriginal": "Derby County"
+        },
+        {
+          "name": "Густаф Лагербіелке",
+          "nameOriginal": "Gustaf Lagerbielke",
+          "position": "DEF",
+          "club": "Брага",
+          "clubOriginal": "Braga"
+        },
+        {
+          "name": "Віктор Лінделоф",
+          "nameOriginal": "Victor Lindelöf",
+          "position": "DEF",
+          "club": "Астон Вілла",
+          "clubOriginal": "Aston Villa"
+        },
+        {
+          "name": "Ісак Гіен",
+          "nameOriginal": "Isak Hien",
+          "position": "DEF",
+          "club": "Аталанта",
+          "clubOriginal": "Atalanta"
+        },
+        {
+          "name": "Габріел Гудмундссон",
+          "nameOriginal": "Gabriel Gudmundsson",
+          "position": "DEF",
+          "club": "Лідс Юнайтед",
+          "clubOriginal": "Leeds United"
+        },
+        {
+          "name": "Еміл Голм",
+          "nameOriginal": "Emil Holm",
+          "position": "DEF",
+          "club": "Ювентус",
+          "clubOriginal": "Juventus"
+        },
+        {
+          "name": "Лукас Бергвалл",
+          "nameOriginal": "Lucas Bergvall",
+          "position": "MID",
+          "club": "Тоттенгем Готспур",
+          "clubOriginal": "Tottenham Hotspur"
+        },
+        {
+          "name": "Даніел Свенссон",
+          "nameOriginal": "Daniel Svensson",
+          "position": "DEF",
+          "club": "Боруссія Дортмунд",
+          "clubOriginal": "Borussia Dortmund"
+        },
+        {
+          "name": "Александер Ісак",
+          "nameOriginal": "Alexander Isak",
+          "position": "FWD",
+          "club": "Ліверпуль",
+          "clubOriginal": "Liverpool"
+        },
+        {
+          "name": "Бенджамін Нйгрен",
+          "nameOriginal": "Benjamin Nygren",
+          "position": "FWD",
+          "club": "Селтік",
+          "clubOriginal": "Celtic"
+        },
+        {
+          "name": "Антонй Еланга",
+          "nameOriginal": "Anthony Elanga",
+          "position": "FWD",
+          "club": "Ньюкасл Юнайтед",
+          "clubOriginal": "Newcastle United"
+        },
+        {
+          "name": "Віктор Йоганссон",
+          "nameOriginal": "Viktor Johansson",
+          "position": "GK",
+          "club": "Стоке Кітй",
+          "clubOriginal": "Stoke City"
+        },
+        {
+          "name": "Кен Сема",
+          "nameOriginal": "Ken Sema",
+          "position": "MID",
+          "club": "Пафос",
+          "clubOriginal": "Pafos"
+        },
+        {
+          "name": "Гджалмар Екдал",
+          "nameOriginal": "Hjalmar Ekdal",
+          "position": "DEF",
+          "club": "Бернлі",
+          "clubOriginal": "Burnley"
+        },
+        {
+          "name": "Карл Старфелт",
+          "nameOriginal": "Carl Starfelt",
+          "position": "DEF",
+          "club": "Келта Віго",
+          "clubOriginal": "Celta Vigo"
+        },
+        {
+          "name": "Джеспер Карлстром",
+          "nameOriginal": "Jesper Karlström",
+          "position": "MID",
+          "club": "Удінезе",
+          "clubOriginal": "Udinese"
+        },
+        {
+          "name": "Віктор Гйокерес",
+          "nameOriginal": "Viktor Gyökeres",
+          "position": "FWD",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Ясін Аярі",
+          "nameOriginal": "Yasin Ayari",
+          "position": "MID",
+          "club": "Брайтон енд Гоув Альбіон",
+          "clubOriginal": "Brighton & Hove Albion"
+        },
+        {
+          "name": "Маттіас Сванберг",
+          "nameOriginal": "Mattias Svanberg",
+          "position": "MID",
+          "club": "Вольфсбург",
+          "clubOriginal": "VfL Wolfsburg"
+        },
+        {
+          "name": "Ерік Сміт",
+          "nameOriginal": "Eric Smith",
+          "position": "DEF",
+          "club": "Санкт-Паулі",
+          "clubOriginal": "FC St. Pauli"
+        },
+        {
+          "name": "Александер Бернгардссон",
+          "nameOriginal": "Alexander Bernhardsson",
+          "position": "FWD",
+          "club": "Гольштайн Кіль",
+          "clubOriginal": "Holstein Kiel"
+        },
+        {
+          "name": "Бесфорт Зенелі",
+          "nameOriginal": "Besfort Zeneli",
+          "position": "MID",
+          "club": "Юніон Сен-Жилуаз",
+          "clubOriginal": "Union Saint-Gilloise"
+        },
+        {
+          "name": "Крістоффер Нордфелдт",
+          "nameOriginal": "Kristoffer Nordfeldt",
+          "position": "GK",
+          "club": "АІК",
+          "clubOriginal": "AIK"
+        },
+        {
+          "name": "Елліот Строуд",
+          "nameOriginal": "Elliot Stroud",
+          "position": "DEF",
+          "club": "Мджаллбй Аіф",
+          "clubOriginal": "Mjällby AIF"
+        },
+        {
+          "name": "Густаф Нілссон",
+          "nameOriginal": "Gustaf Nilsson",
+          "position": "FWD",
+          "club": "Брюгге",
+          "clubOriginal": "Club Brugge"
+        },
+        {
+          "name": "Тага Алі",
+          "nameOriginal": "Taha Ali",
+          "position": "FWD",
+          "club": "Мальме",
+          "clubOriginal": "Malmö FF"
+        }
+      ]
+    },
+    {
+      "countryEn": "Tunisia",
+      "countryUk": "Туніс",
+      "code": "TN",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Sabri Lamouchi Tunisia announced their final squad on May 15.",
+      "players": [
+        {
+          "name": "Аймен Дагмен",
+          "nameOriginal": "Aymen Dahmen",
+          "position": "GK",
+          "club": "Сфаксьєн",
+          "clubOriginal": "CS Sfaxien"
+        },
+        {
+          "name": "Сабрі Бен Гессен",
+          "nameOriginal": "Sabri Ben Hessen",
+          "position": "GK",
+          "club": "Етуаль дю Сахель",
+          "clubOriginal": "Étoile du Sahel"
+        },
+        {
+          "name": "Моугіб Чамах",
+          "nameOriginal": "Mouhib Chamakh",
+          "position": "GK",
+          "club": "Клуб Африкен",
+          "clubOriginal": "Club Africain"
+        },
+        {
+          "name": "Монтассар Талбі",
+          "nameOriginal": "Montassar Talbi",
+          "position": "DEF",
+          "club": "Лор'ян",
+          "clubOriginal": "Lorient"
+        },
+        {
+          "name": "Дйлан Бронн",
+          "nameOriginal": "Dylan Bronn",
+          "position": "DEF",
+          "club": "Серветт",
+          "clubOriginal": "Servette"
+        },
+        {
+          "name": "Алі Абді",
+          "nameOriginal": "Ali Abdi",
+          "position": "DEF",
+          "club": "Ніцца",
+          "clubOriginal": "Nice"
+        },
+        {
+          "name": "Ян Валерй",
+          "nameOriginal": "Yan Valery",
+          "position": "DEF",
+          "club": "Янг Бойз",
+          "clubOriginal": "Young Boys"
+        },
+        {
+          "name": "Могамед Аміне Бен Гаміда",
+          "nameOriginal": "Mohamed Amine Ben Hamida",
+          "position": "DEF",
+          "club": "Есперанс Туніс",
+          "clubOriginal": "Espérance de Tunis"
+        },
+        {
+          "name": "Моутаз Неффаті",
+          "nameOriginal": "Moutaz Neffati",
+          "position": "DEF",
+          "club": "IFK Норркопінг",
+          "clubOriginal": "IFK Norrköping"
+        },
+        {
+          "name": "Омар Рекік",
+          "nameOriginal": "Omar Rekik",
+          "position": "DEF",
+          "club": "Марибор",
+          "clubOriginal": "Maribor"
+        },
+        {
+          "name": "Адем Ароус",
+          "nameOriginal": "Adem Arous",
+          "position": "DEF",
+          "club": "Касимпаша",
+          "clubOriginal": "Kasımpaşa"
+        },
+        {
+          "name": "Раед Чіхаоуі",
+          "nameOriginal": "Raed Chikhaoui",
+          "position": "DEF",
+          "club": "Монастір",
+          "clubOriginal": "US Monastir"
+        },
+        {
+          "name": "Еллєс Схірі",
+          "nameOriginal": "Ellyes Skhiri",
+          "position": "MID",
+          "club": "Айнтрахт Франкфурт",
+          "clubOriginal": "Eintracht Frankfurt"
+        },
+        {
+          "name": "Ганнібал Меджбрі",
+          "nameOriginal": "Hannibal Mejbri",
+          "position": "MID",
+          "club": "Бернлі",
+          "clubOriginal": "Burnley"
+        },
+        {
+          "name": "Аніс Бен Слімане",
+          "nameOriginal": "Anis Ben Slimane",
+          "position": "MID",
+          "club": "Норвіч Сіті",
+          "clubOriginal": "Norwich City"
+        },
+        {
+          "name": "Мортадга Бен Оуанес",
+          "nameOriginal": "Mortadha Ben Ouanes",
+          "position": "MID",
+          "club": "Касимпаша",
+          "clubOriginal": "Kasımpaşa"
+        },
+        {
+          "name": "Ісмаел Ггарбі",
+          "nameOriginal": "Ismaël Gharbi",
+          "position": "MID",
+          "club": "Аугсбург",
+          "clubOriginal": "FC Augsburg"
+        },
+        {
+          "name": "Гаддж Магмоуд",
+          "nameOriginal": "Hadj Mahmoud",
+          "position": "MID",
+          "club": "Лугано",
+          "clubOriginal": "Lugano"
+        },
+        {
+          "name": "Рані Хедіра",
+          "nameOriginal": "Rani Khedira",
+          "position": "MID",
+          "club": "Уніон Берлін",
+          "clubOriginal": "Union Berlin"
+        },
+        {
+          "name": "Еліас Ачоурі",
+          "nameOriginal": "Elias Achouri",
+          "position": "FWD",
+          "club": "Копенгаген",
+          "clubOriginal": "Copenhagen"
+        },
+        {
+          "name": "Фірас Чаоуат",
+          "nameOriginal": "Firas Chaouat",
+          "position": "FWD",
+          "club": "Клуб Африкен",
+          "clubOriginal": "Club Africain"
+        },
+        {
+          "name": "Газем Мастоурі",
+          "nameOriginal": "Hazem Mastouri",
+          "position": "FWD",
+          "club": "Динамо Махачкала",
+          "clubOriginal": "Dynamo Makhachkala"
+        },
+        {
+          "name": "Еліас Саад",
+          "nameOriginal": "Elias Saad",
+          "position": "FWD",
+          "club": "Ганновер 96",
+          "clubOriginal": "Hannover 96"
+        },
+        {
+          "name": "Себастіан Тоунекті",
+          "nameOriginal": "Sebastian Tounekti",
+          "position": "FWD",
+          "club": "Селтік",
+          "clubOriginal": "Celtic"
+        },
+        {
+          "name": "Халіл Аярі",
+          "nameOriginal": "Khalil Ayari",
+          "position": "FWD",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Раян Еллоумі",
+          "nameOriginal": "Rayan Elloumi",
+          "position": "FWD",
+          "club": "Ванкувер Вайткепс",
+          "clubOriginal": "Vancouver Whitecaps FC"
+        }
+      ]
+    },
+    {
+      "countryEn": "Belgium",
+      "countryUk": "Бельгія",
+      "code": "BE",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Rudi Garcia Belgium announced their final squad on May 15.",
+      "players": [
+        {
+          "name": "Тібо Куртуа",
+          "nameOriginal": "Thibaut Courtois",
+          "position": "GK",
+          "club": "Реал Мадрид",
+          "clubOriginal": "Real Madrid"
+        },
+        {
+          "name": "Сенне Ламменс",
+          "nameOriginal": "Senne Lammens",
+          "position": "GK",
+          "club": "Манчестер Юнайтед",
+          "clubOriginal": "Manchester United"
+        },
+        {
+          "name": "Міке Пендерс",
+          "nameOriginal": "Mike Penders",
+          "position": "GK",
+          "club": "Страсбур",
+          "clubOriginal": "Strasbourg"
+        },
+        {
+          "name": "Томас Меуніер",
+          "nameOriginal": "Thomas Meunier",
+          "position": "DEF",
+          "club": "Лілль",
+          "clubOriginal": "Lille"
+        },
+        {
+          "name": "Тімотй Кастагне",
+          "nameOriginal": "Timothy Castagne",
+          "position": "DEF",
+          "club": "Фулгем",
+          "clubOriginal": "Fulham"
+        },
+        {
+          "name": "Артур Теате",
+          "nameOriginal": "Arthur Theate",
+          "position": "DEF",
+          "club": "Айнтрахт Франкфурт",
+          "clubOriginal": "Eintracht Frankfurt"
+        },
+        {
+          "name": "Зено Дебаст",
+          "nameOriginal": "Zeno Debast",
+          "position": "DEF",
+          "club": "Спортінг",
+          "clubOriginal": "Sporting CP"
+        },
+        {
+          "name": "Максім Де Куйпер",
+          "nameOriginal": "Maxim De Cuyper",
+          "position": "DEF",
+          "club": "Брайтон енд Гоув Альбіон",
+          "clubOriginal": "Brighton & Hove Albion"
+        },
+        {
+          "name": "Брандон Мечеле",
+          "nameOriginal": "Brandon Mechele",
+          "position": "DEF",
+          "club": "Брюгге",
+          "clubOriginal": "Club Brugge"
+        },
+        {
+          "name": "Коні Де Вінтер",
+          "nameOriginal": "Koni De Winter",
+          "position": "DEF",
+          "club": "Мілан",
+          "clubOriginal": "Milan"
+        },
+        {
+          "name": "Йоаквін Сейс",
+          "nameOriginal": "Joaquin Seys",
+          "position": "DEF",
+          "club": "Брюгге",
+          "clubOriginal": "Club Brugge"
+        },
+        {
+          "name": "Натан Нгой",
+          "nameOriginal": "Nathan Ngoy",
+          "position": "DEF",
+          "club": "Лілль",
+          "clubOriginal": "Lille"
+        },
+        {
+          "name": "Аксел Віцел",
+          "nameOriginal": "Axel Witsel",
+          "position": "MID",
+          "club": "Гірона",
+          "clubOriginal": "Girona"
+        },
+        {
+          "name": "Кевін Де Брюйне",
+          "nameOriginal": "Kevin De Bruyne",
+          "position": "MID",
+          "club": "Наполі",
+          "clubOriginal": "Napoli"
+        },
+        {
+          "name": "Йоурі Тіелеманс",
+          "nameOriginal": "Youri Tielemans",
+          "position": "MID",
+          "club": "Астон Вілла",
+          "clubOriginal": "Aston Villa"
+        },
+        {
+          "name": "Ганс Ванакен",
+          "nameOriginal": "Hans Vanaken",
+          "position": "MID",
+          "club": "Брюгге",
+          "clubOriginal": "Club Brugge"
+        },
+        {
+          "name": "Амадоу Онана",
+          "nameOriginal": "Amadou Onana",
+          "position": "MID",
+          "club": "Астон Вілла",
+          "clubOriginal": "Aston Villa"
+        },
+        {
+          "name": "Ніколас Раскін",
+          "nameOriginal": "Nicolas Raskin",
+          "position": "MID",
+          "club": "Рейнджерс",
+          "clubOriginal": "Rangers"
+        },
+        {
+          "name": "Ромелу Лукаку",
+          "nameOriginal": "Romelu Lukaku",
+          "position": "FWD",
+          "club": "Наполі",
+          "clubOriginal": "Napoli"
+        },
+        {
+          "name": "Леандро Троссард",
+          "nameOriginal": "Leandro Trossard",
+          "position": "FWD",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Джеремй Доку",
+          "nameOriginal": "Jérémy Doku",
+          "position": "FWD",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Доді Лукебакіо",
+          "nameOriginal": "Dodi Lukébakio",
+          "position": "FWD",
+          "club": "Бенфіка",
+          "clubOriginal": "Benfica"
+        },
+        {
+          "name": "Чарлес Де Кетелаере",
+          "nameOriginal": "Charles De Ketelaere",
+          "position": "FWD",
+          "club": "Аталанта",
+          "clubOriginal": "Atalanta"
+        },
+        {
+          "name": "Алексіс Саелемаекерс",
+          "nameOriginal": "Alexis Saelemaekers",
+          "position": "FWD",
+          "club": "Мілан",
+          "clubOriginal": "Milan"
+        },
+        {
+          "name": "Діего Мореіра",
+          "nameOriginal": "Diego Moreira",
+          "position": "FWD",
+          "club": "Страсбур",
+          "clubOriginal": "Strasbourg"
+        },
+        {
+          "name": "Матіас Фернандез-Пардо",
+          "nameOriginal": "Matias Fernandez-Pardo",
+          "position": "FWD",
+          "club": "Лілль",
+          "clubOriginal": "Lille"
+        }
+      ]
+    },
+    {
+      "countryEn": "New Zealand",
+      "countryUk": "Нова Зеландія",
+      "code": "NZ",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Darren Bazeley New Zealand announced their final squad on May 14.",
+      "players": [
+        {
+          "name": "Макс Крокомбе",
+          "nameOriginal": "Max Crocombe",
+          "position": "GK",
+          "club": "Міллвалл",
+          "clubOriginal": "Millwall"
+        },
+        {
+          "name": "Тім Пайне",
+          "nameOriginal": "Tim Payne",
+          "position": "DEF",
+          "club": "Веллінгтон Фінікс",
+          "clubOriginal": "Wellington Phoenix"
+        },
+        {
+          "name": "Франкіс Де Вріес",
+          "nameOriginal": "Francis de Vries",
+          "position": "DEF",
+          "club": "Окленд",
+          "clubOriginal": "Auckland FC"
+        },
+        {
+          "name": "Тйлер Біндон",
+          "nameOriginal": "Tyler Bindon",
+          "position": "DEF",
+          "club": "Шеффілд Юнайтед",
+          "clubOriginal": "Sheffield United"
+        },
+        {
+          "name": "Мічаел Боксалл",
+          "nameOriginal": "Michael Boxall",
+          "position": "DEF",
+          "club": "Міннесота Юнайтед",
+          "clubOriginal": "Minnesota United FC"
+        },
+        {
+          "name": "Йое Белл",
+          "nameOriginal": "Joe Bell",
+          "position": "MID",
+          "club": "Вікінг",
+          "clubOriginal": "Viking"
+        },
+        {
+          "name": "Маттев Гарбетт",
+          "nameOriginal": "Matthew Garbett",
+          "position": "MID",
+          "club": "Петербороугг Унітед",
+          "clubOriginal": "Peterborough United"
+        },
+        {
+          "name": "Марко Стаменік",
+          "nameOriginal": "Marko Stamenić",
+          "position": "MID",
+          "club": "Свонсі Сіті",
+          "clubOriginal": "Swansea City"
+        },
+        {
+          "name": "Чріс Воод",
+          "nameOriginal": "Chris Wood",
+          "position": "FWD",
+          "club": "Ноттінгем Форест",
+          "clubOriginal": "Nottingham Forest"
+        },
+        {
+          "name": "Сарпреет Сінгг",
+          "nameOriginal": "Sarpreet Singh",
+          "position": "MID",
+          "club": "Веллінгтон Фінікс",
+          "clubOriginal": "Wellington Phoenix"
+        },
+        {
+          "name": "Еліджаг Джуст",
+          "nameOriginal": "Elijah Just",
+          "position": "MID",
+          "club": "Мотервелл",
+          "clubOriginal": "Motherwell"
+        },
+        {
+          "name": "Алекс Паулсен",
+          "nameOriginal": "Alex Paulsen",
+          "position": "GK",
+          "club": "Лехія Гданськ",
+          "clubOriginal": "Lechia Gdańsk"
+        },
+        {
+          "name": "Ліберато Какаке",
+          "nameOriginal": "Liberato Cacace",
+          "position": "DEF",
+          "club": "Рексем",
+          "clubOriginal": "Wrexham"
+        },
+        {
+          "name": "Алекс Руфер",
+          "nameOriginal": "Alex Rufer",
+          "position": "MID",
+          "club": "Веллінгтон Фінікс",
+          "clubOriginal": "Wellington Phoenix"
+        },
+        {
+          "name": "Нандо Піджнакер",
+          "nameOriginal": "Nando Pijnaker",
+          "position": "DEF",
+          "club": "Окленд",
+          "clubOriginal": "Auckland FC"
+        },
+        {
+          "name": "Фінн Сурман",
+          "nameOriginal": "Finn Surman",
+          "position": "DEF",
+          "club": "Портленд Тімберс",
+          "clubOriginal": "Portland Timbers"
+        },
+        {
+          "name": "Коста Барбароусес",
+          "nameOriginal": "Kosta Barbarouses",
+          "position": "FWD",
+          "club": "Вестерн Сідней Вондерерз",
+          "clubOriginal": "Western Sydney Wanderers"
+        },
+        {
+          "name": "Бен Ваіне",
+          "nameOriginal": "Ben Waine",
+          "position": "FWD",
+          "club": "Порт Вале",
+          "clubOriginal": "Port Vale"
+        },
+        {
+          "name": "Бен Олд",
+          "nameOriginal": "Ben Old",
+          "position": "MID",
+          "club": "Сент-Етьєн",
+          "clubOriginal": "Saint-Étienne"
+        },
+        {
+          "name": "Каллум Мкковатт",
+          "nameOriginal": "Callum McCowatt",
+          "position": "MID",
+          "club": "Сілкеборг",
+          "clubOriginal": "Silkeborg"
+        },
+        {
+          "name": "Джессе Рандалл",
+          "nameOriginal": "Jesse Randall",
+          "position": "FWD",
+          "club": "Окленд",
+          "clubOriginal": "Auckland FC"
+        },
+        {
+          "name": "Мічаел Воуд",
+          "nameOriginal": "Michael Woud",
+          "position": "GK",
+          "club": "Окленд",
+          "clubOriginal": "Auckland FC"
+        },
+        {
+          "name": "Рян Томас",
+          "nameOriginal": "Ryan Thomas",
+          "position": "MID",
+          "club": "PEC Зволле",
+          "clubOriginal": "PEC Zwolle"
+        },
+        {
+          "name": "Каллан Елліот",
+          "nameOriginal": "Callan Elliot",
+          "position": "DEF",
+          "club": "Окленд",
+          "clubOriginal": "Auckland FC"
+        },
+        {
+          "name": "Лачлан Байлісс",
+          "nameOriginal": "Lachlan Bayliss",
+          "position": "MID",
+          "club": "Ньюкасл Джетс",
+          "clubOriginal": "Newcastle Jets"
+        },
+        {
+          "name": "Томмй Сміт",
+          "nameOriginal": "Tommy Smith",
+          "position": "DEF",
+          "club": "Браінтрее Товн",
+          "clubOriginal": "Braintree Town"
+        }
+      ]
+    },
+    {
+      "countryEn": "Cape Verde",
+      "countryUk": "Кабо-Верде",
+      "code": "CV",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Bubista Cape Verde announced their final squad on May 18.",
+      "players": [
+        {
+          "name": "Возінга",
+          "nameOriginal": "Vozinha",
+          "position": "GK",
+          "club": "Чавес",
+          "clubOriginal": "Chaves"
+        },
+        {
+          "name": "Маркіо Роса",
+          "nameOriginal": "Márcio Rosa",
+          "position": "GK",
+          "club": "Монтана",
+          "clubOriginal": "Montana"
+        },
+        {
+          "name": "Кдж Дос Сантос",
+          "nameOriginal": "CJ dos Santos",
+          "position": "GK",
+          "club": "Сан-Дієго",
+          "clubOriginal": "San Diego"
+        },
+        {
+          "name": "Стопіра",
+          "nameOriginal": "Stopira",
+          "position": "DEF",
+          "club": "Торреенсе",
+          "clubOriginal": "Torreense"
+        },
+        {
+          "name": "Роберто Лопес",
+          "nameOriginal": "Roberto Lopes",
+          "position": "DEF",
+          "club": "Шамрок Роверс",
+          "clubOriginal": "Shamrock Rovers"
+        },
+        {
+          "name": "Йоао Пауло",
+          "nameOriginal": "João Paulo",
+          "position": "DEF",
+          "club": "ФКСБ",
+          "clubOriginal": "FCSB"
+        },
+        {
+          "name": "Діней",
+          "nameOriginal": "Diney",
+          "position": "DEF",
+          "club": "Аль-Батаєх",
+          "clubOriginal": "Al Bataeh"
+        },
+        {
+          "name": "Логан Коста",
+          "nameOriginal": "Logan Costa",
+          "position": "DEF",
+          "club": "Вільярреал",
+          "clubOriginal": "Villarreal"
+        },
+        {
+          "name": "Стевен Мореіра",
+          "nameOriginal": "Steven Moreira",
+          "position": "DEF",
+          "club": "Коламбус Крю",
+          "clubOriginal": "Columbus Crew"
+        },
+        {
+          "name": "Вагнер Піна",
+          "nameOriginal": "Wagner Pina",
+          "position": "DEF",
+          "club": "Трабзонспор",
+          "clubOriginal": "Trabzonspor"
+        },
+        {
+          "name": "Сіднй Лопес Кабрал",
+          "nameOriginal": "Sidny Lopes Cabral",
+          "position": "DEF",
+          "club": "Бенфіка",
+          "clubOriginal": "Benfica"
+        },
+        {
+          "name": "Келвін Пірес",
+          "nameOriginal": "Kelvin Pires",
+          "position": "DEF",
+          "club": "SJK",
+          "clubOriginal": "SJK"
+        },
+        {
+          "name": "Джаміро Монтеіро",
+          "nameOriginal": "Jamiro Monteiro",
+          "position": "MID",
+          "club": "PEC Зволле",
+          "clubOriginal": "PEC Zwolle"
+        },
+        {
+          "name": "Кевін Піна",
+          "nameOriginal": "Kevin Pina",
+          "position": "MID",
+          "club": "Краснодар",
+          "clubOriginal": "Krasnodar"
+        },
+        {
+          "name": "Дерой Дуарте",
+          "nameOriginal": "Deroy Duarte",
+          "position": "MID",
+          "club": "Лудогорець Разград",
+          "clubOriginal": "Ludogorets Razgrad"
+        },
+        {
+          "name": "Телмо Арканйо",
+          "nameOriginal": "Telmo Arcanjo",
+          "position": "MID",
+          "club": "Віторіа Де Гуімараес",
+          "clubOriginal": "Vitória de Guimarães"
+        },
+        {
+          "name": "Ларос Дуарте",
+          "nameOriginal": "Laros Duarte",
+          "position": "MID",
+          "club": "Академія Пушкаша",
+          "clubOriginal": "Puskás Akadémia"
+        },
+        {
+          "name": "Яннік Семедо",
+          "nameOriginal": "Yannick Semedo",
+          "position": "MID",
+          "club": "Фаренсе",
+          "clubOriginal": "Farense"
+        },
+        {
+          "name": "Рян Мендес",
+          "nameOriginal": "Ryan Mendes",
+          "position": "FWD",
+          "club": "Игдир",
+          "clubOriginal": "Iğdır"
+        },
+        {
+          "name": "Гаррй Родрігуес",
+          "nameOriginal": "Garry Rodrigues",
+          "position": "FWD",
+          "club": "Аполлон Лімасол",
+          "clubOriginal": "Apollon Limassol"
+        },
+        {
+          "name": "Віллй Семедо",
+          "nameOriginal": "Willy Semedo",
+          "position": "FWD",
+          "club": "Омонія",
+          "clubOriginal": "Omonia"
+        },
+        {
+          "name": "Йоване Кабрал",
+          "nameOriginal": "Jovane Cabral",
+          "position": "FWD",
+          "club": "Естрела Амадора",
+          "clubOriginal": "Estrela Amadora"
+        },
+        {
+          "name": "Гілсон Бенчімол",
+          "nameOriginal": "Gilson Benchimol",
+          "position": "FWD",
+          "club": "Акрон Толятті",
+          "clubOriginal": "Akron Tolyatti"
+        },
+        {
+          "name": "Даілон Лівраменто",
+          "nameOriginal": "Dailon Livramento",
+          "position": "FWD",
+          "club": "Каса Піа",
+          "clubOriginal": "Casa Pia"
+        },
+        {
+          "name": "Геліо Варела",
+          "nameOriginal": "Hélio Varela",
+          "position": "FWD",
+          "club": "Маккабі Тель-Авів",
+          "clubOriginal": "Maccabi Tel Aviv"
+        },
+        {
+          "name": "Нуно Да Коста",
+          "nameOriginal": "Nuno da Costa",
+          "position": "FWD",
+          "club": "Істанбул Башакшехір",
+          "clubOriginal": "İstanbul Başakşehir"
+        }
+      ]
+    },
+    {
+      "countryEn": "Spain",
+      "countryUk": "Іспанія",
+      "code": "ES",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Luis de la Fuente Spain announced their final squad on May 25.",
+      "players": [
+        {
+          "name": "Унаї Сімон",
+          "nameOriginal": "Unai Simón",
+          "position": "GK",
+          "club": "Атлетік Більбао",
+          "clubOriginal": "Athletic Bilbao"
+        },
+        {
+          "name": "Давід Рая",
+          "nameOriginal": "David Raya",
+          "position": "GK",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Йоан Гаркіа",
+          "nameOriginal": "Joan Garcia",
+          "position": "GK",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Аймерік Лапорте",
+          "nameOriginal": "Aymeric Laporte",
+          "position": "DEF",
+          "club": "Атлетік Більбао",
+          "clubOriginal": "Athletic Bilbao"
+        },
+        {
+          "name": "Марк Кукурелла",
+          "nameOriginal": "Marc Cucurella",
+          "position": "DEF",
+          "club": "Челсі",
+          "clubOriginal": "Chelsea"
+        },
+        {
+          "name": "Маркос Ллоренте",
+          "nameOriginal": "Marcos Llorente",
+          "position": "DEF",
+          "club": "Атлетіко Мадрид",
+          "clubOriginal": "Atlético Madrid"
+        },
+        {
+          "name": "Ерік Гаркіа",
+          "nameOriginal": "Eric García",
+          "position": "DEF",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Педро Порро",
+          "nameOriginal": "Pedro Porro",
+          "position": "DEF",
+          "club": "Тоттенгем Готспур",
+          "clubOriginal": "Tottenham Hotspur"
+        },
+        {
+          "name": "Алекс Грімалдо",
+          "nameOriginal": "Álex Grimaldo",
+          "position": "DEF",
+          "club": "Баєр Леверкузен",
+          "clubOriginal": "Bayer Leverkusen"
+        },
+        {
+          "name": "Пау Кубарсі",
+          "nameOriginal": "Pau Cubarsí",
+          "position": "DEF",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Марк Пубілл",
+          "nameOriginal": "Marc Pubill",
+          "position": "DEF",
+          "club": "Атлетіко Мадрид",
+          "clubOriginal": "Atlético Madrid"
+        },
+        {
+          "name": "Родрі",
+          "nameOriginal": "Rodri",
+          "position": "MID",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Мікел Меріно",
+          "nameOriginal": "Mikel Merino",
+          "position": "MID",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Фабіан Руіз",
+          "nameOriginal": "Fabián Ruiz",
+          "position": "MID",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Педрі",
+          "nameOriginal": "Pedri",
+          "position": "MID",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Гаві",
+          "nameOriginal": "Gavi",
+          "position": "MID",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Мартін Зубіменді",
+          "nameOriginal": "Martín Zubimendi",
+          "position": "MID",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Алекс Баена",
+          "nameOriginal": "Álex Baena",
+          "position": "MID",
+          "club": "Атлетіко Мадрид",
+          "clubOriginal": "Atlético Madrid"
+        },
+        {
+          "name": "Ферран Торрес",
+          "nameOriginal": "Ferran Torres",
+          "position": "FWD",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Мікел Оярзабал",
+          "nameOriginal": "Mikel Oyarzabal",
+          "position": "FWD",
+          "club": "Реал Сосьєдад",
+          "clubOriginal": "Real Sociedad"
+        },
+        {
+          "name": "Дані Олмо",
+          "nameOriginal": "Dani Olmo",
+          "position": "FWD",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Ніко Вілліамс",
+          "nameOriginal": "Nico Williams",
+          "position": "FWD",
+          "club": "Атлетік Більбао",
+          "clubOriginal": "Athletic Bilbao"
+        },
+        {
+          "name": "Ламін Ямаль",
+          "nameOriginal": "Lamine Yamal",
+          "position": "FWD",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Єремй Піно",
+          "nameOriginal": "Yéremy Pino",
+          "position": "FWD",
+          "club": "Крістал Пелес",
+          "clubOriginal": "Crystal Palace"
+        },
+        {
+          "name": "Борджа Іглесіас",
+          "nameOriginal": "Borja Iglesias",
+          "position": "FWD",
+          "club": "Келта Віго",
+          "clubOriginal": "Celta Vigo"
+        },
+        {
+          "name": "Віктор Муноз",
+          "nameOriginal": "Víctor Muñoz",
+          "position": "FWD",
+          "club": "Осасуна",
+          "clubOriginal": "Osasuna"
+        }
+      ]
+    },
+    {
+      "countryEn": "France",
+      "countryUk": "Франція",
+      "code": "FR",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Didier Deschamps France announced their final squad on May 14.",
+      "players": [
+        {
+          "name": "Бріке Самба",
+          "nameOriginal": "Brice Samba",
+          "position": "GK",
+          "club": "Ренн",
+          "clubOriginal": "Rennes"
+        },
+        {
+          "name": "Мало Густо",
+          "nameOriginal": "Malo Gusto",
+          "position": "DEF",
+          "club": "Челсі",
+          "clubOriginal": "Chelsea"
+        },
+        {
+          "name": "Лукас Дігне",
+          "nameOriginal": "Lucas Digne",
+          "position": "DEF",
+          "club": "Астон Вілла",
+          "clubOriginal": "Aston Villa"
+        },
+        {
+          "name": "Дайот Упамекано",
+          "nameOriginal": "Dayot Upamecano",
+          "position": "DEF",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Джулес Коунде",
+          "nameOriginal": "Jules Koundé",
+          "position": "DEF",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Ману Коне",
+          "nameOriginal": "Manu Koné",
+          "position": "MID",
+          "club": "Рома",
+          "clubOriginal": "Roma"
+        },
+        {
+          "name": "Оусмане Дембеле",
+          "nameOriginal": "Ousmane Dembélé",
+          "position": "FWD",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Орельєн Чуамені",
+          "nameOriginal": "Aurélien Tchouaméni",
+          "position": "MID",
+          "club": "Реал Мадрид",
+          "clubOriginal": "Real Madrid"
+        },
+        {
+          "name": "Маркус Турам",
+          "nameOriginal": "Marcus Thuram",
+          "position": "FWD",
+          "club": "Інтер",
+          "clubOriginal": "Inter Milan"
+        },
+        {
+          "name": "Кіліан Мбаппе",
+          "nameOriginal": "Kylian Mbappé",
+          "position": "FWD",
+          "club": "Реал Мадрид",
+          "clubOriginal": "Real Madrid"
+        },
+        {
+          "name": "Мічаел Олісе",
+          "nameOriginal": "Michael Olise",
+          "position": "FWD",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Брадлей Баркола",
+          "nameOriginal": "Bradley Barcola",
+          "position": "FWD",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Н'Голо Канте",
+          "nameOriginal": "N'Golo Kanté",
+          "position": "MID",
+          "club": "Фенербахче",
+          "clubOriginal": "Fenerbahçe"
+        },
+        {
+          "name": "Адріен Рабіот",
+          "nameOriginal": "Adrien Rabiot",
+          "position": "MID",
+          "club": "Мілан",
+          "clubOriginal": "Milan"
+        },
+        {
+          "name": "Ібрагіма Конате",
+          "nameOriginal": "Ibrahima Konaté",
+          "position": "DEF",
+          "club": "Ліверпуль",
+          "clubOriginal": "Liverpool"
+        },
+        {
+          "name": "Міке Маігнан",
+          "nameOriginal": "Mike Maignan",
+          "position": "GK",
+          "club": "Мілан",
+          "clubOriginal": "Milan"
+        },
+        {
+          "name": "Вільям Саліба",
+          "nameOriginal": "William Saliba",
+          "position": "DEF",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Варрен Заіре-Емерй",
+          "nameOriginal": "Warren Zaïre-Emery",
+          "position": "MID",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Тео Гернандез",
+          "nameOriginal": "Théo Hernandez",
+          "position": "DEF",
+          "club": "Аль-Гіляль",
+          "clubOriginal": "Al-Hilal"
+        },
+        {
+          "name": "Десіре Доуе",
+          "nameOriginal": "Désiré Doué",
+          "position": "FWD",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Лукас Гернандез",
+          "nameOriginal": "Lucas Hernandez",
+          "position": "DEF",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Джеан-Філіппе Матета",
+          "nameOriginal": "Jean-Philippe Mateta",
+          "position": "FWD",
+          "club": "Крістал Пелес",
+          "clubOriginal": "Crystal Palace"
+        },
+        {
+          "name": "Робін Ріссер",
+          "nameOriginal": "Robin Risser",
+          "position": "GK",
+          "club": "Ланс",
+          "clubOriginal": "Lens"
+        },
+        {
+          "name": "Раян Черкі",
+          "nameOriginal": "Rayan Cherki",
+          "position": "FWD",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Маггнес Акліоуче",
+          "nameOriginal": "Maghnes Akliouche",
+          "position": "FWD",
+          "club": "Монако",
+          "clubOriginal": "Monaco"
+        },
+        {
+          "name": "Максенке Лакроікс",
+          "nameOriginal": "Maxence Lacroix",
+          "position": "DEF",
+          "club": "Крістал Пелес",
+          "clubOriginal": "Crystal Palace"
+        }
+      ]
+    },
+    {
+      "countryEn": "Norway",
+      "countryUk": "Норвегія",
+      "code": "NO",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Ståle Solbakken Norway announced their final squad on May 21.",
+      "players": [
+        {
+          "name": "Øрджан Нйланд",
+          "nameOriginal": "Ørjan Nyland",
+          "position": "GK",
+          "club": "Севілья",
+          "clubOriginal": "Sevilla"
+        },
+        {
+          "name": "Мортен Торсбй",
+          "nameOriginal": "Morten Thorsby",
+          "position": "MID",
+          "club": "Кремонезе",
+          "clubOriginal": "Cremonese"
+        },
+        {
+          "name": "Крістоффер Аджер",
+          "nameOriginal": "Kristoffer Ajer",
+          "position": "DEF",
+          "club": "Брентфорд",
+          "clubOriginal": "Brentford"
+        },
+        {
+          "name": "Лео Øстігард",
+          "nameOriginal": "Leo Østigård",
+          "position": "DEF",
+          "club": "Дженоа",
+          "clubOriginal": "Genoa"
+        },
+        {
+          "name": "Давід Мøллер Волфе",
+          "nameOriginal": "David Møller Wolfe",
+          "position": "DEF",
+          "club": "Вулвергемптон",
+          "clubOriginal": "Wolverhampton Wanderers"
+        },
+        {
+          "name": "Патрік Берг",
+          "nameOriginal": "Patrick Berg",
+          "position": "MID",
+          "club": "Бодø/Глімт",
+          "clubOriginal": "Bodø/Glimt"
+        },
+        {
+          "name": "Александер Сøрлот",
+          "nameOriginal": "Alexander Sørloth",
+          "position": "FWD",
+          "club": "Атлетіко Мадрид",
+          "clubOriginal": "Atlético Madrid"
+        },
+        {
+          "name": "Сандер Берге",
+          "nameOriginal": "Sander Berge",
+          "position": "MID",
+          "club": "Фулгем",
+          "clubOriginal": "Fulham"
+        },
+        {
+          "name": "Ерлінг Голанд",
+          "nameOriginal": "Erling Haaland",
+          "position": "FWD",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Мартін Едегор",
+          "nameOriginal": "Martin Ødegaard",
+          "position": "MID",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Джøрген Странд Ларсен",
+          "nameOriginal": "Jørgen Strand Larsen",
+          "position": "FWD",
+          "club": "Крістал Пелес",
+          "clubOriginal": "Crystal Palace"
+        },
+        {
+          "name": "Сандер Тангвік",
+          "nameOriginal": "Sander Tangvik",
+          "position": "GK",
+          "club": "Гамбург",
+          "clubOriginal": "Hamburger SV"
+        },
+        {
+          "name": "Егіл Селвік",
+          "nameOriginal": "Egil Selvik",
+          "position": "GK",
+          "club": "Вотфорд",
+          "clubOriginal": "Watford"
+        },
+        {
+          "name": "Фредрік Аурснес",
+          "nameOriginal": "Fredrik Aursnes",
+          "position": "MID",
+          "club": "Бенфіка",
+          "clubOriginal": "Benfica"
+        },
+        {
+          "name": "Фредрік Андре Бджøркан",
+          "nameOriginal": "Fredrik André Bjørkan",
+          "position": "DEF",
+          "club": "Бодø/Глімт",
+          "clubOriginal": "Bodø/Glimt"
+        },
+        {
+          "name": "Маркус Голмгрен Педерсен",
+          "nameOriginal": "Marcus Holmgren Pedersen",
+          "position": "DEF",
+          "club": "Торіно",
+          "clubOriginal": "Torino"
+        },
+        {
+          "name": "Торбджøрн Геггем",
+          "nameOriginal": "Torbjørn Heggem",
+          "position": "DEF",
+          "club": "Болонья",
+          "clubOriginal": "Bologna"
+        },
+        {
+          "name": "Крістіан Торстведт",
+          "nameOriginal": "Kristian Thorstvedt",
+          "position": "MID",
+          "club": "Сассуоло",
+          "clubOriginal": "Sassuolo"
+        },
+        {
+          "name": "Тело Аасгаард",
+          "nameOriginal": "Thelo Aasgaard",
+          "position": "MID",
+          "club": "Рейнджерс",
+          "clubOriginal": "Rangers"
+        },
+        {
+          "name": "Антоніо Нуса",
+          "nameOriginal": "Antonio Nusa",
+          "position": "MID",
+          "club": "РБ Лейпциг",
+          "clubOriginal": "RB Leipzig"
+        },
+        {
+          "name": "Андреас Щджелдеруп",
+          "nameOriginal": "Andreas Schjelderup",
+          "position": "MID",
+          "club": "Бенфіка",
+          "clubOriginal": "Benfica"
+        },
+        {
+          "name": "Оскар Бобб",
+          "nameOriginal": "Oscar Bobb",
+          "position": "MID",
+          "club": "Фулгем",
+          "clubOriginal": "Fulham"
+        },
+        {
+          "name": "Дженс Петтер Гауге",
+          "nameOriginal": "Jens Petter Hauge",
+          "position": "MID",
+          "club": "Бодø/Глімт",
+          "clubOriginal": "Bodø/Glimt"
+        },
+        {
+          "name": "Сондре Лангас",
+          "nameOriginal": "Sondre Langås",
+          "position": "DEF",
+          "club": "Дербй Коунтй",
+          "clubOriginal": "Derby County"
+        },
+        {
+          "name": "Генрік Фалченер",
+          "nameOriginal": "Henrik Falchener",
+          "position": "DEF",
+          "club": "Вікінг",
+          "clubOriginal": "Viking"
+        },
+        {
+          "name": "Джуліан Рєрсон",
+          "nameOriginal": "Julian Ryerson",
+          "position": "DEF",
+          "club": "Боруссія Дортмунд",
+          "clubOriginal": "Borussia Dortmund"
+        }
+      ]
+    },
+    {
+      "countryEn": "Austria",
+      "countryUk": "Австрія",
+      "code": "AT",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Ralf Rangnick Austria announced their final squad on May 18.",
+      "players": [
+        {
+          "name": "Александер Щлагер",
+          "nameOriginal": "Alexander Schlager",
+          "position": "GK",
+          "club": "Ред Булл Салзбург",
+          "clubOriginal": "Red Bull Salzburg"
+        },
+        {
+          "name": "Давід Аффенгрубер",
+          "nameOriginal": "David Affengruber",
+          "position": "DEF",
+          "club": "Елче",
+          "clubOriginal": "Elche"
+        },
+        {
+          "name": "Кевін Дансо",
+          "nameOriginal": "Kevin Danso",
+          "position": "DEF",
+          "club": "Тоттенгем Готспур",
+          "clubOriginal": "Tottenham Hotspur"
+        },
+        {
+          "name": "Ксавер Щлагер",
+          "nameOriginal": "Xaver Schlager",
+          "position": "MID",
+          "club": "РБ Лейпциг",
+          "clubOriginal": "RB Leipzig"
+        },
+        {
+          "name": "Стефан Пощ",
+          "nameOriginal": "Stefan Posch",
+          "position": "DEF",
+          "club": "Майнц 05",
+          "clubOriginal": "Mainz 05"
+        },
+        {
+          "name": "Ніколас Сеівалд",
+          "nameOriginal": "Nicolas Seiwald",
+          "position": "MID",
+          "club": "РБ Лейпциг",
+          "clubOriginal": "RB Leipzig"
+        },
+        {
+          "name": "Марко Арнаутовік",
+          "nameOriginal": "Marko Arnautović",
+          "position": "FWD",
+          "club": "Црвена Звезда",
+          "clubOriginal": "Red Star Belgrade"
+        },
+        {
+          "name": "Давід Алаба",
+          "nameOriginal": "David Alaba",
+          "position": "DEF",
+          "club": "Реал Мадрид",
+          "clubOriginal": "Real Madrid"
+        },
+        {
+          "name": "Маркел Сабітзер",
+          "nameOriginal": "Marcel Sabitzer",
+          "position": "MID",
+          "club": "Боруссія Дортмунд",
+          "clubOriginal": "Borussia Dortmund"
+        },
+        {
+          "name": "Флоріан Грілліцч",
+          "nameOriginal": "Florian Grillitsch",
+          "position": "MID",
+          "club": "Брага",
+          "clubOriginal": "Braga"
+        },
+        {
+          "name": "Мічаел Грегоріцч",
+          "nameOriginal": "Michael Gregoritsch",
+          "position": "FWD",
+          "club": "Аугсбург",
+          "clubOriginal": "FC Augsburg"
+        },
+        {
+          "name": "Флоріан Віегеле",
+          "nameOriginal": "Florian Wiegele",
+          "position": "GK",
+          "club": "Вікторія Пльзень",
+          "clubOriginal": "Viktoria Plzeň"
+        },
+        {
+          "name": "Патрік Пентз",
+          "nameOriginal": "Patrick Pentz",
+          "position": "GK",
+          "club": "Брондбю",
+          "clubOriginal": "Brøndby"
+        },
+        {
+          "name": "Саса Каладждзік",
+          "nameOriginal": "Saša Kalajdžić",
+          "position": "FWD",
+          "club": "LASK",
+          "clubOriginal": "LASK"
+        },
+        {
+          "name": "Філіпп Ліенгарт",
+          "nameOriginal": "Philipp Lienhart",
+          "position": "DEF",
+          "club": "Фрайбург",
+          "clubOriginal": "SC Freiburg"
+        },
+        {
+          "name": "Філліпп Мвене",
+          "nameOriginal": "Phillipp Mwene",
+          "position": "DEF",
+          "club": "Майнц 05",
+          "clubOriginal": "Mainz 05"
+        },
+        {
+          "name": "Карней Чуквуемека",
+          "nameOriginal": "Carney Chukwuemeka",
+          "position": "MID",
+          "club": "Боруссія Дортмунд",
+          "clubOriginal": "Borussia Dortmund"
+        },
+        {
+          "name": "Романо Щмід",
+          "nameOriginal": "Romano Schmid",
+          "position": "MID",
+          "club": "Вердер",
+          "clubOriginal": "Werder Bremen"
+        },
+        {
+          "name": "Чрістоф Баумгартнер",
+          "nameOriginal": "Christoph Baumgartner",
+          "position": "MID",
+          "club": "РБ Лейпциг",
+          "clubOriginal": "RB Leipzig"
+        },
+        {
+          "name": "Конрад Лаімер",
+          "nameOriginal": "Konrad Laimer",
+          "position": "MID",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Патрік Віммер",
+          "nameOriginal": "Patrick Wimmer",
+          "position": "MID",
+          "club": "Вольфсбург",
+          "clubOriginal": "VfL Wolfsburg"
+        },
+        {
+          "name": "Александер Прасс",
+          "nameOriginal": "Alexander Prass",
+          "position": "DEF",
+          "club": "Гоффенгайм",
+          "clubOriginal": "TSG Hoffenheim"
+        },
+        {
+          "name": "Марко Фріедл",
+          "nameOriginal": "Marco Friedl",
+          "position": "DEF",
+          "club": "Вердер",
+          "clubOriginal": "Werder Bremen"
+        },
+        {
+          "name": "Паул Ваннер",
+          "nameOriginal": "Paul Wanner",
+          "position": "MID",
+          "club": "ПСВ Ейндговен",
+          "clubOriginal": "PSV Eindhoven"
+        },
+        {
+          "name": "Мічаел Свобода",
+          "nameOriginal": "Michael Svoboda",
+          "position": "DEF",
+          "club": "Венеція",
+          "clubOriginal": "Venezia"
+        },
+        {
+          "name": "Алессандро Щопф",
+          "nameOriginal": "Alessandro Schöpf",
+          "position": "MID",
+          "club": "Волфсбергер Ак",
+          "clubOriginal": "Wolfsberger AC"
+        }
+      ]
+    },
+    {
+      "countryEn": "Colombia",
+      "countryUk": "Колумбія",
+      "code": "CO",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Néstor Lorenzo Colombia announced a 55-man preliminary squad on May 14. Their final squad was announced on May 25.",
+      "players": [
+        {
+          "name": "Давід Оспіна",
+          "nameOriginal": "David Ospina",
+          "position": "GK",
+          "club": "Атлетіко Накіонал",
+          "clubOriginal": "Atlético Nacional"
+        },
+        {
+          "name": "Каміло Варгас",
+          "nameOriginal": "Camilo Vargas",
+          "position": "GK",
+          "club": "Атлас",
+          "clubOriginal": "Atlas"
+        },
+        {
+          "name": "Алваро Монтеро",
+          "nameOriginal": "Álvaro Montero",
+          "position": "GK",
+          "club": "Велес Сарсфілд",
+          "clubOriginal": "Vélez Sarsfield"
+        },
+        {
+          "name": "Давінсон Санчез",
+          "nameOriginal": "Davinson Sánchez",
+          "position": "DEF",
+          "club": "Галатасарай",
+          "clubOriginal": "Galatasaray"
+        },
+        {
+          "name": "Сантіаго Аріас",
+          "nameOriginal": "Santiago Arias",
+          "position": "DEF",
+          "club": "Індепендьєнте",
+          "clubOriginal": "Independiente"
+        },
+        {
+          "name": "Єррй Міна",
+          "nameOriginal": "Yerry Mina",
+          "position": "DEF",
+          "club": "Кальярі",
+          "clubOriginal": "Cagliari"
+        },
+        {
+          "name": "Даніел Муноз",
+          "nameOriginal": "Daniel Muñoz",
+          "position": "DEF",
+          "club": "Крістал Пелес",
+          "clubOriginal": "Crystal Palace"
+        },
+        {
+          "name": "Йоган Моджіка",
+          "nameOriginal": "Johan Mojica",
+          "position": "DEF",
+          "club": "Маллорка",
+          "clubOriginal": "Mallorca"
+        },
+        {
+          "name": "Джгон Лукумі",
+          "nameOriginal": "Jhon Lucumí",
+          "position": "DEF",
+          "club": "Болонья",
+          "clubOriginal": "Bologna"
+        },
+        {
+          "name": "Деівер Мачадо",
+          "nameOriginal": "Deiver Machado",
+          "position": "DEF",
+          "club": "Нант",
+          "clubOriginal": "Nantes"
+        },
+        {
+          "name": "Віллер Дітта",
+          "nameOriginal": "Willer Ditta",
+          "position": "DEF",
+          "club": "Круз Азул",
+          "clubOriginal": "Cruz Azul"
+        },
+        {
+          "name": "Хамес Родрігес",
+          "nameOriginal": "James Rodríguez",
+          "position": "MID",
+          "club": "Міннесота Юнайтед",
+          "clubOriginal": "Minnesota United FC"
+        },
+        {
+          "name": "Джефферсон Лерма",
+          "nameOriginal": "Jefferson Lerma",
+          "position": "MID",
+          "club": "Крістал Пелес",
+          "clubOriginal": "Crystal Palace"
+        },
+        {
+          "name": "Джуан Фернандо Квінтеро",
+          "nameOriginal": "Juan Fernando Quintero",
+          "position": "MID",
+          "club": "Рівер Плейт",
+          "clubOriginal": "River Plate"
+        },
+        {
+          "name": "Джгон Аріас",
+          "nameOriginal": "Jhon Arias",
+          "position": "MID",
+          "club": "Палмейрас",
+          "clubOriginal": "Palmeiras"
+        },
+        {
+          "name": "Річард Ріос",
+          "nameOriginal": "Richard Ríos",
+          "position": "MID",
+          "club": "Бенфіка",
+          "clubOriginal": "Benfica"
+        },
+        {
+          "name": "Кевін Кастано",
+          "nameOriginal": "Kevin Castaño",
+          "position": "MID",
+          "club": "Рівер Плейт",
+          "clubOriginal": "River Plate"
+        },
+        {
+          "name": "Йорге Карраскал",
+          "nameOriginal": "Jorge Carrascal",
+          "position": "MID",
+          "club": "Фламенго",
+          "clubOriginal": "Flamengo"
+        },
+        {
+          "name": "Джамінтон Кампаз",
+          "nameOriginal": "Jaminton Campaz",
+          "position": "MID",
+          "club": "Росаріо Сентраль",
+          "clubOriginal": "Rosario Central"
+        },
+        {
+          "name": "Джуан Портілла",
+          "nameOriginal": "Juan Portilla",
+          "position": "MID",
+          "club": "Атлетіко Паранаенсе",
+          "clubOriginal": "Athletico Paranaense"
+        },
+        {
+          "name": "Густаво Пуерта",
+          "nameOriginal": "Gustavo Puerta",
+          "position": "MID",
+          "club": "Ракінг Сантандер",
+          "clubOriginal": "Racing Santander"
+        },
+        {
+          "name": "Луїс Діас",
+          "nameOriginal": "Luis Díaz",
+          "position": "FWD",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Джгон Кордоба",
+          "nameOriginal": "Jhon Córdoba",
+          "position": "FWD",
+          "club": "Краснодар",
+          "clubOriginal": "Krasnodar"
+        },
+        {
+          "name": "Луіс Суарез",
+          "nameOriginal": "Luis Suárez",
+          "position": "FWD",
+          "club": "Спортінг",
+          "clubOriginal": "Sporting CP"
+        },
+        {
+          "name": "Кучо Гернандез",
+          "nameOriginal": "Cucho Hernández",
+          "position": "FWD",
+          "club": "Реал Бетіс",
+          "clubOriginal": "Real Betis"
+        },
+        {
+          "name": "Андрес Гомез",
+          "nameOriginal": "Andrés Gómez",
+          "position": "FWD",
+          "club": "Васко да Гама",
+          "clubOriginal": "Vasco da Gama"
+        }
+      ]
+    },
+    {
+      "countryEn": "DR Congo",
+      "countryUk": "ДР Конго",
+      "code": "CD",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Sébastien Desabre DR Congo announced their final squad on May 18. Rocky Bushiri withdrew injured and was replaced by Aaron Tshibola on May 20.",
+      "players": [
+        {
+          "name": "Ліонел Мпасі",
+          "nameOriginal": "Lionel Mpasi",
+          "position": "GK",
+          "club": "Гавр",
+          "clubOriginal": "Le Havre"
+        },
+        {
+          "name": "Тімотй Фаюлу",
+          "nameOriginal": "Timothy Fayulu",
+          "position": "GK",
+          "club": "Ноаг",
+          "clubOriginal": "Noah"
+        },
+        {
+          "name": "Маттіеу Еполо",
+          "nameOriginal": "Matthieu Epolo",
+          "position": "GK",
+          "club": "Стандард Льєж",
+          "clubOriginal": "Standard Liège"
+        },
+        {
+          "name": "Чанкел Мбемба",
+          "nameOriginal": "Chancel Mbemba",
+          "position": "DEF",
+          "club": "Лілль",
+          "clubOriginal": "Lille"
+        },
+        {
+          "name": "Артур Масуаку",
+          "nameOriginal": "Arthur Masuaku",
+          "position": "DEF",
+          "club": "Ланс",
+          "clubOriginal": "Lens"
+        },
+        {
+          "name": "Гедеон Калулу",
+          "nameOriginal": "Gédéon Kalulu",
+          "position": "DEF",
+          "club": "Аріс Лімасол",
+          "clubOriginal": "Aris Limassol"
+        },
+        {
+          "name": "Йоріс Каємбе",
+          "nameOriginal": "Joris Kayembe",
+          "position": "DEF",
+          "club": "Генк",
+          "clubOriginal": "Genk"
+        },
+        {
+          "name": "Дйлан Батубінсіка",
+          "nameOriginal": "Dylan Batubinsika",
+          "position": "DEF",
+          "club": "АЕЛ",
+          "clubOriginal": "AEL"
+        },
+        {
+          "name": "Аксел Туанзебе",
+          "nameOriginal": "Axel Tuanzebe",
+          "position": "DEF",
+          "club": "Бернлі",
+          "clubOriginal": "Burnley"
+        },
+        {
+          "name": "Аарон Ван-Біссака",
+          "nameOriginal": "Aaron Wan-Bissaka",
+          "position": "DEF",
+          "club": "Вест Гем Юнайтед",
+          "clubOriginal": "West Ham United"
+        },
+        {
+          "name": "Стеве Капуаді",
+          "nameOriginal": "Steve Kapuadi",
+          "position": "DEF",
+          "club": "Відзев Лодзь",
+          "clubOriginal": "Widzew Łódź"
+        },
+        {
+          "name": "Самуел Моутоуссамй",
+          "nameOriginal": "Samuel Moutoussamy",
+          "position": "MID",
+          "club": "Атромітос",
+          "clubOriginal": "Atromitos"
+        },
+        {
+          "name": "Едо Каємбе",
+          "nameOriginal": "Edo Kayembe",
+          "position": "MID",
+          "club": "Вотфорд",
+          "clubOriginal": "Watford"
+        },
+        {
+          "name": "Чарлес Пікел",
+          "nameOriginal": "Charles Pickel",
+          "position": "MID",
+          "club": "Еспанйол",
+          "clubOriginal": "Espanyol"
+        },
+        {
+          "name": "Гаел Какута",
+          "nameOriginal": "Gaël Kakuta",
+          "position": "MID",
+          "club": "АЕЛ",
+          "clubOriginal": "AEL"
+        },
+        {
+          "name": "Ноаг Садікі",
+          "nameOriginal": "Noah Sadiki",
+          "position": "MID",
+          "club": "Сандерленд",
+          "clubOriginal": "Sunderland"
+        },
+        {
+          "name": "Аарон Цгібола",
+          "nameOriginal": "Aaron Tshibola",
+          "position": "MID",
+          "club": "Кілмарнок",
+          "clubOriginal": "Kilmarnock"
+        },
+        {
+          "name": "Нгал'Аєл Мукау",
+          "nameOriginal": "Ngal'ayel Mukau",
+          "position": "MID",
+          "club": "Лілль",
+          "clubOriginal": "Lille"
+        },
+        {
+          "name": "Бріан Кіпенга",
+          "nameOriginal": "Brian Cipenga",
+          "position": "MID",
+          "club": "Кастеллон",
+          "clubOriginal": "Castellón"
+        },
+        {
+          "name": "Кедрік Бакамбу",
+          "nameOriginal": "Cédric Bakambu",
+          "position": "FWD",
+          "club": "Реал Бетіс",
+          "clubOriginal": "Real Betis"
+        },
+        {
+          "name": "Мещак Еліа",
+          "nameOriginal": "Meschak Elia",
+          "position": "FWD",
+          "club": "Аланьяспор",
+          "clubOriginal": "Alanyaspor"
+        },
+        {
+          "name": "Тео Бонгонда",
+          "nameOriginal": "Théo Bongonda",
+          "position": "FWD",
+          "club": "Спартак Москва",
+          "clubOriginal": "Spartak Moscow"
+        },
+        {
+          "name": "Фістон Маєле",
+          "nameOriginal": "Fiston Mayele",
+          "position": "FWD",
+          "club": "Пірамідз",
+          "clubOriginal": "Pyramids"
+        },
+        {
+          "name": "Йоане Вісса",
+          "nameOriginal": "Yoane Wissa",
+          "position": "FWD",
+          "club": "Ньюкасл Юнайтед",
+          "clubOriginal": "Newcastle United"
+        },
+        {
+          "name": "Натанаел Мбуку",
+          "nameOriginal": "Nathanaël Mbuku",
+          "position": "FWD",
+          "club": "Монпельє",
+          "clubOriginal": "Montpellier"
+        },
+        {
+          "name": "Сімон Банза",
+          "nameOriginal": "Simon Banza",
+          "position": "FWD",
+          "club": "Аль-Джазіра",
+          "clubOriginal": "Al Jazira"
+        }
+      ]
+    },
+    {
+      "countryEn": "Portugal",
+      "countryUk": "Португалія",
+      "code": "PT",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Roberto Martínez Portugal announced their final squad on May 19.",
+      "players": [
+        {
+          "name": "Діого Коста",
+          "nameOriginal": "Diogo Costa",
+          "position": "GK",
+          "club": "Порту",
+          "clubOriginal": "Porto"
+        },
+        {
+          "name": "Йосе Са",
+          "nameOriginal": "José Sá",
+          "position": "GK",
+          "club": "Вулвергемптон",
+          "clubOriginal": "Wolverhampton Wanderers"
+        },
+        {
+          "name": "Руі Сілва",
+          "nameOriginal": "Rui Silva",
+          "position": "GK",
+          "club": "Спортінг",
+          "clubOriginal": "Sporting CP"
+        },
+        {
+          "name": "Рубен Діас",
+          "nameOriginal": "Rúben Dias",
+          "position": "DEF",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Йоао Канкело",
+          "nameOriginal": "João Cancelo",
+          "position": "DEF",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Нелсон Семедо",
+          "nameOriginal": "Nélson Semedo",
+          "position": "DEF",
+          "club": "Фенербахче",
+          "clubOriginal": "Fenerbahçe"
+        },
+        {
+          "name": "Нуно Мендес",
+          "nameOriginal": "Nuno Mendes",
+          "position": "DEF",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Діого Далот",
+          "nameOriginal": "Diogo Dalot",
+          "position": "DEF",
+          "club": "Манчестер Юнайтед",
+          "clubOriginal": "Manchester United"
+        },
+        {
+          "name": "Гонкало Інакіо",
+          "nameOriginal": "Gonçalo Inácio",
+          "position": "DEF",
+          "club": "Спортінг",
+          "clubOriginal": "Sporting CP"
+        },
+        {
+          "name": "Матеус Нунес",
+          "nameOriginal": "Matheus Nunes",
+          "position": "DEF",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Ренато Веіга",
+          "nameOriginal": "Renato Veiga",
+          "position": "DEF",
+          "club": "Вільярреал",
+          "clubOriginal": "Villarreal"
+        },
+        {
+          "name": "Томас Арауйо",
+          "nameOriginal": "Tomás Araújo",
+          "position": "DEF",
+          "club": "Бенфіка",
+          "clubOriginal": "Benfica"
+        },
+        {
+          "name": "Бернардо Сілва",
+          "nameOriginal": "Bernardo Silva",
+          "position": "MID",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Бруно Фернандес",
+          "nameOriginal": "Bruno Fernandes",
+          "position": "MID",
+          "club": "Манчестер Юнайтед",
+          "clubOriginal": "Manchester United"
+        },
+        {
+          "name": "Рубен Невес",
+          "nameOriginal": "Rúben Neves",
+          "position": "MID",
+          "club": "Аль-Гіляль",
+          "clubOriginal": "Al-Hilal"
+        },
+        {
+          "name": "Вітінга",
+          "nameOriginal": "Vitinha",
+          "position": "MID",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Йоао Невес",
+          "nameOriginal": "João Neves",
+          "position": "MID",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Саму Коста",
+          "nameOriginal": "Samú Costa",
+          "position": "MID",
+          "club": "Маллорка",
+          "clubOriginal": "Mallorca"
+        },
+        {
+          "name": "Крістіано Роналдо",
+          "nameOriginal": "Cristiano Ronaldo",
+          "position": "FWD",
+          "club": "Аль-Наср",
+          "clubOriginal": "Al-Nassr"
+        },
+        {
+          "name": "Йоао Фелікс",
+          "nameOriginal": "João Félix",
+          "position": "FWD",
+          "club": "Аль-Наср",
+          "clubOriginal": "Al-Nassr"
+        },
+        {
+          "name": "Рафаел Леао",
+          "nameOriginal": "Rafael Leão",
+          "position": "FWD",
+          "club": "Мілан",
+          "clubOriginal": "Milan"
+        },
+        {
+          "name": "Гонкало Гуедес",
+          "nameOriginal": "Gonçalo Guedes",
+          "position": "FWD",
+          "club": "Реал Сосьєдад",
+          "clubOriginal": "Real Sociedad"
+        },
+        {
+          "name": "Гонкало Рамос",
+          "nameOriginal": "Gonçalo Ramos",
+          "position": "FWD",
+          "club": "Парі Сен-Жермен",
+          "clubOriginal": "Paris Saint-Germain"
+        },
+        {
+          "name": "Педро Нето",
+          "nameOriginal": "Pedro Neto",
+          "position": "FWD",
+          "club": "Челсі",
+          "clubOriginal": "Chelsea"
+        },
+        {
+          "name": "Франкіско Трінкао",
+          "nameOriginal": "Francisco Trincão",
+          "position": "FWD",
+          "club": "Спортінг",
+          "clubOriginal": "Sporting CP"
+        },
+        {
+          "name": "Франкіско Конкеікао",
+          "nameOriginal": "Francisco Conceição",
+          "position": "FWD",
+          "club": "Ювентус",
+          "clubOriginal": "Juventus"
+        }
+      ]
+    },
+    {
+      "countryEn": "Croatia",
+      "countryUk": "Хорватія",
+      "code": "HR",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Zlatko Dalić Croatia announced their final squad on May 18.",
+      "players": [
+        {
+          "name": "Домінік Ліваковік",
+          "nameOriginal": "Dominik Livaković",
+          "position": "GK",
+          "club": "Динамо Загреб",
+          "clubOriginal": "Dinamo Zagreb"
+        },
+        {
+          "name": "Домінік Котарскі",
+          "nameOriginal": "Dominik Kotarski",
+          "position": "GK",
+          "club": "Копенгаген",
+          "clubOriginal": "Copenhagen"
+        },
+        {
+          "name": "Івор Пандур",
+          "nameOriginal": "Ivor Pandur",
+          "position": "GK",
+          "club": "Гулл Кітй",
+          "clubOriginal": "Hull City"
+        },
+        {
+          "name": "Йоско Гвардіол",
+          "nameOriginal": "Joško Gvardiol",
+          "position": "DEF",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Дудже Калета-Кар",
+          "nameOriginal": "Duje Ćaleta-Car",
+          "position": "DEF",
+          "club": "Реал Сосьєдад",
+          "clubOriginal": "Real Sociedad"
+        },
+        {
+          "name": "Йосіп Сутало",
+          "nameOriginal": "Josip Šutalo",
+          "position": "DEF",
+          "club": "Аякс",
+          "clubOriginal": "Ajax"
+        },
+        {
+          "name": "Йосіп Станісік",
+          "nameOriginal": "Josip Stanišić",
+          "position": "DEF",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Марін Понгракік",
+          "nameOriginal": "Marin Pongračić",
+          "position": "DEF",
+          "club": "Фіорентина",
+          "clubOriginal": "Fiorentina"
+        },
+        {
+          "name": "Мартін Ерлік",
+          "nameOriginal": "Martin Erlić",
+          "position": "DEF",
+          "club": "Мідтьюлланн",
+          "clubOriginal": "Midtjylland"
+        },
+        {
+          "name": "Лука Вусковік",
+          "nameOriginal": "Luka Vušković",
+          "position": "DEF",
+          "club": "Гамбург",
+          "clubOriginal": "Hamburger SV"
+        },
+        {
+          "name": "Лука Модрік",
+          "nameOriginal": "Luka Modrić",
+          "position": "MID",
+          "club": "Мілан",
+          "clubOriginal": "Milan"
+        },
+        {
+          "name": "Матео Ковакік",
+          "nameOriginal": "Mateo Kovačić",
+          "position": "MID",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Маріо Пасалік",
+          "nameOriginal": "Mario Pašalić",
+          "position": "MID",
+          "club": "Аталанта",
+          "clubOriginal": "Atalanta"
+        },
+        {
+          "name": "Нікола Власік",
+          "nameOriginal": "Nikola Vlašić",
+          "position": "MID",
+          "club": "Торіно",
+          "clubOriginal": "Torino"
+        },
+        {
+          "name": "Лука Сукік",
+          "nameOriginal": "Luka Sučić",
+          "position": "MID",
+          "club": "Реал Сосьєдад",
+          "clubOriginal": "Real Sociedad"
+        },
+        {
+          "name": "Мартін Батуріна",
+          "nameOriginal": "Martin Baturina",
+          "position": "MID",
+          "club": "Комо",
+          "clubOriginal": "Como"
+        },
+        {
+          "name": "Крістіджан Джакік",
+          "nameOriginal": "Kristijan Jakić",
+          "position": "MID",
+          "club": "Аугсбург",
+          "clubOriginal": "FC Augsburg"
+        },
+        {
+          "name": "Петар Сукік",
+          "nameOriginal": "Petar Sučić",
+          "position": "MID",
+          "club": "Інтер",
+          "clubOriginal": "Inter Milan"
+        },
+        {
+          "name": "Нікола Моро",
+          "nameOriginal": "Nikola Moro",
+          "position": "MID",
+          "club": "Болонья",
+          "clubOriginal": "Bologna"
+        },
+        {
+          "name": "Тоні Фрук",
+          "nameOriginal": "Toni Fruk",
+          "position": "MID",
+          "club": "Рієка",
+          "clubOriginal": "Rijeka"
+        },
+        {
+          "name": "Іван Перісік",
+          "nameOriginal": "Ivan Perišić",
+          "position": "FWD",
+          "club": "ПСВ Ейндговен",
+          "clubOriginal": "PSV Eindhoven"
+        },
+        {
+          "name": "Андредж Крамарік",
+          "nameOriginal": "Andrej Kramarić",
+          "position": "FWD",
+          "club": "Гоффенгайм",
+          "clubOriginal": "TSG Hoffenheim"
+        },
+        {
+          "name": "Анте Будімір",
+          "nameOriginal": "Ante Budimir",
+          "position": "FWD",
+          "club": "Осасуна",
+          "clubOriginal": "Osasuna"
+        },
+        {
+          "name": "Марко Пасалік",
+          "nameOriginal": "Marco Pašalić",
+          "position": "FWD",
+          "club": "Орландо Сіті",
+          "clubOriginal": "Orlando City"
+        },
+        {
+          "name": "Петар Муса",
+          "nameOriginal": "Petar Musa",
+          "position": "FWD",
+          "club": "Даллас",
+          "clubOriginal": "FC Dallas"
+        },
+        {
+          "name": "Ігор Матановік",
+          "nameOriginal": "Igor Matanović",
+          "position": "FWD",
+          "club": "Фрайбург",
+          "clubOriginal": "SC Freiburg"
+        }
+      ]
+    },
+    {
+      "countryEn": "England",
+      "countryUk": "Англія",
+      "code": "GB-ENG",
+      "status": "FINAL",
+      "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads",
+      "note": "edit ] Coach: Thomas Tuchel England announced their final squad on May 22.",
+      "players": [
+        {
+          "name": "Йордан Пікфорд",
+          "nameOriginal": "Jordan Pickford",
+          "position": "GK",
+          "club": "Евертон",
+          "clubOriginal": "Everton"
+        },
+        {
+          "name": "Деан Гендерсон",
+          "nameOriginal": "Dean Henderson",
+          "position": "GK",
+          "club": "Крістал Пелес",
+          "clubOriginal": "Crystal Palace"
+        },
+        {
+          "name": "Джамес Траффорд",
+          "nameOriginal": "James Trafford",
+          "position": "GK",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Йогн Стонес",
+          "nameOriginal": "John Stones",
+          "position": "DEF",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Марк Гуегі",
+          "nameOriginal": "Marc Guéhi",
+          "position": "DEF",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Рееке Джамес",
+          "nameOriginal": "Reece James",
+          "position": "DEF",
+          "club": "Челсі",
+          "clubOriginal": "Chelsea"
+        },
+        {
+          "name": "Езрі Конса",
+          "nameOriginal": "Ezri Konsa",
+          "position": "DEF",
+          "club": "Астон Вілла",
+          "clubOriginal": "Aston Villa"
+        },
+        {
+          "name": "Дан Бурн",
+          "nameOriginal": "Dan Burn",
+          "position": "DEF",
+          "club": "Ньюкасл Юнайтед",
+          "clubOriginal": "Newcastle United"
+        },
+        {
+          "name": "Тіно Лівраменто",
+          "nameOriginal": "Tino Livramento",
+          "position": "DEF",
+          "club": "Ньюкасл Юнайтед",
+          "clubOriginal": "Newcastle United"
+        },
+        {
+          "name": "Дджед Спенке",
+          "nameOriginal": "Djed Spence",
+          "position": "DEF",
+          "club": "Тоттенгем Готспур",
+          "clubOriginal": "Tottenham Hotspur"
+        },
+        {
+          "name": "Ніко О'Реіллй",
+          "nameOriginal": "Nico O'Reilly",
+          "position": "DEF",
+          "club": "Манчестер Сіті",
+          "clubOriginal": "Manchester City"
+        },
+        {
+          "name": "Джарелл Квансаг",
+          "nameOriginal": "Jarell Quansah",
+          "position": "DEF",
+          "club": "Баєр Леверкузен",
+          "clubOriginal": "Bayer Leverkusen"
+        },
+        {
+          "name": "Йордан Гендерсон",
+          "nameOriginal": "Jordan Henderson",
+          "position": "MID",
+          "club": "Брентфорд",
+          "clubOriginal": "Brentford"
+        },
+        {
+          "name": "Деклан Ріке",
+          "nameOriginal": "Declan Rice",
+          "position": "MID",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Джуде Беллінггам",
+          "nameOriginal": "Jude Bellingham",
+          "position": "MID",
+          "club": "Реал Мадрид",
+          "clubOriginal": "Real Madrid"
+        },
+        {
+          "name": "Морган Рогерс",
+          "nameOriginal": "Morgan Rogers",
+          "position": "MID",
+          "club": "Астон Вілла",
+          "clubOriginal": "Aston Villa"
+        },
+        {
+          "name": "Коббіе Маіноо",
+          "nameOriginal": "Kobbie Mainoo",
+          "position": "MID",
+          "club": "Манчестер Юнайтед",
+          "clubOriginal": "Manchester United"
+        },
+        {
+          "name": "Елліот Андерсон",
+          "nameOriginal": "Elliot Anderson",
+          "position": "MID",
+          "club": "Ноттінгем Форест",
+          "clubOriginal": "Nottingham Forest"
+        },
+        {
+          "name": "Гаррй Кане",
+          "nameOriginal": "Harry Kane",
+          "position": "FWD",
+          "club": "Баварія",
+          "clubOriginal": "Bayern Munich"
+        },
+        {
+          "name": "Маркус Рашфорд",
+          "nameOriginal": "Marcus Rashford",
+          "position": "FWD",
+          "club": "Барселона",
+          "clubOriginal": "Barcelona"
+        },
+        {
+          "name": "Букайо Сака",
+          "nameOriginal": "Bukayo Saka",
+          "position": "FWD",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Олліе Ваткінс",
+          "nameOriginal": "Ollie Watkins",
+          "position": "FWD",
+          "club": "Астон Вілла",
+          "clubOriginal": "Aston Villa"
+        },
+        {
+          "name": "Антонй Гордон",
+          "nameOriginal": "Anthony Gordon",
+          "position": "FWD",
+          "club": "Ньюкасл Юнайтед",
+          "clubOriginal": "Newcastle United"
+        },
+        {
+          "name": "Еберечі Езе",
+          "nameOriginal": "Eberechi Eze",
+          "position": "FWD",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Ноні Мадуеке",
+          "nameOriginal": "Noni Madueke",
+          "position": "FWD",
+          "club": "Арсенал",
+          "clubOriginal": "Arsenal"
+        },
+        {
+          "name": "Іван Тоней",
+          "nameOriginal": "Ivan Toney",
+          "position": "FWD",
+          "club": "Аль-Аглі",
+          "clubOriginal": "Al-Ahli"
+        }
+      ]
+    }
+  ]
+}

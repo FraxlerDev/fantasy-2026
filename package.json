@@ -1,0 +1,29 @@
+{
+  "name": "fantasy-2026-ua",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ukrainian free-to-play fantasy football platform for World Cup 2026.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:web": "npm run dev -w apps/web",
+    "dev:api": "npm run start:dev -w apps/api",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:up": "docker compose up -d postgres redis",
+    "db:down": "docker compose down",
+    "db:generate": "npm run db:generate -w apps/web",
+    "db:push": "npm run db:push -w apps/web",
+    "db:seed": "npm run db:seed -w apps/web",
+    "db:import-final-squads": "npm run db:import-final-squads -w apps/web",
+    "seed": "npm run seed -w apps/api"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  }
+}
