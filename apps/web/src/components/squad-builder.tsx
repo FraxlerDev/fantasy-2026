@@ -209,17 +209,18 @@ export function SquadBuilder({
   );
   const filteredPlayers = players.filter((player) => {
     const q = query.trim().toLowerCase();
+    const selectedNation = nation.trim().toLowerCase();
     const selectedClub = club.trim().toLowerCase();
     const min = minPrice ? Number(minPrice) : 0;
     return (
       (!q || player.name.toLowerCase().includes(q)) &&
       (!position || player.position === position) &&
-      (!nation || player.nationCode === nation) &&
+      (!selectedNation || player.nationName.toLowerCase() === selectedNation || player.nationCode.toLowerCase() === selectedNation) &&
       (!selectedClub || (player.club ?? player.clubOriginal ?? "").toLowerCase() === selectedClub) &&
       (!min || player.price <= min)
     );
   }).sort((a, b) => b.price - a.price || a.name.localeCompare(b.name, "uk"));
-  const nations = [...new Map(players.map((player) => [player.nationCode, player.nationName])).entries()];
+  const nations = [...new Set(players.map((player) => player.nationName))].sort((a, b) => a.localeCompare(b, "uk"));
   const clubs = [...new Set(players.map((player) => player.club ?? player.clubOriginal).filter(Boolean) as string[])].sort((a, b) =>
     a.localeCompare(b, "uk"),
   );
@@ -601,10 +602,10 @@ export function SquadBuilder({
             <option value="MID">Півзахисник</option>
             <option value="FWD">Нападник</option>
           </select>
-          <select className="input" value={nation} onChange={(event) => setNation(event.target.value)}>
-            <option value="">Збірна</option>
-            {nations.map(([code, name]) => <option value={code} key={code}>{name}</option>)}
-          </select>
+          <input className="input" list="nation-filter-list" value={nation} onChange={(event) => setNation(event.target.value)} placeholder="Збірна" />
+          <datalist id="nation-filter-list">
+            {nations.map((item) => <option value={item} key={item} />)}
+          </datalist>
           <input className="input" list="club-filter-list" value={club} onChange={(event) => setClub(event.target.value)} placeholder="Клуб" />
           <datalist id="club-filter-list">
             {clubs.map((item) => <option value={item} key={item} />)}
