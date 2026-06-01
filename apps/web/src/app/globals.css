@@ -1519,6 +1519,10 @@ h3 {
   gap: 16px;
 }
 
+.legacy-visit-table {
+  display: none;
+}
+
 .admin-modal {
   position: fixed;
   inset: 0;
@@ -1596,6 +1600,13 @@ h3 {
   overflow-x: auto;
 }
 
+.visit-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 14px;
+  align-items: start;
+}
+
 .visit-table-heading {
   display: flex;
   flex-wrap: wrap;
@@ -1612,6 +1623,76 @@ h3 {
 
 .visit-table {
   min-width: 1180px;
+}
+
+.visit-click-row {
+  cursor: pointer;
+}
+
+.visit-click-row:hover,
+.visit-click-row[data-active="true"] {
+  background: #f4faf2;
+}
+
+.visit-click-row[data-active="true"] {
+  box-shadow: inset 4px 0 0 var(--green);
+}
+
+.visit-click-row small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+}
+
+.visit-detail-panel {
+  position: sticky;
+  top: 0;
+  max-height: 650px;
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.visit-detail-heading {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.visit-detail-heading h3,
+.visit-detail-heading p {
+  margin: 0;
+}
+
+.visit-page-list {
+  display: grid;
+  gap: 8px;
+}
+
+.visit-page-item {
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.visit-page-item div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.visit-page-item span,
+.visit-page-item small,
+.visit-page-item p {
+  color: var(--muted);
+}
+
+.visit-page-item p {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .visit-status {
@@ -2648,6 +2729,15 @@ h3 {
   .admin-modal-heading {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .visit-split {
+    grid-template-columns: 1fr;
+  }
+
+  .visit-detail-panel {
+    position: static;
+    max-height: none;
   }
 
   .calendar-row {

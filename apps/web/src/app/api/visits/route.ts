@@ -19,8 +19,15 @@ function clientIp(request: Request) {
 }
 
 function countryCity(request: Request) {
-  const country = request.headers.get("cf-ipcountry") ?? request.headers.get("x-vercel-ip-country");
-  const city = request.headers.get("x-vercel-ip-city");
+  const country =
+    request.headers.get("cf-ipcountry") ??
+    request.headers.get("x-vercel-ip-country") ??
+    request.headers.get("x-country") ??
+    request.headers.get("x-geo-country");
+  const city =
+    request.headers.get("x-vercel-ip-city") ??
+    request.headers.get("x-city") ??
+    request.headers.get("x-geo-city");
   return [country, city].filter(Boolean).join(" / ") || null;
 }
 

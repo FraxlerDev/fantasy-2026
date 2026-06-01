@@ -1,6 +1,7 @@
 import { Calculator, RotateCcw, Save, Trophy } from "lucide-react";
 import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
+import { AdminVisitStats, type AdminVisitRow } from "../../components/admin-visit-stats";
 import { DeleteNationalTeamPlayersButton } from "../../components/delete-national-team-players-button";
 import { AppShell } from "../../components/shell";
 import { requireAdmin } from "../../lib/admin";
@@ -45,6 +46,7 @@ type SiteVisitRow = {
 
 type AggregatedVisitRow = SiteVisitRow & {
   visitCount: number;
+  pages: SiteVisitRow[];
 };
 
 function teamLabel(team: TeamLabel) {
@@ -99,6 +101,23 @@ function formatDuration(totalSeconds: number) {
 
 function visitStatus(lastSeenAt: Date) {
   return Date.now() - lastSeenAt.getTime() < 120_000 ? "Online" : "Offline";
+}
+
+function pageTitle(path: string) {
+  const pathname = path.split("?")[0] || "/";
+  if (pathname === "/") return "Головна";
+  if (pathname === "/squad") return "Склад";
+  if (pathname === "/rules") return "Правила";
+  if (pathname === "/calendar") return "Календар";
+  if (pathname === "/tournament") return "Турнір";
+  if (pathname === "/leaderboard") return "Рейтинг";
+  if (pathname === "/leagues") return "Ліги";
+  if (pathname === "/petitions") return "Поради / Петиції";
+  if (pathname === "/login") return "Вхід";
+  if (pathname === "/admin") return "Адмінка";
+  if (pathname.startsWith("/teams/")) return "Сторінка команди";
+  if (pathname.startsWith("/api/")) return "API";
+  return pathname;
 }
 
 const errorMessages: Record<string, string> = {
@@ -192,7 +211,7 @@ export default async function AdminPage({
     }).catch(() => ({ _sum: { durationSeconds: 0 } })) ?? Promise.resolve({ _sum: { durationSeconds: 0 } }),
     siteVisit?.findMany({
       orderBy: { startedAt: "desc" },
-      take: 500,
+      take: 2000,
     }).catch(() => []) ?? Promise.resolve([]),
   ]);
 
@@ -251,18 +270,46 @@ export default async function AdminPage({
     const existing = groups.get(key);
 
     if (!existing) {
-      groups.set(key, { ...visit, visitCount: 1 });
+      groups.set(key, { ...visit, visitCount: 1, pages: [visit] });
       return groups;
     }
 
     existing.durationSeconds += visit.durationSeconds;
     existing.visitCount += 1;
+    existing.pages.push(visit);
     if (visit.lastSeenAt > existing.lastSeenAt) {
       existing.lastSeenAt = visit.lastSeenAt;
     }
     return groups;
   }, new Map());
-  const uniqueVisitRows = [...visitsByIp.values()].sort((a, b) => b.lastSeenAt.getTime() - a.lastSeenAt.getTime()).slice(0, 50);
+  const uniqueVisitRows: AdminVisitRow[] = [...visitsByIp.entries()]
+    .map(([key, visit]) => ({
+      key,
+      site: visit.site,
+      ip: visit.ip,
+      countryCity: visit.countryCity,
+      device: visit.device,
+      browserOs: visit.browserOs,
+      durationSeconds: visit.durationSeconds,
+      startedAt: visit.startedAt.toISOString(),
+      lastSeenAt: visit.lastSeenAt.toISOString(),
+      path: visit.path,
+      pageTitle: pageTitle(visit.path),
+      referrer: visit.referrer,
+      visitCount: visit.visitCount,
+      pages: visit.pages
+        .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())
+        .map((page) => ({
+          id: page.id,
+          path: page.path,
+          title: pageTitle(page.path),
+          referrer: page.referrer,
+          startedAt: page.startedAt.toISOString(),
+          durationSeconds: page.durationSeconds,
+        })),
+    }))
+    .sort((a, b) => new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime())
+    .slice(0, 50);
 
   return (
     <AppShell active="/admin">
@@ -313,7 +360,14 @@ export default async function AdminPage({
             <h2>Статистика користувачів сайту</h2>
             <a className="button" href="#">Закрити</a>
           </div>
-          <div className="admin-visits">
+          <AdminVisitStats
+            rows={uniqueVisitRows}
+            todayVisitors={todayVisitors.length}
+            todayDurationSeconds={todayDuration._sum.durationSeconds ?? 0}
+            allVisitors={allVisitors.length}
+            allDurationSeconds={allDuration._sum.durationSeconds ?? 0}
+          />
+          <div className="admin-visits legacy-visit-table">
         <div className="visit-stat-grid">
           <div className="visit-stat-card">
             <span>Користувачів сьогодні</span>
@@ -354,7 +408,7 @@ export default async function AdminPage({
               </tr>
             </thead>
             <tbody>
-              {uniqueVisitRows.map((visit) => {
+              {(recentVisits as SiteVisitRow[]).map((visit) => {
                 const status = visitStatus(visit.lastSeenAt);
                 return (
                   <tr key={visit.id}>
