@@ -1487,6 +1487,56 @@ h3 {
   margin-top: 10px;
 }
 
+.snapshot-team-link {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  color: var(--ink);
+}
+
+.snapshot-team-link:hover {
+  color: var(--green);
+  text-decoration: underline;
+}
+
+.admin-team-modal-content {
+  width: min(1100px, 100%);
+}
+
+.admin-team-checks {
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.admin-team-checks .card {
+  padding: 12px;
+}
+
+.admin-team-checks small {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.admin-team-checks .check-ok {
+  border-color: #bde8c8;
+  background: #f4fbf5;
+}
+
+.admin-team-checks .check-bad {
+  border-color: #f1c1c1;
+  background: #fff7f7;
+}
+
+.admin-team-roster-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 14px;
+}
+
+.admin-team-roster-grid h3 {
+  margin-top: 0;
+}
+
 .danger-badge {
   background: #f8d7da;
   color: #842029;
@@ -2738,6 +2788,10 @@ h3 {
   .visit-detail-panel {
     position: static;
     max-height: none;
+  }
+
+  .admin-team-roster-grid {
+    grid-template-columns: 1fr;
   }
 
   .calendar-row {

@@ -103,6 +103,64 @@ function visitStatus(lastSeenAt: Date) {
   return Date.now() - lastSeenAt.getTime() < 120_000 ? "Online" : "Offline";
 }
 
+function positionLabel(position: string) {
+  if (position === "GK") return "Воротар";
+  if (position === "DEF") return "Захисник";
+  if (position === "MID") return "Півзахисник";
+  if (position === "FWD") return "Нападник";
+  return position;
+}
+
+function rosterDiagnostics(team: {
+  formation: string;
+  rosterEntries: Array<{
+    slot: string;
+    isCaptain: boolean;
+    player: {
+      position: string;
+      price: unknown;
+      nationalTeam: { nameUk: string };
+    };
+  }>;
+}) {
+  const total = team.rosterEntries.length;
+  const starters = team.rosterEntries.filter((entry) => entry.slot === "STARTER");
+  const budget = team.rosterEntries.reduce((sum, entry) => sum + Number(entry.player.price), 0);
+  const counts = {
+    GK: team.rosterEntries.filter((entry) => entry.player.position === "GK").length,
+    DEF: team.rosterEntries.filter((entry) => entry.player.position === "DEF").length,
+    MID: team.rosterEntries.filter((entry) => entry.player.position === "MID").length,
+    FWD: team.rosterEntries.filter((entry) => entry.player.position === "FWD").length,
+  };
+  const starterCounts = {
+    GK: starters.filter((entry) => entry.player.position === "GK").length,
+    DEF: starters.filter((entry) => entry.player.position === "DEF").length,
+    MID: starters.filter((entry) => entry.player.position === "MID").length,
+    FWD: starters.filter((entry) => entry.player.position === "FWD").length,
+  };
+  const nationCounts = team.rosterEntries.reduce<Map<string, number>>((map, entry) => {
+    map.set(entry.player.nationalTeam.nameUk, (map.get(entry.player.nationalTeam.nameUk) ?? 0) + 1);
+    return map;
+  }, new Map());
+  const overloadedNations = [...nationCounts.entries()].filter(([, count]) => count > 2);
+  const formationParts = team.formation.split("-").map((part) => Number(part));
+  const formationOk =
+    starterCounts.GK === 1 &&
+    starterCounts.DEF === formationParts[0] &&
+    starterCounts.MID === formationParts[1] &&
+    starterCounts.FWD === formationParts[2];
+  const captainOk = starters.some((entry) => entry.isCaptain);
+
+  return [
+    { label: "15 гравців у складі", ok: total === 15, value: `${total}/15` },
+    { label: "2 GK, 5 DEF, 5 MID, 3 FWD", ok: counts.GK === 2 && counts.DEF === 5 && counts.MID === 5 && counts.FWD === 3, value: `${counts.GK}/${counts.DEF}/${counts.MID}/${counts.FWD}` },
+    { label: "Бюджет не більше 100", ok: budget <= 100, value: budget.toFixed(1) },
+    { label: "Не більше 2 з однієї збірної", ok: overloadedNations.length === 0, value: overloadedNations.length ? overloadedNations.map(([name, count]) => `${name}: ${count}`).join(", ") : "OK" },
+    { label: `Старт відповідає схемі ${team.formation}`, ok: formationOk, value: `${starterCounts.DEF}-${starterCounts.MID}-${starterCounts.FWD}` },
+    { label: "Капітан обраний зі старту", ok: captainOk, value: captainOk ? "OK" : "Немає" },
+  ];
+}
+
 function pageTitle(path: string) {
   const pathname = path.split("?")[0] || "/";
   if (pathname === "/") return "Головна";
@@ -189,7 +247,16 @@ export default async function AdminPage({
     prisma.fantasyTeam.findMany({
       include: {
         user: true,
-        rosterEntries: true,
+        rosterEntries: {
+          include: {
+            player: {
+              include: {
+                nationalTeam: true,
+              },
+            },
+          },
+          orderBy: [{ slot: "desc" }, { player: { position: "asc" } }, { player: { name: "asc" } }],
+        },
         lineupSnapshots: { select: { id: true, gameweek: true, createdAt: true, entries: { select: { id: true } } } },
         snapshotFailures: { select: { gameweek: true, reason: true, updatedAt: true } },
       },
@@ -239,6 +306,8 @@ export default async function AdminPage({
         id: team.id,
         name: team.name,
         manager: team.user.username ?? team.user.email ?? "Без менеджера",
+        formation: team.formation,
+        rosterEntries: team.rosterEntries,
         reason: team.snapshotFailures.find((failure) => failure.gameweek === gameweek.number)?.reason,
       }))
       .filter((team) => team.reason);
@@ -310,6 +379,7 @@ export default async function AdminPage({
     }))
     .sort((a, b) => new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime())
     .slice(0, 50);
+  const teamsWithRoster = fantasyTeams.filter((team) => team.rosterEntries.length > 0);
 
   return (
     <AppShell active="/admin">
@@ -512,9 +582,9 @@ export default async function AdminPage({
                     <tbody>
                       {item.failedTeams.map((team) => (
                         <tr key={team.id}>
-                          <td>{team.name}</td>
-                          <td>{team.manager}</td>
-                          <td>{team.reason}</td>
+                          <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.name}</a></td>
+                          <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.manager}</a></td>
+                          <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.reason}</a></td>
                         </tr>
                       ))}
                     </tbody>
@@ -530,8 +600,8 @@ export default async function AdminPage({
                     <tbody>
                       {item.missingTeams.map((team) => (
                         <tr key={team.id}>
-                          <td>{team.name}</td>
-                          <td>{team.manager}</td>
+                          <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.name}</a></td>
+                          <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.manager}</a></td>
                         </tr>
                       ))}
                     </tbody>
@@ -542,6 +612,75 @@ export default async function AdminPage({
           ))}
         </div>
       </section>
+
+      {teamsWithRoster.map((team) => {
+        const diagnostics = rosterDiagnostics(team);
+        const starters = team.rosterEntries.filter((entry) => entry.slot === "STARTER");
+        const bench = team.rosterEntries.filter((entry) => entry.slot !== "STARTER");
+
+        return (
+          <section className="admin-modal" id={`admin-team-${team.id}`} aria-label={`Склад ${team.name}`} key={team.id}>
+            <a className="admin-modal-backdrop" href="#gameweeks" aria-label="Закрити склад" />
+            <div className="admin-modal-content admin-team-modal-content">
+              <div className="admin-modal-heading">
+                <div>
+                  <p className="eyebrow">Перегляд складу</p>
+                  <h2>{team.name}</h2>
+                  <p className="muted">Менеджер: {team.user.username ?? team.user.email ?? "Без менеджера"} · Схема: {team.formation}</p>
+                </div>
+                <a className="button" href="#gameweeks">Закрити</a>
+              </div>
+
+              <div className="snapshot-metrics admin-team-checks">
+                {diagnostics.map((item) => (
+                  <div className={`card stat ${item.ok ? "check-ok" : "check-bad"}`} key={item.label}>
+                    <span className="badge">{item.ok ? "OK" : "!"}</span>
+                    <strong>{item.value}</strong>
+                    <small>{item.label}</small>
+                  </div>
+                ))}
+              </div>
+
+              <div className="admin-team-roster-grid">
+                <section>
+                  <h3>Старт</h3>
+                  <table className="table compact-table">
+                    <thead><tr><th>Гравець</th><th>Поз.</th><th>Збірна</th><th>Ціна</th><th></th></tr></thead>
+                    <tbody>
+                      {starters.map((entry) => (
+                        <tr key={entry.id}>
+                          <td>{entry.player.name}</td>
+                          <td>{positionLabel(entry.player.position)}</td>
+                          <td>{teamLabel(entry.player.nationalTeam)}</td>
+                          <td>{Number(entry.player.price).toFixed(1)}</td>
+                          <td>{entry.isCaptain ? "К" : ""}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </section>
+
+                <section>
+                  <h3>Лавка</h3>
+                  <table className="table compact-table">
+                    <thead><tr><th>Гравець</th><th>Поз.</th><th>Збірна</th><th>Ціна</th></tr></thead>
+                    <tbody>
+                      {bench.map((entry) => (
+                        <tr key={entry.id}>
+                          <td>{entry.player.name}</td>
+                          <td>{positionLabel(entry.player.position)}</td>
+                          <td>{teamLabel(entry.player.nationalTeam)}</td>
+                          <td>{Number(entry.player.price).toFixed(1)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </section>
+              </div>
+            </div>
+          </section>
+        );
+      })}
 
       <section className="grid cols-2" id="matches">
         <div className="panel">
