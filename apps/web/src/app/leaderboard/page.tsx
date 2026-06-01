@@ -6,6 +6,7 @@ const PAGE_SIZE = 50;
 
 type MaybeRankedTeam = {
   leaderboardRows?: Array<{ rank: number }>;
+  computedRank?: number;
 };
 
 function teamInitial(name: string) {
@@ -56,17 +57,12 @@ export default async function LeaderboardPage({
       }
     : savedTeamWhere;
 
-  const [rows, rowCount, teams, teamCount] = await Promise.all([
-    query
-      ? Promise.resolve([])
-      : prisma.leaderboardRow.findMany({
-          where: { scope: "GLOBAL", fantasyTeam: savedTeamWhere },
-          include: { fantasyTeam: { include: { user: true } } },
-          orderBy: [{ rank: "asc" }, { fantasyTeamId: "asc" }],
-          skip,
-          take: PAGE_SIZE,
-        }),
-    query ? Promise.resolve(0) : prisma.leaderboardRow.count({ where: { scope: "GLOBAL", fantasyTeam: savedTeamWhere } }),
+  const [rankedTeams, teams, teamCount] = await Promise.all([
+    prisma.fantasyTeam.findMany({
+      where: searchWhere,
+      select: { id: true, totalPoints: true },
+      orderBy: [{ totalPoints: "desc" }, { createdAt: "asc" }],
+    }),
     prisma.fantasyTeam.findMany({
       where: searchWhere,
       include: {
@@ -74,24 +70,25 @@ export default async function LeaderboardPage({
         leaderboardRows: { where: { scope: "GLOBAL" }, take: 1 },
       },
       orderBy: [{ totalPoints: "desc" }, { createdAt: "asc" }],
-      skip: query ? skip : 0,
-      take: query ? PAGE_SIZE : 0,
+      skip,
+      take: PAGE_SIZE,
     }),
     prisma.fantasyTeam.count({ where: searchWhere }),
   ]);
 
-  const fallbackRows =
-    !query && rowCount === 0
-      ? await prisma.fantasyTeam.findMany({
-          where: savedTeamWhere,
-          include: { user: true },
-          orderBy: [{ totalPoints: "desc" }, { createdAt: "asc" }],
-          skip,
-          take: PAGE_SIZE,
-        })
-      : [];
-  const visibleTeams = query ? teams : fallbackRows;
-  const totalItems = query ? teamCount : rowCount || teamCount;
+  const rankByTeamId = new Map<string, number>();
+  let previousPoints: number | null = null;
+  let previousRank = 0;
+
+  rankedTeams.forEach((team, index) => {
+    const rank = previousPoints === team.totalPoints ? previousRank : index + 1;
+    previousPoints = team.totalPoints;
+    previousRank = rank;
+    rankByTeamId.set(team.id, rank);
+  });
+
+  const visibleTeams = teams.map((team) => ({ ...team, computedRank: rankByTeamId.get(team.id) }));
+  const totalItems = teamCount;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
   const canGoBack = page > 1;
   const canGoForward = page < totalPages;
@@ -126,24 +123,15 @@ export default async function LeaderboardPage({
             </tr>
           </thead>
           <tbody>
-            {!query && rows.length > 0
-              ? rows.map((row) => (
-                  <tr key={row.id}>
-                    <td>{row.rank}</td>
-                    <td><TeamLink id={row.fantasyTeam.id} name={row.fantasyTeam.name} image={row.fantasyTeam.user.image} /></td>
-                    <td>{row.fantasyTeam.user.username ?? row.fantasyTeam.user.email}</td>
-                    <td><strong>{row.totalPoints}</strong></td>
-                  </tr>
-                ))
-              : visibleTeams.map((team, index) => (
-                  <tr key={team.id}>
-                    <td>{(team as MaybeRankedTeam).leaderboardRows?.[0]?.rank ?? skip + index + 1}</td>
-                    <td><TeamLink id={team.id} name={team.name} image={team.user.image} /></td>
-                    <td>{team.user.username ?? team.user.email}</td>
-                    <td><strong>{team.totalPoints}</strong></td>
-                  </tr>
-                ))}
-            {rows.length === 0 && visibleTeams.length === 0 ? (
+            {visibleTeams.map((team, index) => (
+              <tr key={team.id}>
+                <td>{(team as MaybeRankedTeam).computedRank ?? skip + index + 1}</td>
+                <td><TeamLink id={team.id} name={team.name} image={team.user.image} /></td>
+                <td>{team.user.username ?? team.user.email}</td>
+                <td><strong>{team.totalPoints}</strong></td>
+              </tr>
+            ))}
+            {visibleTeams.length === 0 ? (
               <tr><td colSpan={4}>Команд у рейтингу ще немає.</td></tr>
             ) : null}
           </tbody>
