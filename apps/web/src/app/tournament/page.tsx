@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AppShell } from "../../components/shell";
 import { FantasyLayout } from "../../components/fantasy-layout";
 import { prisma } from "../../lib/prisma";
+import { createMetadata } from "../../lib/seo";
+
+export const metadata: Metadata = createMetadata({
+  title: "Турнір ЧС-2026",
+  description: "Турнірна сторінка ЧС-2026: збірні, групи, календар, таблиці та рейтинг fantasy-команд.",
+  path: "/tournament",
+});
 
 type Team = {
   id: string;
@@ -77,7 +85,7 @@ function buildStandings(groupTeams: Team[], fixtures: Fixture[]) {
 }
 
 export default async function TournamentPage() {
-  const [teams, playersCount, fixtures, gameweeks, leaders] = await Promise.all([
+  const [teams, playersCount, fixtures, gameweeks, leaders, popularPlayerCounts] = await Promise.all([
     prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }] }),
     prisma.player.count(),
     prisma.fixture.findMany({
@@ -91,8 +99,21 @@ export default async function TournamentPage() {
       orderBy: { rank: "asc" },
       take: 10,
     }),
+    prisma.rosterEntry.groupBy({
+      by: ["playerId"],
+      _count: { playerId: true },
+      orderBy: { _count: { playerId: "desc" } },
+      take: 20,
+    }),
   ]);
 
+  const popularPlayers = popularPlayerCounts.length
+    ? await prisma.player.findMany({
+        where: { id: { in: popularPlayerCounts.map((row) => row.playerId) } },
+        include: { nationalTeam: true },
+      })
+    : [];
+  const popularPlayersById = new Map(popularPlayers.map((player) => [player.id, player]));
   const previewFixtures = fixtures.slice(0, 18);
   const teamsByGroup = teams.reduce<Map<string, Team[]>>((groups, team) => {
     const group = team.groupKey ?? "-";
@@ -139,6 +160,39 @@ export default async function TournamentPage() {
                   <td>{formatDate(gameweek.deadlineAt)}</td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </section>
+
+        <section className="panel" style={{ marginTop: 16 }}>
+          <h2>Найпопулярніші гравці</h2>
+          <p className="muted">ТОП-20 гравців, яких найчастіше обирали у fantasy-команди.</p>
+          <table className="table compact-table">
+            <thead>
+              <tr><th>#</th><th>Гравець</th><th>Поз.</th><th>Збірна</th><th>Клуб</th><th>Виборів</th></tr>
+            </thead>
+            <tbody>
+              {popularPlayerCounts.map((row, index) => {
+                const player = popularPlayersById.get(row.playerId);
+                if (!player) return null;
+
+                return (
+                  <tr key={row.playerId}>
+                    <td>{index + 1}</td>
+                    <td><strong>{player.name}</strong></td>
+                    <td>{player.position}</td>
+                    <td>
+                      <span className="team-with-flag">
+                        {player.nationalTeam.flagPath ? <img alt="" className="flag" src={player.nationalTeam.flagPath} /> : null}
+                        {player.nationalTeam.nameUk}
+                      </span>
+                    </td>
+                    <td>{player.club ?? "-"}</td>
+                    <td><strong>{row._count.playerId}</strong></td>
+                  </tr>
+                );
+              })}
+              {popularPlayerCounts.length === 0 ? <tr><td colSpan={6}>Гравців у складах ще немає.</td></tr> : null}
             </tbody>
           </table>
         </section>

@@ -1,9 +1,17 @@
 import type { PlayerPosition, RosterSlot } from "@prisma/client";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FantasyLayout } from "../../../components/fantasy-layout";
 import { AppShell } from "../../../components/shell";
 import { prisma } from "../../../lib/prisma";
+import { createMetadata } from "../../../lib/seo";
+
+export const metadata: Metadata = createMetadata({
+  title: "Команда користувача",
+  path: "/teams",
+  noIndex: true,
+});
 
 type LineupEntry = {
   id: string;

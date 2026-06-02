@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
@@ -7,6 +8,13 @@ import { AppShell } from "../../components/shell";
 import { SquadBuilder, type SavedRosterEntry, type SquadPlayer } from "../../components/squad-builder";
 import { getEditableGameweek } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
+import { createMetadata } from "../../lib/seo";
+
+export const metadata: Metadata = createMetadata({
+  title: "Склад команди",
+  path: "/squad",
+  noIndex: true,
+});
 
 export default async function SquadPage({
   searchParams,

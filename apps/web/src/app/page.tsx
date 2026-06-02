@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Shield, Users } from "lucide-react";
 import { AppShell } from "../components/shell";
+import { createMetadata } from "../lib/seo";
 import { startFromPromo } from "./actions/promo-actions";
+
+export const metadata: Metadata = createMetadata({
+  title: "Фентезі до ЧС-2026",
+  description: "Фентезі-футбол до ЧС-2026 українською: збери склад, обери капітана, грай у лігах з друзями та глобальному рейтингу.",
+  path: "/",
+});
 
 export default function HomePage() {
   return (

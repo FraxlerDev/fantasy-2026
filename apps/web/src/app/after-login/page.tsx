@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
 import { prisma } from "../../lib/prisma";
+import { createMetadata } from "../../lib/seo";
+
+export const metadata: Metadata = createMetadata({
+  title: "Після входу",
+  path: "/after-login",
+  noIndex: true,
+});
 
 export default async function AfterLoginPage() {
   const session = await auth();

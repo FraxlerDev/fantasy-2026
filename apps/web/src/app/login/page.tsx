@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { Chrome } from "lucide-react";
 import { AppShell } from "../../components/shell";
+import { createMetadata } from "../../lib/seo";
 import { signInWithGoogle } from "../actions/auth-actions";
+
+export const metadata: Metadata = createMetadata({
+  title: "Вхід",
+  path: "/login",
+  noIndex: true,
+});
 
 export default function LoginPage() {
   return (

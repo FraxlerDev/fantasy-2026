@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import { CheckCircle2, Megaphone, Trash2 } from "lucide-react";
 import { AppShell } from "../../components/shell";
 import { auth } from "../../auth";
 import { prisma } from "../../lib/prisma";
+import { createMetadata } from "../../lib/seo";
 import { createPetition, deletePetition, reviewPetition, votePetition } from "../actions/petition-actions";
+
+export const metadata: Metadata = createMetadata({
+  title: "Поради та петиції",
+  description: "Сторінка зворотного зв'язку для фентезі до ЧС-2026: пропозиції щодо цін, гравців, правил, очок і технічних деталей.",
+  path: "/petitions",
+});
 
 const examples = [
   "Змінити ціну гравця збірної Англії Гаррі Кейна з 9 на 9,5",

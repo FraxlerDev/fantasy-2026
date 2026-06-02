@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Calculator, RotateCcw, Save, Trophy } from "lucide-react";
 import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
@@ -7,6 +8,7 @@ import { AppShell } from "../../components/shell";
 import { requireAdmin } from "../../lib/admin";
 import { ensureDefaultGameweeks } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
+import { createMetadata } from "../../lib/seo";
 import {
   createGameweekSnapshotsAction,
   createFixture,
@@ -17,6 +19,12 @@ import {
   saveFixtureScore,
   updatePlayerPrice,
 } from "../actions/admin-actions";
+
+export const metadata: Metadata = createMetadata({
+  title: "Адмінка",
+  path: "/admin",
+  noIndex: true,
+});
 
 type TeamLabel = { nameUk: string; flagPath: string | null };
 type FixtureListItem = {

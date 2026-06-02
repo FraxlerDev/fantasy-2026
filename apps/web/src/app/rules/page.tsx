@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { AppShell } from "../../components/shell";
 import { FantasyLayout } from "../../components/fantasy-layout";
+import { createMetadata } from "../../lib/seo";
+
+export const metadata: Metadata = createMetadata({
+  title: "Правила фентезі до ЧС-2026",
+  description: "Детальні правила фентезі-футболу до ЧС-2026: склад, бюджет, капітан, дедлайни, трансфери, snapshot і підрахунок очок.",
+  path: "/rules",
+});
 
 const gameweeks = [
   ["GW1", "1 тур групового етапу", "11 червня 2026, 22:00", "11 червня 2026, 20:30", "Безліміт"],

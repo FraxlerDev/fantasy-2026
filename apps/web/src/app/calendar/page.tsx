@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { AppShell } from "../../components/shell";
 import { FantasyLayout } from "../../components/fantasy-layout";
 import { prisma } from "../../lib/prisma";
+import { createMetadata } from "../../lib/seo";
+
+export const metadata: Metadata = createMetadata({
+  title: "Календар матчів ЧС-2026",
+  description: "Календар матчів ЧС-2026 для fantasy-гри: gameweeks, групи, час початку матчів, рахунки та розклад турів.",
+  path: "/calendar",
+});
 
 function formatKickoff(date: Date) {
   return date.toLocaleString("uk-UA", {

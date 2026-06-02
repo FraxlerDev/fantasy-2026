@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { AppShell } from "../../components/shell";
 import { guideCards } from "../../data/mock";
+import { createMetadata } from "../../lib/seo";
+
+export const metadata: Metadata = createMetadata({
+  title: "Гайди та поради",
+  description: "Гайди, поради та редакційні матеріали для швидкого старту у фентезі-футболі до ЧС-2026.",
+  path: "/guides",
+});
 
 export default function GuidesPage() {
   return (

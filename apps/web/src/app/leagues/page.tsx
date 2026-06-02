@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { Lock, Plus, Unlock, Users } from "lucide-react";
 import Link from "next/link";
 import { AppShell } from "../../components/shell";
 import { auth } from "../../auth";
 import { prisma } from "../../lib/prisma";
+import { createMetadata } from "../../lib/seo";
 import { CopyButton } from "../../components/copy-button";
 import { DeleteLeagueButton } from "../../components/delete-league-button";
 import {
@@ -11,6 +13,12 @@ import {
   leaveLeague,
   removeLeagueMember,
 } from "../actions/league-actions";
+
+export const metadata: Metadata = createMetadata({
+  title: "Ліги фентезі до ЧС-2026",
+  description: "Створюй відкриті та приватні ліги, запрошуй друзів і змагайся у фентезі-футболі до ЧС-2026.",
+  path: "/leagues",
+});
 
 const errorMessages: Record<string, string> = {
   "league-name": "Назва ліги має містити від 2 до 40 символів.",

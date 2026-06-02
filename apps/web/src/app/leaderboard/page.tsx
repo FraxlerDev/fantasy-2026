@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AppShell } from "../../components/shell";
 import { prisma } from "../../lib/prisma";
+import { createMetadata } from "../../lib/seo";
 
 const PAGE_SIZE = 50;
+
+export const metadata: Metadata = createMetadata({
+  title: "Рейтинг фентезі-команд",
+  description: "Глобальний рейтинг команд у фентезі-футболі до ЧС-2026: очки, місця, менеджери та таблиця сезону.",
+  path: "/leaderboard",
+});
 
 type MaybeRankedTeam = {
   leaderboardRows?: Array<{ rank: number }>;

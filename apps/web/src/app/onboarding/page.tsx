@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AppShell } from "../../components/shell";
 import { auth } from "../../auth";
+import { createMetadata } from "../../lib/seo";
 import { completeOnboarding } from "../actions/onboarding-actions";
+
+export const metadata: Metadata = createMetadata({
+  title: "Перший вхід",
+  path: "/onboarding",
+  noIndex: true,
+});
 
 export default async function OnboardingPage({
   searchParams,
