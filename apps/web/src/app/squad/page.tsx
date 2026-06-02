@@ -1,9 +1,7 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
-import { DeadlineCountdown } from "../../components/deadline-countdown";
-import { FantasyLayout } from "../../components/fantasy-layout";
 import { AppShell } from "../../components/shell";
 import { SquadBuilder, type SavedRosterEntry, type SquadPlayer } from "../../components/squad-builder";
 import { getEditableGameweek } from "../../lib/gameweeks";
@@ -79,18 +77,10 @@ export default async function SquadPage({
 
   return (
     <AppShell active="/squad">
-      <FantasyLayout>
-        {editableGameweek ? (
-          <div className="deadline-banner">
-            <div>
-              <strong>Дедлайн GW{editableGameweek.number}</strong>
-              <div className="muted">{editableGameweek.stage ?? editableGameweek.name}</div>
-            </div>
-            <DeadlineCountdown deadlineAt={editableGameweek.deadlineAt.toISOString()} />
-          </div>
-        ) : (
+      <div>
+        {!editableGameweek ? (
           <div className="form-error">Трансфери зараз закриті. Адмін має відкрити наступний GW після створення snapshot.</div>
-        )}
+        ) : null}
 
         <SquadBuilder
           players={mappedPlayers}
@@ -113,6 +103,7 @@ export default async function SquadPage({
             },
           }))}
           currentGameweek={editableGameweek?.number}
+          currentStage={editableGameweek?.stage ?? editableGameweek?.name}
           currentDeadline={editableGameweek?.deadlineAt.toISOString()}
           currentStart={editableGameweek?.startAt.toISOString()}
           transferLimit={editableGameweek?.transferLimit}
@@ -129,7 +120,7 @@ export default async function SquadPage({
           error={params?.error}
           saved={params?.saved === "1"}
         />
-      </FantasyLayout>
+      </div>
     </AppShell>
   );
 }

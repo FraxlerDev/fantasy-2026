@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import type { PlayerPosition } from "@fantasy/shared";
 import { AlertTriangle, Pencil, Save, Search, UserRound, X } from "lucide-react";
 import type { DragEvent, FormEvent } from "react";
 import { useMemo, useState } from "react";
 import { saveSquad } from "../app/actions/squad-actions";
+import { DeadlineCountdown } from "./deadline-countdown";
 
 export interface SquadPlayer {
   id: string;
@@ -130,6 +131,7 @@ export function SquadBuilder({
   players,
   fixtures,
   currentGameweek,
+  currentStage,
   currentDeadline,
   currentStart,
   transferLimit,
@@ -145,6 +147,7 @@ export function SquadBuilder({
   players: SquadPlayer[];
   fixtures: SquadFixture[];
   currentGameweek?: number;
+  currentStage?: string | null;
   currentDeadline?: string;
   currentStart?: string;
   transferLimit?: number | null;
@@ -403,6 +406,33 @@ export function SquadBuilder({
     );
   }
 
+  function visualSquad() {
+    return (
+      <>
+        <section className="fixed-pitch" onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, "STARTER")}>
+          {pitchRows(formation).map((row) => {
+            const rowPlayers = starterPlayers.filter((player) => player.position === row.position);
+            return (
+              <div className={`fixed-pitch-row slots-${row.slots}`} key={row.position}>
+                {Array.from({ length: row.slots }, (_, index) => {
+                  const player = rowPlayers[index];
+                  return player ? playerChip(player, row.label) : emptySlot(`${row.position}-${index}`, row.label, "STARTER");
+                })}
+              </div>
+            );
+          })}
+        </section>
+
+        <div className="fixed-bench" onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, "BENCH")}>
+          {Array.from({ length: 4 }, (_, index) => {
+            const player = benchPlayers[index];
+            return player ? playerChip(player, "Лавка") : emptySlot(`bench-${index}`, "Лавка", "BENCH");
+          })}
+        </div>
+      </>
+    );
+  }
+
   return (
     <form action={saveSquad} onSubmit={onSubmit}>
       {popupMessage ? (
@@ -423,6 +453,7 @@ export function SquadBuilder({
       <input type="hidden" name="formation" value={formation} />
       <input type="hidden" name="teamName" value={teamName} />
 
+      <div className="squad-top-row">
       <section className="squad-profile panel">
         <p className="eyebrow">Фентезі Команда</p>
         <div className="squad-profile-row">
@@ -460,17 +491,27 @@ export function SquadBuilder({
         </div>
       </section>
 
+      <section className="deadline-banner squad-deadline-card">
+        {currentGameweek && currentDeadline ? (
+          <>
+            <div>
+              <strong>Дедлайн GW{currentGameweek}</strong>
+              <div className="muted">{currentStage ?? "-"}</div>
+            </div>
+            <DeadlineCountdown deadlineAt={currentDeadline} />
+          </>
+        ) : (
+          <strong>Дедлайн зараз недоступний</strong>
+        )}
+      </section>
+      </div>
+
       <div className="topbar">
         <div>
           <h1>Склад команди</h1>
           <p className="muted">Додавай гравців кнопкою або перетягуй їх на поле чи лавку.</p>
         </div>
         <div className="toolbar">
-          <select className="input" value={formation} onChange={(event) => applyFormation(event.target.value)} aria-label="Схема гри">
-            {Object.keys(formations).map((item) => (
-              <option value={item} key={item}>{item}</option>
-            ))}
-          </select>
             <button className="button primary" type="submit" disabled={!isSignedIn || !hasProfile || !currentGameweek}>
             <Save size={18} />
             Зберегти
@@ -484,27 +525,24 @@ export function SquadBuilder({
       {clientError ? <div className="form-error">{clientError}</div> : null}
       {saved ? <div className="form-success">Команду збережено.</div> : null}
 
-      <section className="squad-builder-layout">
-        <div className="panel">
+      <div className="squad-workspace">
+        <div className="squad-workspace-main">
+          <section className="panel squad-field-panel">
           <nav className="squad-tabs" aria-label="Вигляд складу">
             <button className={view === "field" ? "active" : ""} type="button" onClick={() => setView("field")}>Поле</button>
             <button className={view === "table" ? "active" : ""} type="button" onClick={() => setView("table")}>Таблиця</button>
+            <label className="formation-control">
+              <span>Схема:</span>
+              <select className="input" value={formation} onChange={(event) => applyFormation(event.target.value)} aria-label="Схема гри">
+                {Object.keys(formations).map((item) => (
+                  <option value={item} key={item}>{item}</option>
+                ))}
+              </select>
+            </label>
           </nav>
 
           {view === "field" ? (
-            <section className="fixed-pitch" onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, "STARTER")}>
-              {pitchRows(formation).map((row) => {
-                const rowPlayers = starterPlayers.filter((player) => player.position === row.position);
-                return (
-                  <div className={`fixed-pitch-row slots-${row.slots}`} key={row.position}>
-                    {Array.from({ length: row.slots }, (_, index) => {
-                      const player = rowPlayers[index];
-                      return player ? playerChip(player, row.label) : emptySlot(`${row.position}-${index}`, row.label, "STARTER");
-                    })}
-                  </div>
-                );
-              })}
-            </section>
+            visualSquad()
           ) : (
             <table className="table compact-table">
               <thead><tr><th>Гравець</th><th>Позиція</th><th>Збірна</th><th>Клуб</th><th>Ціна</th><th>Слот</th></tr></thead>
@@ -524,17 +562,9 @@ export function SquadBuilder({
             </table>
           )}
 
-          {view === "field" ? (
-            <div className="fixed-bench" onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, "BENCH")}>
-              {Array.from({ length: 4 }, (_, index) => {
-                const player = benchPlayers[index];
-                return player ? playerChip(player, "Лавка") : emptySlot(`bench-${index}`, "Лавка", "BENCH");
-              })}
-            </div>
-          ) : null}
-        </div>
+          </section>
 
-        <aside className="squad-summary panel">
+        <section className="squad-summary panel" style={{ marginTop: 16 }}>
           <h2>Інформація</h2>
           <dl className="squad-meta">
             <dt>Поточний тур</dt><dd>{currentGameweek ? `GW${currentGameweek}` : "-"}</dd>
@@ -567,8 +597,7 @@ export function SquadBuilder({
               </li>
             ))}
           </ul>
-        </aside>
-      </section>
+        </section>
 
       <section className="panel" style={{ marginTop: 16 }}>
         <h2>Матчі туру</h2>
@@ -587,9 +616,11 @@ export function SquadBuilder({
           </tbody>
         </table>
       </section>
+        </div>
 
-      <section className="panel" style={{ marginTop: 16 }}>
+      <section className="panel player-catalog-panel">
         <h2>Каталог гравців</h2>
+        <div className="catalog-table-panel">
         <div className="filters">
           <div style={{ position: "relative" }}>
             <Search size={16} style={{ position: "absolute", left: 10, top: 12 }} />
@@ -653,12 +684,9 @@ export function SquadBuilder({
             ))}
           </tbody>
         </table>
+        </div>
       </section>
-
-      <section className="panel squad-chat" style={{ marginTop: 16 }}>
-        <h2>Чат</h2>
-        <div>Сюди ще ніхто не додався. Залишимо чат як заглушку для наступного етапу.</div>
-      </section>
+      </div>
     </form>
   );
 }

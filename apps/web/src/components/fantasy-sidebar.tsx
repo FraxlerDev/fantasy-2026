@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "../lib/prisma";
 
 export async function FantasySidebar() {
-  const [fixtures, teams, gameweeks, topRows] = await Promise.all([
+  const [fixtures, teams, gameweeks, topTeams] = await Promise.all([
     prisma.fixture.findMany({
       include: { homeTeam: true, awayTeam: true },
       orderBy: [{ gameweek: "asc" }, { kickoffAt: "asc" }],
@@ -10,13 +10,21 @@ export async function FantasySidebar() {
     }),
     prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }], take: 48 }),
     prisma.gameweek.findMany({ orderBy: { number: "asc" } }),
-    prisma.leaderboardRow.findMany({
-      where: { scope: "GLOBAL" },
-      include: { fantasyTeam: { include: { user: true } } },
-      orderBy: [{ rank: "asc" }],
-      take: 5,
+    prisma.fantasyTeam.findMany({
+      where: { rosterEntries: { some: {} } },
+      orderBy: [{ totalPoints: "desc" }, { createdAt: "asc" }],
+      take: 10,
     }),
   ]);
+
+  let previousPoints: number | null = null;
+  let previousRank = 0;
+  const topRows = topTeams.map((team, index) => {
+    const rank = previousPoints === team.totalPoints ? previousRank : index + 1;
+    previousPoints = team.totalPoints;
+    previousRank = rank;
+    return { id: team.id, rank, name: team.name, totalPoints: team.totalPoints };
+  });
 
   return (
     <aside className="fantasy-sidebar">
@@ -49,7 +57,7 @@ export async function FantasySidebar() {
             topRows.map((row) => (
               <div className="mini-row" key={row.id}>
                 <span>{row.rank}</span>
-                <strong>{row.fantasyTeam.name}</strong>
+                <strong>{row.name}</strong>
                 <em>{row.totalPoints}</em>
               </div>
             ))

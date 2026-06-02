@@ -2145,9 +2145,22 @@ h3 {
   min-height: 76px;
 }
 
-.squad-profile {
+.squad-top-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: 16px;
+  align-items: stretch;
   margin-bottom: 16px;
+}
+
+.squad-profile {
+  margin-bottom: 0;
   overflow: hidden;
+}
+
+.squad-deadline-card {
+  min-height: 100%;
+  margin-bottom: 0;
 }
 
 .squad-profile-row {
@@ -2182,8 +2195,28 @@ h3 {
   align-items: start;
 }
 
+.squad-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 500px) minmax(520px, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+.squad-workspace-main {
+  width: 100%;
+  max-width: 500px;
+  min-width: 0;
+}
+
+.squad-field-panel,
+.player-catalog-panel {
+  min-width: 0;
+}
+
 .squad-tabs {
   display: flex;
+  align-items: center;
   gap: 2px;
   margin-bottom: 10px;
   padding: 6px;
@@ -2203,6 +2236,20 @@ h3 {
 .squad-tabs button.active {
   border-color: var(--green);
   color: var(--green);
+}
+
+.formation-control {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+}
+
+.formation-control .input {
+  min-height: 34px;
+  width: 110px;
+  padding: 4px 8px;
 }
 
 .fixed-pitch {
@@ -2406,6 +2453,10 @@ h3 {
   border-top: 0;
 }
 
+.catalog-table-panel {
+  min-width: 0;
+}
+
 .team-title-row {
   display: flex;
   align-items: center;
@@ -2506,10 +2557,6 @@ h3 {
   font-weight: 800;
 }
 
-.squad-chat {
-  min-height: 220px;
-}
-
 @media (max-width: 1200px) {
   .filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2526,6 +2573,18 @@ h3 {
   .promo-steps,
   .squad-builder-layout {
     grid-template-columns: 1fr;
+  }
+
+  .squad-top-row {
+    grid-template-columns: 1fr;
+  }
+
+  .squad-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .squad-workspace-main {
+    max-width: none;
   }
 
   .promo-form {
@@ -2698,6 +2757,16 @@ h3 {
   .public-fixed-pitch,
   .public-fixed-bench {
     width: 100%;
+  }
+
+  .squad-tabs {
+    flex-wrap: wrap;
+  }
+
+  .formation-control {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
   }
 
   .fixed-pitch {
