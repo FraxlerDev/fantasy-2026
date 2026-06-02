@@ -77,7 +77,7 @@ export default async function SquadPage({
 
   return (
     <AppShell active="/squad">
-      <div>
+      <div className="squad-page">
         {!editableGameweek ? (
           <div className="form-error">Трансфери зараз закриті. Адмін має відкрити наступний GW після створення snapshot.</div>
         ) : null}

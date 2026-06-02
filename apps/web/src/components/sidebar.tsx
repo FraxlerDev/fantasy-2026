@@ -1,4 +1,4 @@
-import { BookOpen, CalendarDays, Flag, Megaphone, Shield, Table2, Trophy, Users, Wrench } from "lucide-react";
+import { BookOpen, CalendarDays, Flag, Megaphone, Send, Shield, Table2, Trophy, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 import { signOutUser } from "../app/actions/auth-actions";
 import { auth } from "../auth";
@@ -31,7 +31,6 @@ export async function Sidebar({ active = "/" }: { active?: string }) {
           </div>
           <div className="brand-text">
             <div>Fantasy 2026 UA</div>
-            <small className="muted">ЧС-2026 для своїх ліг</small>
           </div>
         </Link>
         <label className="mobile-menu-button" htmlFor="mobile-nav-toggle" aria-label="Відкрити меню">
@@ -51,6 +50,9 @@ export async function Sidebar({ active = "/" }: { active?: string }) {
         </nav>
         <div className="sidebar-note">
           <a className="author-link" href="https://t.me/fraxler7" target="_blank" rel="noreferrer">
+            <span className="telegram-icon" aria-hidden="true">
+              <Send size={12} />
+            </span>
             Зв'язок з автором
           </a>
           {session?.user?.username ? (
