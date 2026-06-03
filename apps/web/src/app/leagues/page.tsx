@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Lock, Plus, Unlock, Users } from "lucide-react";
+import { Lock, Plus, Search, Unlock, Users } from "lucide-react";
 import Link from "next/link";
 import { AppShell } from "../../components/shell";
 import { auth } from "../../auth";
@@ -22,6 +22,7 @@ export const metadata: Metadata = createMetadata({
 
 const errorMessages: Record<string, string> = {
   "league-name": "Назва ліги має містити від 2 до 40 символів.",
+  "league-description": "Опис ліги має бути не довшим за 240 символів.",
   invite: "Лігу з таким кодом не знайдено.",
   closed: "Ця ліга закрита. Попроси власника надіслати invite code.",
   limit: "Досягнуто ліміт: можна вступити максимум у 5 запрошених ліг.",
@@ -29,13 +30,58 @@ const errorMessages: Record<string, string> = {
   owner: "Ця дія доступна тільки власнику ліги.",
 };
 
+type LeagueSearchParams = {
+  error?: string;
+  saved?: string;
+  joined?: string;
+  left?: string;
+  removed?: string;
+  deleted?: string;
+  q?: string;
+};
+
+function memberLabel(count: number) {
+  if (count === 1) return "1 учасник";
+  if (count > 1 && count < 5) return `${count} учасники`;
+  return `${count} учасників`;
+}
+
+function leagueUrl(leagueId: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fantasy.fraxler.site";
+  return `${baseUrl.replace(/\/$/, "")}/leagues/${leagueId}`;
+}
+
+function fallbackRows(league: {
+  members: Array<{
+    fantasyTeam: {
+      id: string;
+      name: string;
+      totalPoints: number;
+      user: { username: string | null; email: string | null };
+    };
+  }>;
+}) {
+  const sorted = [...league.members].sort((a, b) => b.fantasyTeam.totalPoints - a.fantasyTeam.totalPoints || a.fantasyTeam.name.localeCompare(b.fantasyTeam.name, "uk"));
+  let previousPoints: number | null = null;
+  let previousRank = 0;
+
+  return sorted.map((member, index) => {
+    const rank = previousPoints === member.fantasyTeam.totalPoints ? previousRank : index + 1;
+    previousPoints = member.fantasyTeam.totalPoints;
+    previousRank = rank;
+    return { rank, totalPoints: member.fantasyTeam.totalPoints, fantasyTeam: member.fantasyTeam };
+  });
+}
+
 export default async function LeaguesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; saved?: string; joined?: string; left?: string; removed?: string; deleted?: string }>;
+  searchParams?: Promise<LeagueSearchParams>;
 }) {
   const session = await auth();
   const params = await searchParams;
+  const query = String(params?.q ?? "").trim();
+
   const fantasyTeam = session?.user?.id
     ? await prisma.fantasyTeam.findUnique({ where: { userId: session.user.id } })
     : null;
@@ -51,7 +97,12 @@ export default async function LeaguesPage({
     ? await prisma.leagueMember.findMany({
         where: { fantasyTeamId: fantasyTeam.id },
         include: {
-          league: { include: { members: { include: { fantasyTeam: { include: { user: true } } } } } },
+          league: {
+            include: {
+              owner: true,
+              members: { include: { fantasyTeam: { include: { user: true } } } },
+            },
+          },
         },
         orderBy: { joinedAt: "desc" },
       })
@@ -61,12 +112,13 @@ export default async function LeaguesPage({
   const openLeagues = await prisma.league.findMany({
     where: {
       isOpen: true,
+      ...(query ? { name: { contains: query, mode: "insensitive" as const } } : {}),
       ...(session?.user?.id ? { ownerId: { not: session.user.id } } : {}),
       ...(membershipLeagueIds.size > 0 ? { id: { notIn: [...membershipLeagueIds] } } : {}),
     },
     include: { owner: true, members: true },
-    orderBy: [{ createdAt: "desc" }],
-    take: 20,
+    orderBy: [{ members: { _count: "desc" } }, { createdAt: "desc" }],
+    take: 30,
   });
 
   const leagueIds = memberships.map((membership) => membership.leagueId);
@@ -86,7 +138,7 @@ export default async function LeaguesPage({
           <p className="eyebrow">Ліги</p>
           <h1>Змагайся з друзями</h1>
           <p className="muted">
-            Можна створити одну власну лігу ще до команди. Команда без ліги все одно потрапляє у глобальний рейтинг після збереження складу.
+            Створи одну власну лігу, відкрий її для всіх або запроси друзів кодом. Команда без ліги все одно потрапляє у глобальний рейтинг після збереження складу.
           </p>
         </div>
       </div>
@@ -101,45 +153,51 @@ export default async function LeaguesPage({
           <h2>Моя власна ліга</h2>
           {session?.user?.id ? (
             <>
-            <form action={createOrRenameLeague} className="form-stack">
-              <label>
-                Назва ліги
-                <input className="input" name="name" defaultValue={ownedLeague?.name ?? "Моя ліга"} minLength={2} maxLength={40} />
-              </label>
-              <label>
-                Доступ
-                <select className="input" name="isOpen" defaultValue={ownedLeague?.isOpen ? "open" : "closed"}>
-                  <option value="closed">Закрита: вступ тільки за кодом</option>
-                  <option value="open">Відкрита: кожен може вступити сам</option>
-                </select>
-              </label>
-              {ownedLeague ? (
-                <div className="card">
-                  <span className="badge">{ownedLeague.isOpen ? "Відкрита ліга" : "Закрита ліга"}</span>
-                  <h1 style={{ marginTop: 10 }}>{ownedLeague.inviteCode}</h1>
-                  <p className="muted">Код потрібен для закритих ліг і ручного запрошення друзів.</p>
-                  <div className="toolbar">
-                    <CopyButton text={ownedLeague.inviteCode} />
-                    <span className="button">
-                      <Users size={18} />
-                      {ownedLeague.members.length} учасників
-                    </span>
+              <form action={createOrRenameLeague} className="form-stack">
+                <label>
+                  Назва ліги
+                  <input className="input" name="name" defaultValue={ownedLeague?.name ?? "Моя ліга"} minLength={2} maxLength={40} />
+                </label>
+                <label>
+                  Опис
+                  <textarea className="input textarea" name="description" defaultValue={ownedLeague?.description ?? ""} maxLength={240} placeholder="Наприклад: ліга друзів, колег або Telegram-спільноти" />
+                </label>
+                <label>
+                  Доступ
+                  <select className="input" name="isOpen" defaultValue={ownedLeague?.isOpen ? "open" : "closed"}>
+                    <option value="closed">Закрита: вступ тільки за кодом</option>
+                    <option value="open">Відкрита: кожен може вступити сам</option>
+                  </select>
+                </label>
+                {ownedLeague ? (
+                  <div className="card">
+                    <span className="badge">{ownedLeague.isOpen ? "Відкрита ліга" : "Закрита ліга"}</span>
+                    <h1 style={{ marginTop: 10 }}>{ownedLeague.inviteCode}</h1>
+                    <p className="muted">Код потрібен для закритих ліг і ручного запрошення друзів.</p>
+                    <div className="toolbar">
+                      <CopyButton text={ownedLeague.inviteCode} label="Скопіювати код" />
+                      <CopyButton text={leagueUrl(ownedLeague.id)} label="Скопіювати посилання" />
+                      <Link className="button" href={`/leagues/${ownedLeague.id}`}>Відкрити лігу</Link>
+                      <span className="button">
+                        <Users size={18} />
+                        {memberLabel(ownedLeague.members.length)}
+                      </span>
+                    </div>
                   </div>
+                ) : null}
+                {!fantasyTeam ? (
+                  <p className="muted">Лігу можна створити зараз. Твоя команда додасться в неї автоматично після першого збереження складу.</p>
+                ) : null}
+                <button className="button primary" type="submit">
+                  <Plus size={18} />
+                  {ownedLeague ? "Зберегти лігу" : "Створити лігу"}
+                </button>
+              </form>
+              {ownedLeague ? (
+                <div style={{ marginTop: 12 }}>
+                  <DeleteLeagueButton leagueId={ownedLeague.id} leagueName={ownedLeague.name} />
                 </div>
               ) : null}
-              {!fantasyTeam ? (
-                <p className="muted">Лігу можна створити зараз. Твоя команда додасться в неї автоматично після першого збереження складу.</p>
-              ) : null}
-              <button className="button primary" type="submit">
-                <Plus size={18} />
-                {ownedLeague ? "Зберегти лігу" : "Створити лігу"}
-              </button>
-            </form>
-            {ownedLeague ? (
-              <div style={{ marginTop: 12 }}>
-                <DeleteLeagueButton leagueId={ownedLeague.id} leagueName={ownedLeague.name} />
-              </div>
-            ) : null}
             </>
           ) : (
             <p className="muted">Увійди через Google, щоб створити власну лігу.</p>
@@ -160,24 +218,40 @@ export default async function LeaguesPage({
       </section>
 
       <section className="panel" style={{ marginTop: 16 }}>
-        <h2>Відкриті ліги</h2>
-        <div className="grid">
+        <div className="topbar" style={{ marginBottom: 12 }}>
+          <div>
+            <h2>Відкриті ліги</h2>
+            <p className="muted">Знайди лігу та вступи без коду, якщо вона відкрита.</p>
+          </div>
+        </div>
+        <form className="form-inline" action="/leagues">
+          <input className="input" name="q" defaultValue={query} placeholder="Пошук відкритої ліги" />
+          <button className="button primary" type="submit">
+            <Search size={18} />
+            Знайти
+          </button>
+          {query ? <Link className="button" href="/leagues">Скинути</Link> : <span />}
+        </form>
+        <div className="grid" style={{ marginTop: 16 }}>
           {openLeagues.map((league) => (
             <article className="card" key={league.id}>
               <div className="topbar" style={{ marginBottom: 10 }}>
                 <div>
-                  <h3>{league.name}</h3>
+                  <h3><Link href={`/leagues/${league.id}`}>{league.name}</Link></h3>
                   <p className="muted">Власник: {league.owner.username ?? league.owner.email}</p>
                 </div>
                 <span className="badge">
                   <Unlock size={14} />
-                  {league.members.length} учасників
+                  {memberLabel(league.members.length)}
                 </span>
               </div>
-              <form action={joinLeague}>
-                <input type="hidden" name="leagueId" value={league.id} />
-                <button className="button primary" type="submit" disabled={!fantasyTeam}>Вступити</button>
-              </form>
+              <div className="toolbar">
+                <Link className="button" href={`/leagues/${league.id}`}>Переглянути</Link>
+                <form action={joinLeague}>
+                  <input type="hidden" name="leagueId" value={league.id} />
+                  <button className="button primary" type="submit" disabled={!fantasyTeam}>Вступити</button>
+                </form>
+              </div>
             </article>
           ))}
           {openLeagues.length === 0 ? <p className="muted">Відкритих ліг поки немає.</p> : null}
@@ -190,20 +264,13 @@ export default async function LeaguesPage({
           {memberships.map((membership) => {
             const leagueRows = leaderboardRows.filter((row) => row.leagueId === membership.leagueId);
             const isOwner = membership.league.ownerId === session?.user?.id;
-            const rows =
-              leagueRows.length > 0
-                ? leagueRows
-                : membership.league.members.map((member, index) => ({
-                    rank: index + 1,
-                    totalPoints: member.fantasyTeam.totalPoints,
-                    fantasyTeam: member.fantasyTeam,
-                  }));
+            const rows = leagueRows.length > 0 ? leagueRows : fallbackRows(membership.league);
 
             return (
               <article className="card" key={membership.id}>
                 <div className="topbar" style={{ marginBottom: 10 }}>
                   <div>
-                    <h3>{membership.league.name}</h3>
+                    <h3><Link href={`/leagues/${membership.league.id}`}>{membership.league.name}</Link></h3>
                     <p className="muted">
                       {membership.league.isOpen ? <Unlock size={14} /> : <Lock size={14} />} Код: {membership.league.inviteCode}
                     </p>
@@ -227,7 +294,7 @@ export default async function LeaguesPage({
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((row) => (
+                    {rows.slice(0, 10).map((row) => (
                       <tr key={row.fantasyTeam.id}>
                         <td>{row.rank}</td>
                         <td><Link href={`/teams/${row.fantasyTeam.id}`}>{row.fantasyTeam.name}</Link></td>
@@ -248,6 +315,9 @@ export default async function LeaguesPage({
                     ))}
                   </tbody>
                 </table>
+                <div className="toolbar" style={{ marginTop: 12 }}>
+                  <Link className="button" href={`/leagues/${membership.league.id}`}>Повна таблиця</Link>
+                </div>
               </article>
             );
           })}

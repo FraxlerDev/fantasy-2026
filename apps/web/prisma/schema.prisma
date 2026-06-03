@@ -286,6 +286,7 @@ model League {
   id        String   @id @default(cuid())
   ownerId   String   @unique
   name      String
+  description String?
   inviteCode String  @unique
   isOpen    Boolean  @default(false)
   createdAt DateTime @default(now())

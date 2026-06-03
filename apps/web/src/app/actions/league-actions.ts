@@ -31,12 +31,18 @@ async function requireUser() {
 export async function createOrRenameLeague(formData: FormData) {
   const session = await requireUser();
   const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
   const isOpen = String(formData.get("isOpen") ?? "") === "open";
   if (name.length < 2 || name.length > 40) redirect("/leagues?error=league-name");
+  if (description.length > 240) redirect("/leagues?error=league-description");
 
   const existing = await prisma.league.findUnique({ where: { ownerId: session.user.id } });
   if (existing) {
-    await prisma.league.update({ where: { id: existing.id }, data: { name, isOpen } });
+    await prisma.league.update({
+      where: { id: existing.id },
+      data: { name, description: description || null, isOpen },
+    });
+    revalidatePath(`/leagues/${existing.id}`);
   } else {
     let inviteCode = makeInviteCode();
     while (await prisma.league.findUnique({ where: { inviteCode } })) {
@@ -47,6 +53,7 @@ export async function createOrRenameLeague(formData: FormData) {
       data: {
         ownerId: session.user.id,
         name,
+        description: description || null,
         inviteCode,
         isOpen,
       },
@@ -87,7 +94,8 @@ export async function joinLeague(formData: FormData) {
   }
 
   revalidatePath("/leagues");
-  redirect("/leagues?joined=1");
+  revalidatePath(`/leagues/${league.id}`);
+  redirect(`/leagues/${league.id}?joined=1`);
 }
 
 export async function leaveLeague(formData: FormData) {
@@ -99,6 +107,7 @@ export async function leaveLeague(formData: FormData) {
 
   await prisma.leagueMember.deleteMany({ where: { leagueId, fantasyTeamId: team.id } });
   revalidatePath("/leagues");
+  revalidatePath(`/leagues/${leagueId}`);
   redirect("/leagues?left=1");
 }
 
@@ -113,6 +122,7 @@ export async function removeLeagueMember(formData: FormData) {
 
   await prisma.leagueMember.deleteMany({ where: { leagueId, fantasyTeamId } });
   revalidatePath("/leagues");
+  revalidatePath(`/leagues/${leagueId}`);
   redirect("/leagues?removed=1");
 }
 
