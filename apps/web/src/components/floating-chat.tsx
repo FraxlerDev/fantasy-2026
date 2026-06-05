@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, MessageCircle, Reply, Send, Smile, Trash2, X } from "lucide-react";
+import { Ban, Reply, Send, Smile, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type ChatMessage = {
@@ -37,6 +37,9 @@ const emojiGroups = [
   { title: "Їжа", items: "🍕 🍔 🍟 🌭 🥪 🌮 🌯 🍗 🥩 🍿 🥐 🍞 🍌 🍎 🍊 🍓 🍒 🍉 🍇".split(" ") },
   { title: "Подорожі", items: "✈️ 🚆 🚇 🚕 🚌 🚗 🏎️ 🚲 🚀 🛫 🛬 🗺️ 🧭 🏨 🏠 🏙️ 🌆 🌃 🌍".split(" ") },
 ];
+
+const CHAT_OPEN_EVENT = "fantasy:chat-open";
+const CHAT_UNREAD_EVENT = "fantasy:chat-unread";
 
 function formatTime(value: string) {
   return new Intl.DateTimeFormat("uk-UA", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
@@ -105,6 +108,20 @@ export function FloatingChat() {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [isOpen, messages.length]);
 
+  useEffect(() => {
+    function openFromNavigation() {
+      setIsOpen(true);
+      setUnreadCount(0);
+    }
+
+    window.addEventListener(CHAT_OPEN_EVENT, openFromNavigation);
+    return () => window.removeEventListener(CHAT_OPEN_EVENT, openFromNavigation);
+  }, []);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(CHAT_UNREAD_EVENT, { detail: unreadCount }));
+  }, [unreadCount]);
+
   async function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = body.trim();
@@ -162,21 +179,13 @@ export function FloatingChat() {
     setBody((value) => `${value}${emoji}`);
   }
 
-  function openChat() {
-    setIsOpen((value) => {
-      const next = !value;
-      if (next) setUnreadCount(0);
-      return next;
-    });
-  }
-
   return (
     <div className="floating-chat">
       {isOpen ? (
         <section className="chat-panel" aria-label="Загальний чат">
           <header className="chat-header">
             <div>
-              <strong>Загальний чат</strong>
+              <strong>Фан-сектор</strong>
               <span>{currentUser ? "Пишуть авторизовані, читають усі" : "Увійди, щоб писати"}</span>
             </div>
             <button className="chat-icon-button" type="button" onClick={() => setIsOpen(false)} aria-label="Закрити чат">
@@ -284,10 +293,6 @@ export function FloatingChat() {
         </section>
       ) : null}
 
-      <button className="chat-fab" type="button" onClick={openChat} aria-label="Відкрити загальний чат">
-        <MessageCircle size={24} />
-        {unreadCount > 0 ? <span className="chat-unread-badge">{unreadCount > 99 ? "99+" : unreadCount}</span> : null}
-      </button>
     </div>
   );
 }

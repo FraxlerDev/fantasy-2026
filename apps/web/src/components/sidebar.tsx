@@ -2,6 +2,7 @@ import { BookOpen, CalendarDays, Flag, Megaphone, Send, Shield, Table2, Trophy, 
 import Link from "next/link";
 import { signOutUser } from "../app/actions/auth-actions";
 import { auth } from "../auth";
+import { FanSectorNavButton } from "./fan-sector-nav-button";
 
 const items = [
   { href: "/", label: "Головна", icon: Trophy },
@@ -42,10 +43,13 @@ export async function Sidebar({ active = "/" }: { active?: string }) {
       <div className="sidebar-menu">
         <nav className="nav" aria-label="Головна навігація">
           {visibleItems.map((item) => (
-            <Link key={item.href} href={item.href} data-active={active === item.href}>
-              <item.icon size={18} />
-              {item.label}
-            </Link>
+            <div className="nav-entry" key={item.href}>
+              <Link href={item.href} data-active={active === item.href}>
+                <item.icon size={18} />
+                {item.label}
+              </Link>
+              {item.href === "/leaderboard" ? <FanSectorNavButton /> : null}
+            </div>
           ))}
         </nav>
         <div className="sidebar-note">

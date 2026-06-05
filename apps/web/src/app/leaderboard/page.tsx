@@ -58,7 +58,6 @@ export default async function LeaderboardPage({
             OR: [
               { name: { contains: query, mode: "insensitive" as const } },
               { user: { username: { contains: query, mode: "insensitive" as const } } },
-              { user: { email: { contains: query, mode: "insensitive" as const } } },
             ],
           },
         ],
@@ -135,7 +134,7 @@ export default async function LeaderboardPage({
               <tr key={team.id}>
                 <td>{(team as MaybeRankedTeam).computedRank ?? skip + index + 1}</td>
                 <td><TeamLink id={team.id} name={team.name} image={team.user.image} /></td>
-                <td>{team.user.username ?? team.user.email}</td>
+                <td>{team.user.username?.trim() || "Користувач"}</td>
                 <td><strong>{team.totalPoints}</strong></td>
               </tr>
             ))}

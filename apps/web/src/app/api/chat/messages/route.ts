@@ -9,7 +9,7 @@ function isAdminEmail(email?: string | null) {
 }
 
 function displayName(user: { username: string | null; email: string | null }) {
-  return user.username ?? user.email ?? "Користувач";
+  return user.username?.trim() || "Користувач";
 }
 
 function serializeMessage(message: {
@@ -90,7 +90,7 @@ export async function GET(request: Request) {
     currentUser: session?.user?.id
       ? {
           id: session.user.id,
-          name: session.user.username ?? session.user.email ?? "Користувач",
+          name: session.user.username?.trim() || "Користувач",
           image: session.user.image,
           isAdmin: isAdminEmail(session.user.email),
           isBanned: banned,

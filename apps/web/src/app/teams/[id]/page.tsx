@@ -7,11 +7,39 @@ import { AppShell } from "../../../components/shell";
 import { prisma } from "../../../lib/prisma";
 import { createMetadata } from "../../../lib/seo";
 
-export const metadata: Metadata = createMetadata({
-  title: "Команда користувача",
-  path: "/teams",
-  noIndex: true,
-});
+type PublicTeamPageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export async function generateMetadata({ params }: PublicTeamPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const team = await prisma.fantasyTeam.findUnique({
+    where: { id },
+    select: {
+      name: true,
+      totalPoints: true,
+      formation: true,
+      user: { select: { username: true } },
+    },
+  });
+
+  if (!team) {
+    return createMetadata({
+      title: "Команду не знайдено",
+      path: `/teams/${id}`,
+      noIndex: true,
+    });
+  }
+
+  const manager = team.user.username?.trim() || "Користувач";
+
+  return createMetadata({
+    title: team.name,
+    description: `Фентезі-команда «${team.name}». Менеджер: ${manager}. Очки: ${team.totalPoints}. Схема: ${team.formation}.`,
+    path: `/teams/${id}`,
+    noIndex: true,
+  });
+}
 
 type LineupEntry = {
   id: string;
@@ -98,7 +126,7 @@ function gameweekPoints(entries: LineupEntry[], points: Map<string, number>) {
   return total;
 }
 
-export default async function PublicTeamPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PublicTeamPage({ params }: PublicTeamPageProps) {
   const { id } = await params;
   const team = await prisma.fantasyTeam.findUnique({
     where: { id },
@@ -168,7 +196,7 @@ export default async function PublicTeamPage({ params }: { params: Promise<{ id:
         <section className="team-header panel">
           <p className="eyebrow">Фентезі команда</p>
           <h1>{team.name}</h1>
-          <p className="muted">Менеджер: {team.user.username ?? team.user.email}</p>
+          <p className="muted">Менеджер: {team.user.username?.trim() || "Користувач"}</p>
           <div className="grid cols-3" style={{ marginTop: 14 }}>
             <div className="card stat"><span className="badge">Очки</span><strong>{team.totalPoints}</strong></div>
             <div className="card stat"><span className="badge">Місце</span><strong>{rank?.rank ?? "-"}</strong></div>

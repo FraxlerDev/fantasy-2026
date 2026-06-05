@@ -5,6 +5,7 @@ import { AlertTriangle, Pencil, Save, Search, UserRound, X } from "lucide-react"
 import type { DragEvent, FormEvent } from "react";
 import { useMemo, useState } from "react";
 import { saveSquad } from "../app/actions/squad-actions";
+import { ShareSquadButton } from "./share-squad-button";
 import { DeadlineCountdown } from "./deadline-countdown";
 
 export interface SquadPlayer {
@@ -137,6 +138,7 @@ export function SquadBuilder({
   transferLimit,
   userProfile,
   initialTeamName,
+  initialTeamId,
   initialFormation,
   initialRoster,
   isSignedIn,
@@ -153,6 +155,7 @@ export function SquadBuilder({
   transferLimit?: number | null;
   userProfile?: SquadUserProfile;
   initialTeamName?: string;
+  initialTeamId?: string;
   initialFormation?: string;
   initialRoster: SavedRosterEntry[];
   isSignedIn: boolean;
@@ -512,6 +515,7 @@ export function SquadBuilder({
           <p className="muted">Додавай гравців кнопкою або перетягуй їх на поле чи лавку.</p>
         </div>
         <div className="toolbar">
+          {initialTeamId ? <ShareSquadButton teamId={initialTeamId} /> : null}
             <button className="button primary" type="submit" disabled={!isSignedIn || !hasProfile || !currentGameweek}>
             <Save size={18} />
             Зберегти

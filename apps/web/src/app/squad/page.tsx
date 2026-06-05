@@ -113,6 +113,7 @@ export default async function SquadPage({
             image: session?.user?.image,
           }}
           initialTeamName={fantasyTeam?.name ?? promoTeamName}
+          initialTeamId={fantasyTeam?.id}
           initialFormation={fantasyTeam?.formation ?? "4-3-3"}
           initialRoster={initialRoster}
           isSignedIn={Boolean(session?.user?.id)}

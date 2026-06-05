@@ -238,7 +238,7 @@ export default async function LeaguesPage({
               <div className="topbar" style={{ marginBottom: 10 }}>
                 <div>
                   <h3><Link href={`/leagues/${league.id}`}>{league.name}</Link></h3>
-                  <p className="muted">Власник: {league.owner.username ?? league.owner.email}</p>
+                  <p className="muted">Власник: {league.owner.username?.trim() || "Користувач"}</p>
                 </div>
                 <span className="badge">
                   <Unlock size={14} />
@@ -272,7 +272,9 @@ export default async function LeaguesPage({
                   <div>
                     <h3><Link href={`/leagues/${membership.league.id}`}>{membership.league.name}</Link></h3>
                     <p className="muted">
-                      {membership.league.isOpen ? <Unlock size={14} /> : <Lock size={14} />} Код: {membership.league.inviteCode}
+                      {membership.league.isOpen ? <Unlock size={14} /> : <Lock size={14} />}
+                      {membership.league.isOpen ? " Відкрита ліга" : " Закрита ліга"}
+                      {isOwner ? ` · Код: ${membership.league.inviteCode}` : null}
                     </p>
                   </div>
                   {!isOwner ? (
@@ -298,7 +300,7 @@ export default async function LeaguesPage({
                       <tr key={row.fantasyTeam.id}>
                         <td>{row.rank}</td>
                         <td><Link href={`/teams/${row.fantasyTeam.id}`}>{row.fantasyTeam.name}</Link></td>
-                        <td>{row.fantasyTeam.user.username ?? row.fantasyTeam.user.email}</td>
+                        <td>{row.fantasyTeam.user.username?.trim() || "Користувач"}</td>
                         <td><strong>{row.totalPoints}</strong></td>
                         {isOwner ? (
                           <td>

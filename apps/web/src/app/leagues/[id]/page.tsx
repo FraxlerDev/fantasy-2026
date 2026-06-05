@@ -122,13 +122,13 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
           <h2>Інформація</h2>
           <table className="table">
             <tbody>
-              <tr><td>Власник</td><td><strong>{league.owner.username ?? league.owner.email}</strong></td></tr>
+              <tr><td>Власник</td><td><strong>{league.owner.username?.trim() || "Користувач"}</strong></td></tr>
               <tr><td>Учасники</td><td><strong>{league.members.length}</strong></td></tr>
-              <tr><td>Invite code</td><td><strong>{league.inviteCode}</strong></td></tr>
+              {isOwner ? <tr><td>Invite code</td><td><strong>{league.inviteCode}</strong></td></tr> : null}
             </tbody>
           </table>
           <div className="toolbar" style={{ marginTop: 14 }}>
-            <CopyButton text={league.inviteCode} label="Скопіювати код" />
+            {isOwner ? <CopyButton text={league.inviteCode} label="Скопіювати код" /> : null}
             <CopyButton text={leagueUrl(league.id)} label="Скопіювати посилання" />
             {isOwner ? <Link className="button" href="/leagues">Редагувати</Link> : null}
           </div>
@@ -205,7 +205,7 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
                     <span>{row.fantasyTeam.name}</span>
                   </Link>
                 </td>
-                <td>{row.fantasyTeam.user.username ?? row.fantasyTeam.user.email}</td>
+                <td>{row.fantasyTeam.user.username?.trim() || "Користувач"}</td>
                 <td><strong>{row.totalPoints}</strong></td>
                 {isOwner ? (
                   <td>
