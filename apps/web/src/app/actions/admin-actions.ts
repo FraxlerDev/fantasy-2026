@@ -5,6 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { playoffMatches } from "../../data/match-center";
 import { requireAdmin } from "../../lib/admin";
 import { createGameweekSnapshots, openGameweekTransfers } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
@@ -14,6 +15,22 @@ const playerPositions = new Set(["GK", "DEF", "MID", "FWD"]);
 const playerStatuses = new Set(["AVAILABLE", "DOUBTFUL", "OUT", "ELIMINATED"]);
 const maxPlayerPhotoSize = 200 * 1024;
 const allowedPhotoTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+function downstreamPlayoffIds(matchId: string) {
+  const result = new Set<string>();
+  const queue = [matchId];
+  while (queue.length) {
+    const current = queue.shift()!;
+    for (const definition of playoffMatches) {
+      if (!("fromA" in definition) || (definition.fromA !== current && definition.fromB !== current)) continue;
+      if (!result.has(definition.id)) {
+        result.add(definition.id);
+        queue.push(definition.id);
+      }
+    }
+  }
+  return [...result];
+}
 
 function splitCsvLine(line: string) {
   return line.includes(";") ? line.split(";") : line.split(",");
@@ -300,6 +317,7 @@ export async function saveFixtureScore(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/tournament");
+  revalidatePath("/matches");
   redirect(`/admin?fixtureId=${fixtureId}&score=saved`);
 }
 
@@ -315,7 +333,106 @@ export async function resetFixtureScore(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/tournament");
+  revalidatePath("/matches");
   redirect(`/admin?fixtureId=${fixtureId}&score=reset`);
+}
+
+export async function savePlayoffScore(formData: FormData) {
+  await requireAdmin();
+  const matchId = String(formData.get("matchId") ?? "");
+  const homeScore = Number.parseInt(String(formData.get("homeScore") ?? ""), 10);
+  const awayScore = Number.parseInt(String(formData.get("awayScore") ?? ""), 10);
+  const homePenaltiesRaw = String(formData.get("homePenalties") ?? "").trim();
+  const awayPenaltiesRaw = String(formData.get("awayPenalties") ?? "").trim();
+  const homePenalties = homePenaltiesRaw === "" ? null : Number.parseInt(homePenaltiesRaw, 10);
+  const awayPenalties = awayPenaltiesRaw === "" ? null : Number.parseInt(awayPenaltiesRaw, 10);
+
+  const invalidMain =
+    !matchId ||
+    Number.isNaN(homeScore) ||
+    Number.isNaN(awayScore) ||
+    homeScore < 0 ||
+    awayScore < 0;
+  const invalidPenalties =
+    homeScore === awayScore &&
+    (homePenalties === null ||
+      awayPenalties === null ||
+      Number.isNaN(homePenalties) ||
+      Number.isNaN(awayPenalties) ||
+      homePenalties < 0 ||
+      awayPenalties < 0 ||
+      homePenalties === awayPenalties);
+
+  if (invalidMain || invalidPenalties) {
+    redirect(`/admin?playoffId=${matchId}&error=playoff-score#playoff-scores`);
+  }
+
+  const downstreamIds = downstreamPlayoffIds(matchId);
+  await prisma.$transaction([
+    prisma.playoffMatch.update({
+      where: { id: matchId },
+      data: {
+        homeScore,
+        awayScore,
+        homePenalties: homeScore === awayScore ? homePenalties : null,
+        awayPenalties: homeScore === awayScore ? awayPenalties : null,
+      },
+    }),
+    ...(downstreamIds.length
+      ? [
+          prisma.playoffMatch.updateMany({
+            where: { id: { in: downstreamIds } },
+            data: { homeScore: null, awayScore: null, homePenalties: null, awayPenalties: null },
+          }),
+        ]
+      : []),
+  ]);
+
+  revalidatePath("/admin");
+  revalidatePath("/matches");
+  redirect(`/admin?playoffId=${matchId}&playoffScore=saved#playoff-scores`);
+}
+
+export async function resetPlayoffScore(formData: FormData) {
+  await requireAdmin();
+  const matchId = String(formData.get("matchId") ?? "");
+  if (!matchId) redirect("/admin?error=playoff-score#playoff-scores");
+
+  const affectedIds = [matchId, ...downstreamPlayoffIds(matchId)];
+  await prisma.playoffMatch.updateMany({
+    where: { id: { in: affectedIds } },
+    data: {
+      homeScore: null,
+      awayScore: null,
+      homePenalties: null,
+      awayPenalties: null,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/matches");
+  redirect(`/admin?playoffId=${matchId}&playoffScore=reset#playoff-scores`);
+}
+
+export async function updateTournamentTiebreaks(formData: FormData) {
+  await requireAdmin();
+  const teamId = String(formData.get("teamId") ?? "");
+  const conduct = Number.parseInt(String(formData.get("teamConductScore") ?? "0"), 10);
+  const fifaRankRaw = String(formData.get("fifaRank") ?? "").trim();
+  const fifaRank = fifaRankRaw === "" ? null : Number.parseInt(fifaRankRaw, 10);
+
+  if (!teamId || Number.isNaN(conduct) || (fifaRank !== null && (Number.isNaN(fifaRank) || fifaRank < 1))) {
+    redirect("/admin?error=tiebreak#playoff-scores");
+  }
+
+  await prisma.nationalTeam.update({
+    where: { id: teamId },
+    data: { teamConductScore: conduct, fifaRank },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/matches");
+  redirect("/admin?tiebreak=saved#playoff-scores");
 }
 
 export async function refreshRankingsAction() {

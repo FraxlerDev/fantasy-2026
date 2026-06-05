@@ -101,7 +101,7 @@ export function AdminVisitStats({
         <div className="visit-table-panel">
           <div className="visit-table-heading">
             <h2>Статистика користувачів сайту</h2>
-            <span className="muted">Унікальних IP: {rows.length}</span>
+            <span className="muted">Унікальних IP: {allVisitors}</span>
           </div>
           <table className="table compact-table visit-table">
             <thead>

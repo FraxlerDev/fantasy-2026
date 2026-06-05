@@ -146,6 +146,8 @@ model NationalTeam {
   flagPath String?
   status   String  @default("ACTIVE")
   squadStatus String @default("UNKNOWN")
+  teamConductScore Int @default(0)
+  fifaRank Int?
 
   players Player[]
   homeFixtures Fixture[] @relation("HomeFixtures")
@@ -333,6 +335,28 @@ model Fixture {
   @@index([gameweekId])
   @@index([homeTeamId])
   @@index([awayTeamId])
+}
+
+model PlayoffMatch {
+  id            String        @id
+  matchNo       Int           @unique
+  stage         String
+  sourceHome    String
+  sourceAway    String
+  loserMatch    Boolean       @default(false)
+  label         String?
+  kickoffAt     DateTime
+  stadiumId     String?
+  homeScore     Int?
+  awayScore     Int?
+  homePenalties Int?
+  awayPenalties Int?
+  status        FixtureStatus @default(SCHEDULED)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([stage])
+  @@index([kickoffAt])
 }
 
 model Gameweek {

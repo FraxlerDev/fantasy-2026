@@ -21,13 +21,25 @@ function clientIp(request: Request) {
 function countryCity(request: Request) {
   const country =
     request.headers.get("cf-ipcountry") ??
+    request.headers.get("cloudfront-viewer-country") ??
     request.headers.get("x-vercel-ip-country") ??
+    request.headers.get("x-appengine-country") ??
     request.headers.get("x-country") ??
     request.headers.get("x-geo-country");
-  const city =
+  const rawCity =
+    request.headers.get("cf-ipcity") ??
     request.headers.get("x-vercel-ip-city") ??
+    request.headers.get("x-appengine-city") ??
     request.headers.get("x-city") ??
     request.headers.get("x-geo-city");
+  let city = rawCity;
+  if (rawCity) {
+    try {
+      city = decodeURIComponent(rawCity);
+    } catch {
+      city = rawCity;
+    }
+  }
   return [country, city].filter(Boolean).join(" / ") || null;
 }
 

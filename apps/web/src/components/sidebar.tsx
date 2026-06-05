@@ -6,7 +6,7 @@ import { auth } from "../auth";
 const items = [
   { href: "/", label: "Головна", icon: Trophy },
   { href: "/tournament", label: "Турнір", icon: Flag },
-  { href: "/calendar", label: "Календар", icon: CalendarDays },
+  { href: "/matches", label: "Розклад і результати", icon: CalendarDays },
   { href: "/squad", label: "Склад", icon: Shield },
   { href: "/leagues", label: "Ліги", icon: Users },
   { href: "/petitions", label: "Поради / Петиції", icon: Megaphone },

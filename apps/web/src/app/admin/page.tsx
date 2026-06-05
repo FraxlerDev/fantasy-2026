@@ -1,5 +1,18 @@
 import type { Metadata } from "next";
-import { Calculator, RotateCcw, Save, Trophy } from "lucide-react";
+import {
+  BarChart3,
+  Calculator,
+  CalendarClock,
+  CirclePlus,
+  Goal,
+  ListChecks,
+  RotateCcw,
+  Save,
+  Trophy,
+  Upload,
+  UserRoundCog,
+  Users,
+} from "lucide-react";
 import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
 import { AdminVisitStats, type AdminVisitRow } from "../../components/admin-visit-stats";
@@ -9,14 +22,18 @@ import { requireAdmin } from "../../lib/admin";
 import { ensureDefaultGameweeks } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
 import { createMetadata } from "../../lib/seo";
+import { buildAllGroupStandings, ensurePlayoffMatches, resolvePlayoffMatches } from "../../lib/tournament";
 import {
   createGameweekSnapshotsAction,
   createFixture,
   openGameweekTransfersAction,
   refreshRankingsAction,
+  resetPlayoffScore,
   resetFixtureScore,
+  savePlayoffScore,
   saveFixturePoints,
   saveFixtureScore,
+  updateTournamentTiebreaks,
   updatePlayerPrice,
 } from "../actions/admin-actions";
 
@@ -175,6 +192,7 @@ function pageTitle(path: string) {
   if (pathname === "/squad") return "Склад";
   if (pathname === "/rules") return "Правила";
   if (pathname === "/calendar") return "Календар";
+  if (pathname === "/matches") return "Розклад і результати";
   if (pathname === "/tournament") return "Турнір";
   if (pathname === "/leaderboard") return "Рейтинг";
   if (pathname === "/leagues") return "Ліги";
@@ -199,6 +217,8 @@ errorMessages["team-players-in-use"] = "Склад цієї збірної вж�
 errorMessages["team-players-delete"] = "Не вдалося видалити склад збірної.";
 errorMessages.gameweek = "Не вдалося визначити GW.";
 errorMessages["open-gameweek"] = "Не вдалося відкрити трансфери: дедлайн цього GW уже закритий або GW не існує.";
+errorMessages["playoff-score"] = "Для нічиєї після додаткового часу потрібно ввести різний рахунок серії пенальті.";
+errorMessages.tiebreak = "Перевір дисциплінарні очки та місце збірної у рейтингу FIFA.";
 
 export default async function AdminPage({
   searchParams,
@@ -217,6 +237,9 @@ export default async function AdminPage({
     snapshotFailed?: string;
     snapshotSkipped?: string;
     openedGw?: string;
+    playoffId?: string;
+    playoffScore?: string;
+    tiebreak?: string;
   }>;
 }) {
   try {
@@ -235,7 +258,7 @@ export default async function AdminPage({
     );
   }
 
-  await ensureDefaultGameweeks();
+  await Promise.all([ensureDefaultGameweeks(), ensurePlayoffMatches()]);
 
   const params = await searchParams;
   const selectedGameweek = params?.gw ? Number(params.gw) : undefined;
@@ -289,6 +312,25 @@ export default async function AdminPage({
       take: 2000,
     }).catch(() => []) ?? Promise.resolve([]),
   ]);
+  const playoffScores = await prisma.playoffMatch.findMany({ orderBy: { matchNo: "asc" } });
+  const tournamentTeams = teams.map((team) => ({
+    id: team.id,
+    nameUk: team.nameUk,
+    groupKey: team.groupKey,
+    flagPath: team.flagPath,
+    teamConductScore: team.teamConductScore,
+    fifaRank: team.fifaRank,
+  }));
+  const tournamentTeamById = new Map(tournamentTeams.map((team) => [team.id, team]));
+  const tournamentFixtures = allFixtures.map((fixture) => ({
+    ...fixture,
+    homeTeam: tournamentTeamById.get(fixture.homeTeamId)!,
+    awayTeam: tournamentTeamById.get(fixture.awayTeamId)!,
+  }));
+  const tournamentTables = buildAllGroupStandings(tournamentTeams, tournamentFixtures);
+  const resolvedPlayoff = resolvePlayoffMatches(tournamentTables, playoffScores);
+  const activePlayoffId = params?.playoffId ?? resolvedPlayoff[0]?.id;
+  const activePlayoff = resolvedPlayoff.find((match) => match.id === activePlayoffId) ?? resolvedPlayoff[0] ?? null;
 
   const fixtures = selectedGameweek ? allFixtures.filter((fixture) => fixture.gameweek === selectedGameweek) : allFixtures;
   const activeFixtureId = params?.fixtureId ?? fixtures[0]?.id;
@@ -385,36 +427,50 @@ export default async function AdminPage({
           durationSeconds: page.durationSeconds,
         })),
     }))
-    .sort((a, b) => new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime())
-    .slice(0, 50);
+    .sort((a, b) => new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime());
   const teamsWithRoster = fantasyTeams.filter((team) => team.rosterEntries.length > 0);
 
   return (
     <AppShell active="/admin">
-      <div className="topbar">
+      <div className="topbar admin-heading" id="admin-top">
         <div>
-          <p className="eyebrow">Backoffice</p>
-          <h1>Admin Console</h1>
-          <p className="muted">Керування матчами, гравцями, ручними очками й рейтингами.</p>
+          <p className="eyebrow">Панель керування</p>
+          <h1>Адмінка Фентезі</h1>
+          <p className="muted">Турнір, склади, результати та системні інструменти в одному місці.</p>
         </div>
         <div className="toolbar">
-          <a className="button" href="#visits-modal">Статистика</a>
+          <a className="button" href="#visits-modal">
+            <BarChart3 size={18} />
+            Статистика
+          </a>
           <form action={refreshRankingsAction}>
-          <button className="button primary" type="submit">
-            <Trophy size={18} />
-            Оновити рейтинги
-          </button>
+            <button className="button primary" type="submit">
+              <Trophy size={18} />
+              Оновити рейтинги
+            </button>
           </form>
         </div>
       </div>
 
-      <nav className="admin-tabs">
-        <a href="#visits-modal">Статистика</a>
-        <a href="#gameweeks">GW / Snapshot</a>
-        <a href="#matches">Матчі</a>
-        <a href="#players">Гравці</a>
-        <a href="#points">Очки</a>
-        <a href="#rankings">Рейтинги</a>
+      <nav className="admin-navigation" aria-label="Навігація адмінкою">
+        <div className="admin-nav-group">
+          <span>Турнір</span>
+          <a href="#gameweeks"><CalendarClock size={16} />GW і snapshot</a>
+          <a href="#matches"><CirclePlus size={16} />Створити матч</a>
+          <a href="#points"><Goal size={16} />Рахунки й очки</a>
+          <a href="#playoff-scores"><Trophy size={16} />Плей-оф</a>
+        </div>
+        <div className="admin-nav-group">
+          <span>Гравці</span>
+          <a href="#players"><Upload size={16} />Імпорт</a>
+          <a href="#player-price"><Calculator size={16} />Ціни</a>
+          <a href="#players-list"><UserRoundCog size={16} />Редагування</a>
+        </div>
+        <div className="admin-nav-group">
+          <span>Система</span>
+          <a href="#rankings"><ListChecks size={16} />Рейтинги</a>
+          <a href="#visits-modal"><BarChart3 size={16} />Відвідування</a>
+        </div>
       </nav>
 
       {params?.error ? <div className="form-error">Помилка: {errorMessages[params.error] ?? params.error}</div> : null}
@@ -430,6 +486,33 @@ export default async function AdminPage({
             : `Snapshot створено: ${params.snapshots ?? "0"}, невалідних складів: ${params.snapshotFailed ?? "0"}${params.snapshotSkipped === "1" ? " (snapshot уже існував)." : "."}`}
         </div>
       ) : null}
+
+      <section className="admin-overview" aria-label="Огляд даних">
+        <a href="#gameweeks">
+          <CalendarClock size={20} />
+          <span>Ігрові тижні</span>
+          <strong>{gameweeks.length}</strong>
+          <small>дедлайни та snapshot</small>
+        </a>
+        <a href="#matches">
+          <Goal size={20} />
+          <span>Матчі</span>
+          <strong>{allFixtures.length}</strong>
+          <small>груповий етап</small>
+        </a>
+        <a href="#players-list">
+          <Users size={20} />
+          <span>Гравці</span>
+          <strong>{players.length}</strong>
+          <small>{teams.length} збірних</small>
+        </a>
+        <a href="#gameweeks">
+          <ListChecks size={20} />
+          <span>Фентезі-команди</span>
+          <strong>{fantasyTeams.length}</strong>
+          <small>{teamsWithRoster.length} зі складом</small>
+        </a>
+      </section>
 
       <section className="admin-modal" id="visits-modal" aria-label="Статистика користувачів сайту">
         <a className="admin-modal-backdrop" href="#" aria-label="Закрити статистику" />
@@ -752,7 +835,7 @@ export default async function AdminPage({
         </div>
       </section>
 
-      <section className="panel" style={{ marginTop: 16 }}>
+      <section className="panel" style={{ marginTop: 16 }} id="player-price">
         <h2>Редагувати ціну гравця</h2>
         <form action={updatePlayerPrice} className="form-inline">
           <select className="input" name="playerId" required>
@@ -944,6 +1027,119 @@ export default async function AdminPage({
         ) : (
           <p className="muted">Спочатку створи матч.</p>
         )}
+      </section>
+
+      <section className="panel" style={{ marginTop: 16 }} id="playoff-scores">
+        <div className="topbar" style={{ marginBottom: 12 }}>
+          <div>
+            <h2>Результати плей-оф</h2>
+            <p className="muted">
+              Учасники підставляються з групових таблиць і попередніх раундів. Якщо після додаткового часу нічия, введи також рахунок серії пенальті.
+            </p>
+          </div>
+        </div>
+
+        <div className="admin-match-browser">
+          {[
+            ["r32", "1/16 фіналу"],
+            ["r16", "1/8 фіналу"],
+            ["qf", "Чвертьфінали"],
+            ["sf", "Півфінали"],
+            ["final", "Фінал / 3-тє місце"],
+          ].map(([stage, title]) => (
+            <section className="admin-match-group" key={stage}>
+              <h3>{title}</h3>
+              <div className="admin-match-list">
+                {resolvedPlayoff.filter((match) => match.stage === stage).map((match) => (
+                  <a
+                    className={`admin-match-link ${match.id === activePlayoff?.id ? "active" : ""}`}
+                    href={`/admin?playoffId=${match.id}#playoff-scores`}
+                    key={match.id}
+                  >
+                    <span className="match-meta">Матч #{match.matchNo}</span>
+                    <span className="admin-match-teams">
+                      <span>
+                        {match.home.type === "team" ? teamLabel(match.home.team) : match.home.slot}
+                      </span>
+                      <strong>
+                        {match.homeScore === null || match.awayScore === null
+                          ? "не зіграно"
+                          : `${match.homeScore}:${match.awayScore}`}
+                      </strong>
+                      <span>
+                        {match.away.type === "team" ? teamLabel(match.away.team) : match.away.slot}
+                      </span>
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        {activePlayoff ? (
+          <div className="active-fixture-panel">
+            <p className="eyebrow">Матч #{activePlayoff.matchNo}</p>
+            <h3>
+              {activePlayoff.home.type === "team" ? teamLabel(activePlayoff.home.team) : activePlayoff.home.slot}
+              <span> · </span>
+              {activePlayoff.away.type === "team" ? teamLabel(activePlayoff.away.team) : activePlayoff.away.slot}
+            </h3>
+            <div className="score-actions">
+              <form action={savePlayoffScore} className="score-form playoff-score-form">
+                <input type="hidden" name="matchId" value={activePlayoff.id} />
+                <label>
+                  Голи господарів
+                  <input className="input points-input" name="homeScore" type="number" min={0} step={1} defaultValue={activePlayoff.homeScore ?? ""} required />
+                </label>
+                <label>
+                  Голи гостей
+                  <input className="input points-input" name="awayScore" type="number" min={0} step={1} defaultValue={activePlayoff.awayScore ?? ""} required />
+                </label>
+                <label>
+                  Пенальті господарів
+                  <input className="input points-input" name="homePenalties" type="number" min={0} step={1} defaultValue={activePlayoff.homePenalties ?? ""} />
+                </label>
+                <label>
+                  Пенальті гостей
+                  <input className="input points-input" name="awayPenalties" type="number" min={0} step={1} defaultValue={activePlayoff.awayPenalties ?? ""} />
+                </label>
+                <button className="button primary" type="submit">Зберегти результат</button>
+              </form>
+              <form action={resetPlayoffScore}>
+                <input type="hidden" name="matchId" value={activePlayoff.id} />
+                <button className="button warning" type="submit">
+                  <RotateCcw size={18} />
+                  Скинути результат
+                </button>
+              </form>
+            </div>
+          </div>
+        ) : null}
+
+        <details className="admin-tiebreak-panel">
+          <summary>Критерії FIFA: дисциплінарні очки та світовий рейтинг</summary>
+          <p className="muted">
+            Заповнюй лише якщо команди залишаються рівними після очних матчів, загальної різниці та забитих м’ячів. Вище значення conduct score краще; жовта картка дає −1.
+          </p>
+          <div className="admin-tiebreak-grid">
+            {teams.map((team) => (
+              <form action={updateTournamentTiebreaks} className="admin-tiebreak-row" key={team.id}>
+                <input type="hidden" name="teamId" value={team.id} />
+                <span>{teamLabel(team)}</span>
+                <label>
+                  Conduct
+                  <input className="input points-input" name="teamConductScore" type="number" step={1} defaultValue={team.teamConductScore} />
+                </label>
+                <label>
+                  Рейтинг FIFA
+                  <input className="input points-input" name="fifaRank" type="number" min={1} step={1} defaultValue={team.fifaRank ?? ""} />
+                </label>
+                <button className="button" type="submit">Зберегти</button>
+              </form>
+            ))}
+          </div>
+        </details>
       </section>
 
       <section className="panel" style={{ marginTop: 16 }} id="rankings">
