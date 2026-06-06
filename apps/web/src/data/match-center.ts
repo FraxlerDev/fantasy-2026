@@ -98,7 +98,7 @@ export const stadiums = [
         "sf-1"
       ]
     ],
-    "imagePath": "/stadiums/at-and-t-stadium.png",
+    "imagePath": "/stadiums/at-and-t-stadium.jpg",
     "coordinates": {
       "lat": 32.748138,
       "lng": -97.093231
@@ -172,7 +172,7 @@ export const stadiums = [
         "sf-2"
       ]
     ],
-    "imagePath": "/stadiums/Mercedes-Benz Stadium.png",
+    "imagePath": "/stadiums/Mercedes-Benz Stadium.jpg",
     "coordinates": {
       "lat": 33.755371,
       "lng": -84.401436
@@ -246,7 +246,7 @@ export const stadiums = [
         "qf-2"
       ]
     ],
-    "imagePath": "/stadiums/SoFi Stadium.png",
+    "imagePath": "/stadiums/SoFi Stadium.jpg",
     "coordinates": {
       "lat": 33.953438,
       "lng": -118.339447
@@ -320,7 +320,7 @@ export const stadiums = [
         "final-1"
       ]
     ],
-    "imagePath": "/stadiums/MetLife Stadium.png",
+    "imagePath": "/stadiums/MetLife Stadium.jpg",
     "coordinates": {
       "lat": 40.813477,
       "lng": -74.074951
@@ -386,7 +386,7 @@ export const stadiums = [
         "qf-1"
       ]
     ],
-    "imagePath": "/stadiums/Gillette Stadium.png",
+    "imagePath": "/stadiums/Gillette Stadium.jpg",
     "coordinates": {
       "lat": 42.09079,
       "lng": -71.264404
@@ -452,7 +452,7 @@ export const stadiums = [
         "r16-2"
       ]
     ],
-    "imagePath": "/stadiums/NRG Stadium.png",
+    "imagePath": "/stadiums/NRG Stadium.jpg",
     "coordinates": {
       "lat": 29.684702,
       "lng": -95.410965
@@ -519,7 +519,7 @@ export const stadiums = [
         "third-1"
       ]
     ],
-    "imagePath": "/stadiums/Hard Rock Stadium.png",
+    "imagePath": "/stadiums/Hard Rock Stadium.jpg",
     "coordinates": {
       "lat": 25.95783,
       "lng": -80.239326
@@ -578,7 +578,7 @@ export const stadiums = [
         "qf-4"
       ]
     ],
-    "imagePath": "/stadiums/Arrowhead Stadium.png",
+    "imagePath": "/stadiums/Arrowhead Stadium.jpg",
     "coordinates": {
       "lat": 39.048855,
       "lng": -94.484474
@@ -636,7 +636,7 @@ export const stadiums = [
         "r16-1"
       ]
     ],
-    "imagePath": "/stadiums/Lincoln Financial Field.png",
+    "imagePath": "/stadiums/Lincoln Financial Field.jpg",
     "coordinates": {
       "lat": 39.901325,
       "lng": -75.167862
@@ -694,7 +694,7 @@ export const stadiums = [
         "r32-7"
       ]
     ],
-    "imagePath": "/stadiums/Levi's Stadium.png",
+    "imagePath": "/stadiums/Levi's Stadium.jpg",
     "coordinates": {
       "lat": 37.403297,
       "lng": -121.969765
@@ -753,7 +753,7 @@ export const stadiums = [
         "r16-4"
       ]
     ],
-    "imagePath": "/stadiums/Lumen Field.png",
+    "imagePath": "/stadiums/Lumen Field.jpg",
     "coordinates": {
       "lat": 47.595135,
       "lng": -122.331917
@@ -819,7 +819,7 @@ export const stadiums = [
         "r16-8"
       ]
     ],
-    "imagePath": "/stadiums/BC Place.png",
+    "imagePath": "/stadiums/BC Place.jpg",
     "coordinates": {
       "lat": 49.276646,
       "lng": -123.112564
@@ -877,7 +877,7 @@ export const stadiums = [
         "r32-5"
       ]
     ],
-    "imagePath": "/stadiums/BMO Field.png",
+    "imagePath": "/stadiums/BMO Field.jpg",
     "coordinates": {
       "lat": 43.633087,
       "lng": -79.418961
@@ -929,7 +929,7 @@ export const stadiums = [
         "r16-6"
       ]
     ],
-    "imagePath": "/stadiums/Estadio Azteca.png",
+    "imagePath": "/stadiums/Estadio Azteca.jpg",
     "coordinates": {
       "lat": 19.302837,
       "lng": -99.150803
@@ -972,7 +972,7 @@ export const stadiums = [
         "Іспанія"
       ]
     ],
-    "imagePath": "/stadiums/Estadio Akron.png",
+    "imagePath": "/stadiums/Estadio Akron.jpg",
     "coordinates": {
       "lat": 20.681721,
       "lng": -103.463135
@@ -1016,7 +1016,7 @@ export const stadiums = [
         "r32-4"
       ]
     ],
-    "imagePath": "/stadiums/Estadio BBVA.png",
+    "imagePath": "/stadiums/Estadio BBVA.jpg",
     "coordinates": {
       "lat": 25.669132,
       "lng": -100.244621
