@@ -7,6 +7,9 @@ import { AppShell } from "../../../components/shell";
 import { prisma } from "../../../lib/prisma";
 import { createMetadata } from "../../../lib/seo";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type PublicTeamPageProps = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<{ gw?: string }>;

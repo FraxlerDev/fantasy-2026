@@ -8,6 +8,8 @@ import { prisma } from "../../../lib/prisma";
 export const alt = "Склад фентезі-команди до ЧС-2026";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const formationShapes: Record<string, Record<PlayerPosition, number>> = {
   "4-3-3": { GK: 1, DEF: 4, MID: 3, FWD: 3 },
