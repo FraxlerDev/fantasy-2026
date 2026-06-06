@@ -98,7 +98,7 @@ export const stadiums = [
         "sf-1"
       ]
     ],
-    "imagePath": "/stadiums/AT&T Stadium.png",
+    "imagePath": "/stadiums/at-and-t-stadium.png",
     "coordinates": {
       "lat": 32.748138,
       "lng": -97.093231
