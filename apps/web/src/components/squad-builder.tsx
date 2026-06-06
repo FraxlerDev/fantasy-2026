@@ -751,7 +751,7 @@ export function SquadBuilder({
           </select>
         </div>
         <table className="table">
-          <thead><tr><th>Гравець</th><th>Поз.</th><th>Збірна</th><th>Клуб</th><th>Ціна</th><th></th></tr></thead>
+          <thead><tr><th>Гравець</th><th>Поз.</th><th className="catalog-nation-column">Збірна</th><th>Клуб</th><th>Ціна</th><th></th></tr></thead>
           <tbody>
             {visiblePlayers.map((player) => (
               <tr key={player.id} draggable={player.status === "AVAILABLE" || selectedIds.has(player.id)} onDragStart={(event) => event.dataTransfer.setData("text/plain", player.id)}>
@@ -767,8 +767,11 @@ export function SquadBuilder({
                     ) : null}
                   </span>
                 </td>
-                <td>{positionLabels[player.position]}</td>
-                <td className="team-with-flag">
+                <td className="catalog-position">
+                  <span className="catalog-position-full">{positionLabels[player.position]}</span>
+                  <span className="catalog-position-short">{shortPositionLabels[player.position]}</span>
+                </td>
+                <td className="team-with-flag catalog-nation-column">
                   {player.nationFlagPath ? <img alt="" className="flag" src={player.nationFlagPath} /> : null}
                   {player.nationName}
                 </td>

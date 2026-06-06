@@ -2854,6 +2854,10 @@ h3 {
   padding: 0 12px;
 }
 
+.catalog-position-short {
+  display: none;
+}
+
 .squad-tabs {
   display: flex;
   align-items: center;
@@ -4595,6 +4599,43 @@ h3 {
 }
 
 @media (max-width: 620px) {
+  .squad-page .player-catalog-panel .catalog-nation-column {
+    display: none;
+  }
+
+  .squad-page .player-catalog-panel .catalog-position-full {
+    display: none;
+  }
+
+  .squad-page .player-catalog-panel .catalog-position-short {
+    display: inline;
+  }
+
+  .squad-page .player-catalog-panel .table th:nth-child(1),
+  .squad-page .player-catalog-panel .table td:nth-child(1) {
+    width: 32%;
+  }
+
+  .squad-page .player-catalog-panel .table th:nth-child(2),
+  .squad-page .player-catalog-panel .table td:nth-child(2) {
+    width: 9%;
+  }
+
+  .squad-page .player-catalog-panel .table th:nth-child(4),
+  .squad-page .player-catalog-panel .table td:nth-child(4) {
+    width: 23%;
+  }
+
+  .squad-page .player-catalog-panel .table th:nth-child(5),
+  .squad-page .player-catalog-panel .table td:nth-child(5) {
+    width: 11%;
+  }
+
+  .squad-page .player-catalog-panel .table th:nth-child(6),
+  .squad-page .player-catalog-panel .table td:nth-child(6) {
+    width: 25%;
+  }
+
   .squad-profile-header {
     align-items: stretch;
     flex-direction: column;
