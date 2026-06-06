@@ -4599,6 +4599,65 @@ h3 {
 }
 
 @media (max-width: 620px) {
+  .squad-page .player-catalog-panel,
+  .squad-page .catalog-table-panel {
+    overflow-x: hidden;
+  }
+
+  .squad-page .player-catalog-panel {
+    padding: 12px;
+  }
+
+  .squad-page .player-catalog-panel .filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .squad-page .player-catalog-panel .filters > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .squad-page .player-catalog-panel .filters > :last-child {
+    grid-column: span 2;
+  }
+
+  .squad-page .player-catalog-panel .filters .input,
+  .squad-page .player-catalog-panel .filters input,
+  .squad-page .player-catalog-panel .filters select {
+    min-width: 0;
+    padding: 0 6px;
+    font-size: 12px;
+  }
+
+  .squad-page .player-catalog-panel .table {
+    width: 100%;
+    min-width: 0;
+    font-size: 11px;
+  }
+
+  .squad-page .player-catalog-panel .table th,
+  .squad-page .player-catalog-panel .table td {
+    padding: 7px 3px;
+    overflow-wrap: anywhere;
+  }
+
+  .squad-page .player-catalog-panel .catalog-player {
+    gap: 5px;
+    white-space: normal;
+  }
+
+  .squad-page .player-catalog-panel .catalog-player .player-photo-wrap {
+    flex: 0 0 auto;
+  }
+
+  .squad-page .player-catalog-panel .button {
+    width: 100%;
+    min-height: 34px;
+    padding: 4px;
+    font-size: 11px;
+    white-space: normal;
+  }
+
   .squad-page .player-catalog-panel .catalog-nation-column {
     display: none;
   }
@@ -4613,7 +4672,7 @@ h3 {
 
   .squad-page .player-catalog-panel .table th:nth-child(1),
   .squad-page .player-catalog-panel .table td:nth-child(1) {
-    width: 32%;
+    width: 34%;
   }
 
   .squad-page .player-catalog-panel .table th:nth-child(2),
@@ -4623,12 +4682,12 @@ h3 {
 
   .squad-page .player-catalog-panel .table th:nth-child(4),
   .squad-page .player-catalog-panel .table td:nth-child(4) {
-    width: 23%;
+    width: 22%;
   }
 
   .squad-page .player-catalog-panel .table th:nth-child(5),
   .squad-page .player-catalog-panel .table td:nth-child(5) {
-    width: 11%;
+    width: 10%;
   }
 
   .squad-page .player-catalog-panel .table th:nth-child(6),

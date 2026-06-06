@@ -316,7 +316,11 @@ export function SquadBuilder({
 
   function addPlayer(playerId: string) {
     const player = playerById.get(playerId);
-    if (!player || selectedIds.has(playerId) || selectedIds.size >= 15) return;
+    if (!player || selectedIds.has(playerId)) return;
+    if (selectedIds.size >= 15) {
+      setPopupMessage("Склад уже повністю заповнено: обрано 15 гравців. Щоб додати іншого футболіста, спочатку вилучи когось зі складу.");
+      return;
+    }
     if (player.status !== "AVAILABLE") {
       setPopupMessage(`${player.name} зараз недоступний: ${player.unavailableReason ?? "травма / дискваліфікація"}. Його не можна додати у склад.`);
       return;
@@ -344,7 +348,7 @@ export function SquadBuilder({
       return;
     }
 
-    setClientError("У складі вже 15 гравців. Вилучи когось перед додаванням нового.");
+    setPopupMessage("Склад уже повністю заповнено: обрано 15 гравців. Щоб додати іншого футболіста, спочатку вилучи когось зі складу.");
   }
 
   function removePlayer(playerId: string) {
