@@ -1,4 +1,4 @@
-import { BookOpen, CalendarDays, Flag, Megaphone, Send, Shield, Table2, Trophy, Users, Wrench } from "lucide-react";
+import { BookOpen, CalendarDays, Flag, Megaphone, Shield, Table2, Trophy, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 import { signOutUser } from "../app/actions/auth-actions";
 import { auth } from "../auth";
@@ -7,8 +7,8 @@ import { FanSectorNavButton } from "./fan-sector-nav-button";
 const items = [
   { href: "/", label: "Головна", icon: Trophy },
   { href: "/tournament", label: "Турнір", icon: Flag },
-  { href: "/matches", label: "Розклад і результати", icon: CalendarDays },
-  { href: "/squad", label: "Склад", icon: Shield },
+  { href: "/matches", label: "Матч-центр", icon: CalendarDays },
+  { href: "/squad", label: "Мій склад", icon: Shield },
   { href: "/leagues", label: "Ліги", icon: Users },
   { href: "/petitions", label: "Поради / Петиції", icon: Megaphone },
   { href: "/rules", label: "Правила", icon: BookOpen },
@@ -55,7 +55,7 @@ export async function Sidebar({ active = "/" }: { active?: string }) {
         <div className="sidebar-note">
           <a className="author-link" href="https://t.me/fraxler7" target="_blank" rel="noreferrer">
             <span className="telegram-icon" aria-hidden="true">
-              <Send size={12} />
+              <img src="/Telegram_Messenger.png" alt="" />
             </span>
             Зв'язок з автором
           </a>

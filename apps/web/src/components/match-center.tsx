@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarDays, MapPin, Trophy, Users, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Team = {
@@ -81,6 +82,7 @@ type Props = {
   matches: Match[];
   teamProfiles: TeamProfile[];
   stadiums: Stadium[];
+  initialTab?: (typeof tabs)[number]["id"];
 };
 
 const tabs = [
@@ -421,10 +423,15 @@ function ReferenceStadiumMap({
   );
 }
 
-export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums }: Props) {
-  const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("groups");
+export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, initialTab = "groups" }: Props) {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>(initialTab);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [selectedStadiumId, setSelectedStadiumId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   const selectedTeam = teamProfiles.find((team) => team.id === selectedTeamId) ?? null;
   const selectedStadium = stadiums.find((stadium) => stadium.id === selectedStadiumId) ?? null;
@@ -455,7 +462,7 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums }:
       <section className="match-center-hero">
         <div>
           <p className="eyebrow">Чемпіонат світу 2026</p>
-          <h1>Розклад і результати</h1>
+          <h1>Матч-центр</h1>
           <p>104 матчі, турнірні таблиці, плей-оф і всі 16 арен в одному розділі.</p>
         </div>
         <div className="match-center-summary">
@@ -470,7 +477,10 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums }:
           <button
             className={activeTab === tab.id ? "active" : ""}
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => {
+              setActiveTab(tab.id);
+              router.replace(`/matches?tab=${tab.id}`, { scroll: false });
+            }}
             type="button"
           >
             <tab.icon size={18} />

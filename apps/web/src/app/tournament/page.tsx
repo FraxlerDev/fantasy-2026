@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { UserRound } from "lucide-react";
+import { CalendarDays, MapPin, Trophy, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import { AppShell } from "../../components/shell";
-import { FantasyLayout } from "../../components/fantasy-layout";
+import { DeadlineCountdown } from "../../components/deadline-countdown";
 import { prisma } from "../../lib/prisma";
 import { createMetadata } from "../../lib/seo";
 
@@ -23,13 +23,10 @@ function formatDate(date: Date) {
 }
 
 export default async function TournamentPage() {
-  const [teams, playersCount, fixtures, gameweeks, popularPlayerCounts] = await Promise.all([
-    prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }] }),
+  const [teamsCount, playersCount, fixturesCount, gameweeks, popularPlayerCounts] = await Promise.all([
+    prisma.nationalTeam.count(),
     prisma.player.count(),
-    prisma.fixture.findMany({
-      include: { homeTeam: true, awayTeam: true },
-      orderBy: [{ gameweek: "asc" }, { kickoffAt: "asc" }, { matchNo: "asc" }],
-    }),
+    prisma.fixture.count(),
     prisma.gameweek.findMany({ orderBy: { number: "asc" } }),
     prisma.rosterEntry.groupBy({
       by: ["playerId"],
@@ -46,14 +43,15 @@ export default async function TournamentPage() {
       })
     : [];
   const popularPlayersById = new Map(popularPlayers.map((player) => [player.id, player]));
-  const previewFixtures = fixtures.slice(0, 18);
+  const nextGameweek = gameweeks.find((gameweek) => gameweek.deadlineAt > new Date()) ?? null;
+  const activeGameweek = gameweeks.find((gameweek) => gameweek.transfersOpen) ?? nextGameweek;
   return (
     <AppShell active="/tournament">
-      <FantasyLayout>
+      <div className="tournament-page">
         <div className="tournament-banner">
           <p className="eyebrow">Фентезі Турнір</p>
           <h1>Fantasy World Cup 2026</h1>
-          <p>Профіль турніру, дедлайни, групи, календар і рейтинг в одному місці.</p>
+          <p>Статус фентезі-турніру, найближчий дедлайн і головні переходи до матч-центру.</p>
           <div className="toolbar">
             <Link className="button primary" href="/squad">Зібрати команду</Link>
             <Link className="button" href="/rules">Правила</Link>
@@ -61,26 +59,39 @@ export default async function TournamentPage() {
         </div>
 
         <section className="grid cols-3" style={{ marginTop: 16 }}>
-          <div className="panel stat"><span className="badge">Збірні</span><strong>{teams.length}</strong></div>
+          <div className="panel stat"><span className="badge">Збірні</span><strong>{teamsCount}</strong></div>
           <div className="panel stat"><span className="badge">Гравці</span><strong>{playersCount}</strong></div>
-          <div className="panel stat"><span className="badge">Матчі</span><strong>{fixtures.length + 32}/104</strong></div>
+          <div className="panel stat"><span className="badge">Матчі</span><strong>{fixturesCount + 32}/104</strong></div>
         </section>
 
-        <section className="panel" style={{ marginTop: 16 }}>
-          <h2>Дедлайни турів</h2>
-          <table className="table compact-table">
-            <thead>
-              <tr><th>Тур</th><th>Дедлайн</th></tr>
-            </thead>
-            <tbody>
-              {gameweeks.map((gameweek) => (
-                <tr key={gameweek.id}>
-                  <td><strong>GW{gameweek.number}</strong></td>
-                  <td>{formatDate(gameweek.deadlineAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <section className="grid cols-2 tournament-status-grid" style={{ marginTop: 16 }}>
+          <div className="panel">
+            <p className="eyebrow">Статус турніру</p>
+            <h2>{activeGameweek ? `GW${activeGameweek.number} · ${activeGameweek.stage}` : "Турнір завершено"}</h2>
+            <p className="muted">
+              {activeGameweek?.transfersOpen ? "Трансфери відкриті." : "Трансфери зараз закриті."}
+            </p>
+          </div>
+          <div className="panel">
+            <p className="eyebrow">Наступний дедлайн</p>
+            {nextGameweek ? (
+              <>
+                <h2>GW{nextGameweek.number}</h2>
+                <p className="muted">{formatDate(nextGameweek.deadlineAt)}</p>
+                <DeadlineCountdown deadlineAt={nextGameweek.deadlineAt.toISOString()} />
+              </>
+            ) : <h2>Дедлайнів більше немає</h2>}
+          </div>
+        </section>
+
+        <section className="panel tournament-links" style={{ marginTop: 16 }}>
+          <h2>Матч-центр</h2>
+          <div className="tournament-link-grid">
+            <Link href="/matches?tab=groups"><Users size={22} /><strong>Групи</strong><span>Таблиці та матчі групового етапу</span></Link>
+            <Link href="/matches?tab=playoff"><Trophy size={22} /><strong>Плей-оф</strong><span>Сітка вирішальних матчів</span></Link>
+            <Link href="/matches?tab=calendar"><CalendarDays size={22} /><strong>Календар</strong><span>Усі матчі за датами</span></Link>
+            <Link href="/matches?tab=stadiums"><MapPin size={22} /><strong>Стадіони</strong><span>Арени та карта турніру</span></Link>
+          </div>
         </section>
 
         <section className="panel" style={{ marginTop: 16 }}>
@@ -128,32 +139,7 @@ export default async function TournamentPage() {
           </table>
         </section>
 
-        <section className="panel" style={{ marginTop: 16 }}>
-          <h2>Календар групового етапу</h2>
-          <table className="table compact-table">
-            <thead>
-              <tr><th>#</th><th>GW</th><th>Матч</th><th>Початок</th></tr>
-            </thead>
-            <tbody>
-              {previewFixtures.map((fixture) => (
-                <tr key={fixture.id}>
-                  <td>{fixture.matchNo}</td>
-                  <td>GW{fixture.gameweek}</td>
-                  <td className="fixture-line">
-                    {fixture.homeTeam.flagPath ? <img alt="" className="flag" src={fixture.homeTeam.flagPath} /> : null}
-                    {fixture.homeTeam.nameUk} - {fixture.awayTeam.nameUk}
-                    {fixture.awayTeam.flagPath ? <img alt="" className="flag" src={fixture.awayTeam.flagPath} /> : null}
-                  </td>
-                  <td>{formatDate(fixture.kickoffAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="muted" style={{ marginTop: 10 }}>
-            Показані перші 18 матчів. <Link href="/matches">Відкрити повний розклад і результати.</Link>
-          </p>
-        </section>
-      </FantasyLayout>
+      </div>
     </AppShell>
   );
 }

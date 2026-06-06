@@ -192,7 +192,7 @@ function pageTitle(path: string) {
   if (pathname === "/squad") return "Склад";
   if (pathname === "/rules") return "Правила";
   if (pathname === "/calendar") return "Календар";
-  if (pathname === "/matches") return "Розклад і результати";
+  if (pathname === "/matches") return "Матч-центр";
   if (pathname === "/tournament") return "Турнір";
   if (pathname === "/leaderboard") return "Рейтинг";
   if (pathname === "/leagues") return "Ліги";

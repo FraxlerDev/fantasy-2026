@@ -38,7 +38,7 @@ const emojiGroups = [
   { title: "Подорожі", items: "✈️ 🚆 🚇 🚕 🚌 🚗 🏎️ 🚲 🚀 🛫 🛬 🗺️ 🧭 🏨 🏠 🏙️ 🌆 🌃 🌍".split(" ") },
 ];
 
-const CHAT_OPEN_EVENT = "fantasy:chat-open";
+const CHAT_TOGGLE_EVENT = "fantasy:chat-toggle";
 const CHAT_UNREAD_EVENT = "fantasy:chat-unread";
 
 function formatTime(value: string) {
@@ -109,13 +109,15 @@ export function FloatingChat() {
   }, [isOpen, messages.length]);
 
   useEffect(() => {
-    function openFromNavigation() {
-      setIsOpen(true);
-      setUnreadCount(0);
+    function toggleFromNavigation() {
+      setIsOpen((open) => {
+        if (!open) setUnreadCount(0);
+        return !open;
+      });
     }
 
-    window.addEventListener(CHAT_OPEN_EVENT, openFromNavigation);
-    return () => window.removeEventListener(CHAT_OPEN_EVENT, openFromNavigation);
+    window.addEventListener(CHAT_TOGGLE_EVENT, toggleFromNavigation);
+    return () => window.removeEventListener(CHAT_TOGGLE_EVENT, toggleFromNavigation);
   }, []);
 
   useEffect(() => {

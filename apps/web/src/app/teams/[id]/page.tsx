@@ -2,13 +2,14 @@ import type { PlayerPosition, RosterSlot } from "@prisma/client";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FantasyLayout } from "../../../components/fantasy-layout";
+import { ShareSquadButton } from "../../../components/share-squad-button";
 import { AppShell } from "../../../components/shell";
 import { prisma } from "../../../lib/prisma";
 import { createMetadata } from "../../../lib/seo";
 
 type PublicTeamPageProps = {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ gw?: string }>;
 };
 
 export async function generateMetadata({ params }: PublicTeamPageProps): Promise<Metadata> {
@@ -126,8 +127,9 @@ function gameweekPoints(entries: LineupEntry[], points: Map<string, number>) {
   return total;
 }
 
-export default async function PublicTeamPage({ params }: PublicTeamPageProps) {
+export default async function PublicTeamPage({ params, searchParams }: PublicTeamPageProps) {
   const { id } = await params;
+  const query = await searchParams;
   const team = await prisma.fantasyTeam.findUnique({
     where: { id },
     include: {
@@ -159,13 +161,16 @@ export default async function PublicTeamPage({ params }: PublicTeamPageProps) {
   ]);
 
   const latestSnapshot = team.lineupSnapshots.at(-1);
-  const currentFormation = latestSnapshot?.formation ?? team.formation;
-  const currentEntries = (latestSnapshot?.entries.length ? latestSnapshot.entries : team.rosterEntries) as LineupEntry[];
+  const parsedGameweek = Number(query?.gw ?? latestSnapshot?.gameweek ?? 1);
+  const requestedGameweek = Number.isFinite(parsedGameweek) ? Math.min(7, Math.max(1, parsedGameweek)) : 1;
+  const selectedSnapshot = team.lineupSnapshots.find((snapshot) => snapshot.gameweek === requestedGameweek);
+  const currentFormation = selectedSnapshot?.formation ?? team.formation;
+  const currentEntries = (selectedSnapshot?.entries.length ? selectedSnapshot.entries : team.rosterEntries) as LineupEntry[];
   const starters = currentEntries.filter((entry) => entry.slot === "STARTER");
   const bench = currentEntries.filter((entry) => entry.slot === "BENCH").sort((a, b) => (a.benchOrder ?? 99) - (b.benchOrder ?? 99));
   const playerPointTotals = new Map<string, number>();
 
-  for (const fixture of fixtures) {
+  for (const fixture of fixtures.filter((item) => item.gameweek === requestedGameweek)) {
     for (const point of fixture.playerPoints) {
       playerPointTotals.set(point.playerId, (playerPointTotals.get(point.playerId) ?? 0) + point.points);
     }
@@ -187,33 +192,54 @@ export default async function PublicTeamPage({ params }: PublicTeamPageProps) {
 
   const selectedTeamCodes = new Set(currentEntries.map((entry) => entry.player.nationalTeam.nameUk));
   const currentFixtures = fixtures
+    .filter((fixture) => fixture.gameweek === requestedGameweek)
     .filter((fixture) => selectedTeamCodes.has(fixture.homeTeam.nameUk) || selectedTeamCodes.has(fixture.awayTeam.nameUk))
     .slice(0, 18);
+  const selectedGameweekPoints = gameweekRows.find((row) => row.gameweek === requestedGameweek)?.points ?? 0;
 
   return (
     <AppShell active="/leaderboard">
-      <FantasyLayout>
+      <>
         <section className="team-header panel">
-          <p className="eyebrow">Фентезі команда</p>
-          <h1>{team.name}</h1>
-          <p className="muted">Менеджер: {team.user.username?.trim() || "Користувач"}</p>
+          <div className="topbar">
+            <div>
+              <p className="eyebrow">Фентезі команда</p>
+              <h1>{team.name}</h1>
+              <p className="muted">Менеджер: {team.user.username?.trim() || "Користувач"}</p>
+            </div>
+            <ShareSquadButton teamId={team.id} />
+          </div>
           <div className="grid cols-3" style={{ marginTop: 14 }}>
-            <div className="card stat"><span className="badge">Очки</span><strong>{team.totalPoints}</strong></div>
+            <div className="card stat"><span className="badge">Очки GW{requestedGameweek}</span><strong>{selectedGameweekPoints}</strong></div>
             <div className="card stat"><span className="badge">Місце</span><strong>{rank?.rank ?? "-"}</strong></div>
             <div className="card stat"><span className="badge">Схема</span><strong>{currentFormation}</strong></div>
           </div>
         </section>
 
-        <nav className="fantasy-tabs">
-          <Link href={`/teams/${team.id}`}>Поле</Link>
-          <Link href="/leaderboard">Рейтинг</Link>
-          <Link href="/rules">Правила</Link>
-          <Link href="/leagues">Ліги</Link>
+        <nav className="gameweek-switcher" aria-label="Історія складу за турами">
+          {Array.from({ length: 7 }, (_, index) => {
+            const gameweek = index + 1;
+            const points = gameweekRows.find((row) => row.gameweek === gameweek)?.points ?? 0;
+            return (
+              <Link
+                className={requestedGameweek === gameweek ? "active" : ""}
+                href={`/teams/${team.id}?gw=${gameweek}`}
+                key={gameweek}
+              >
+                GW{gameweek} · {points}
+              </Link>
+            );
+          })}
         </nav>
+        {!selectedSnapshot ? (
+          <div className="form-success snapshot-fallback-note">
+            Для GW{requestedGameweek} snapshot ще немає — показано поточний збережений склад.
+          </div>
+        ) : null}
 
         <section className="grid cols-2" style={{ marginTop: 16 }}>
           <div className="panel">
-            <h2>Склад</h2>
+            <h2>Склад GW{requestedGameweek}</h2>
             <div className="fixed-pitch public-fixed-pitch">
               {starters.length > 0 ? (
                 pitchRows(currentFormation).map((row) => {
@@ -276,7 +302,7 @@ export default async function PublicTeamPage({ params }: PublicTeamPageProps) {
             </tbody>
           </table>
         </section>
-      </FantasyLayout>
+      </>
     </AppShell>
   );
 }

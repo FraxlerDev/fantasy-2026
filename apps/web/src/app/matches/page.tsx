@@ -12,12 +12,20 @@ import {
 } from "../../lib/tournament";
 
 export const metadata: Metadata = createMetadata({
-  title: "Розклад і результати ЧС-2026",
+  title: "Матч-центр ЧС-2026",
   description: "Усі 104 матчі ЧС-2026, групові таблиці, сітка плей-оф, календар, результати, стадіони та склади збірних.",
   path: "/matches",
 });
 
-export default async function MatchesPage() {
+const validTabs = new Set(["groups", "playoff", "calendar", "stadiums"]);
+
+export default async function MatchesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ tab?: string }>;
+}) {
+  const query = await searchParams;
+  const initialTab = validTabs.has(query?.tab ?? "") ? query?.tab as "groups" | "playoff" | "calendar" | "stadiums" : "groups";
   await ensurePlayoffMatches();
 
   const [teams, fixtures, playoffScores] = await Promise.all([
@@ -122,6 +130,7 @@ export default async function MatchesPage() {
   return (
     <AppShell active="/matches">
       <MatchCenter
+        initialTab={initialTab}
         groups={[...tables.entries()].map(([key, rows]) => ({ key, rows }))}
         thirds={rankThirdPlacedTeams(tables).map(({ group, row, rank, qualified }) => ({
           ...row,

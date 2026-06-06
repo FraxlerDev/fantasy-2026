@@ -1,12 +1,12 @@
 ﻿"use client";
 
 import type { PlayerPosition } from "@fantasy/shared";
-import { AlertTriangle, Pencil, Save, Search, UserRound, X } from "lucide-react";
+import { AlertTriangle, Pencil, RotateCcw, Save, Search, UserRound, X } from "lucide-react";
+import Link from "next/link";
 import type { DragEvent, FormEvent } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { saveSquad } from "../app/actions/squad-actions";
 import { ShareSquadButton } from "./share-squad-button";
-import { DeadlineCountdown } from "./deadline-countdown";
 
 export interface SquadPlayer {
   id: string;
@@ -58,6 +58,8 @@ const formations: Record<string, { DEF: number; MID: number; FWD: number }> = {
   "5-3-2": { DEF: 5, MID: 3, FWD: 2 },
   "5-4-1": { DEF: 5, MID: 4, FWD: 1 },
 };
+
+const CATALOG_PAGE_SIZE = 50;
 
 const positionLabels: Record<PlayerPosition, string> = {
   GK: "Воротар",
@@ -132,13 +134,13 @@ export function SquadBuilder({
   players,
   fixtures,
   currentGameweek,
-  currentStage,
   currentDeadline,
   currentStart,
   transferLimit,
   userProfile,
   initialTeamName,
   initialTeamId,
+  publicTeamUrl,
   initialFormation,
   initialRoster,
   isSignedIn,
@@ -149,13 +151,13 @@ export function SquadBuilder({
   players: SquadPlayer[];
   fixtures: SquadFixture[];
   currentGameweek?: number;
-  currentStage?: string | null;
   currentDeadline?: string;
   currentStart?: string;
   transferLimit?: number | null;
   userProfile?: SquadUserProfile;
   initialTeamName?: string;
   initialTeamId?: string;
+  publicTeamUrl?: string;
   initialFormation?: string;
   initialRoster: SavedRosterEntry[];
   isSignedIn: boolean;
@@ -179,9 +181,27 @@ export function SquadBuilder({
   const [nation, setNation] = useState("");
   const [club, setClub] = useState("");
   const [minPrice, setMinPrice] = useState("");
+  const [availability, setAvailability] = useState("");
+  const [catalogPage, setCatalogPage] = useState(1);
   const [view, setView] = useState<"field" | "table">("field");
   const [clientError, setClientError] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const allowNavigationRef = useRef(false);
+
+  const initialSquadSignature = useMemo(
+    () =>
+      JSON.stringify({
+        teamName: initialTeamName ?? "Моя команда",
+        formation: initialFormation ?? "4-3-3",
+        starters: initialStarters,
+        bench: initialBench,
+        captainId: initialRoster.find((entry) => entry.isCaptain)?.playerId ?? "",
+      }),
+    [initialBench, initialFormation, initialRoster, initialStarters, initialTeamName],
+  );
+  const currentSquadSignature = JSON.stringify({ teamName, formation, starters, bench, captainId });
+  const hasUnsavedChanges = currentSquadSignature !== initialSquadSignature;
 
   const playerById = useMemo(() => new Map(players.map((player) => [player.id, player])), [players]);
   const selectedIds = useMemo(() => new Set([...starters, ...bench]), [starters, bench]);
@@ -223,13 +243,59 @@ export function SquadBuilder({
       (!position || player.position === position) &&
       (!selectedNation || player.nationName.toLowerCase() === selectedNation || player.nationCode.toLowerCase() === selectedNation) &&
       (!selectedClub || (player.club ?? player.clubOriginal ?? "").toLowerCase() === selectedClub) &&
+      (!availability || player.status === availability) &&
       (!min || player.price <= min)
     );
   }).sort((a, b) => b.price - a.price || a.name.localeCompare(b.name, "uk"));
+  const catalogPageCount = Math.max(1, Math.ceil(filteredPlayers.length / CATALOG_PAGE_SIZE));
+  const visiblePlayers = filteredPlayers.slice((catalogPage - 1) * CATALOG_PAGE_SIZE, catalogPage * CATALOG_PAGE_SIZE);
   const nations = [...new Set(players.map((player) => player.nationName))].sort((a, b) => a.localeCompare(b, "uk"));
   const clubs = [...new Set(players.map((player) => player.club ?? player.clubOriginal).filter(Boolean) as string[])].sort((a, b) =>
     a.localeCompare(b, "uk"),
   );
+
+  useEffect(() => {
+    setCatalogPage(1);
+  }, [availability, club, minPrice, nation, position, query]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges || isSubmitting) return;
+
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (allowNavigationRef.current) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const onDocumentClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const link = target?.closest("a[href]") as HTMLAnchorElement | null;
+      if (allowNavigationRef.current) return;
+      if (!link || link.target === "_blank" || link.href.startsWith("javascript:")) return;
+      if (!window.confirm("Є незбережені зміни складу. Вийти зі сторінки без збереження?")) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    const onPopState = () => {
+      if (allowNavigationRef.current) return;
+      if (window.confirm("Є незбережені зміни складу. Вийти зі сторінки без збереження?")) {
+        allowNavigationRef.current = true;
+        window.history.back();
+        return;
+      }
+      window.history.pushState({ squadGuard: true }, "", window.location.href);
+    };
+
+    window.history.pushState({ squadGuard: true }, "", window.location.href);
+    window.addEventListener("beforeunload", onBeforeUnload);
+    window.addEventListener("popstate", onPopState);
+    document.addEventListener("click", onDocumentClick, true);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      window.removeEventListener("popstate", onPopState);
+      document.removeEventListener("click", onDocumentClick, true);
+    };
+  }, [hasUnsavedChanges, isSubmitting]);
 
   function countStarters(ids = starters, currentFormation = formation) {
     const limits = starterLimits(currentFormation);
@@ -363,9 +429,14 @@ export function SquadBuilder({
     if (!isSignedIn || !hasProfile) return;
 
     const failedItems = validationItems.filter((item) => !item.ok);
-    if (failedItems.length === 0 && currentGameweek) return;
+    if (failedItems.length === 0 && currentGameweek) {
+      allowNavigationRef.current = true;
+      setIsSubmitting(true);
+      return;
+    }
 
     event.preventDefault();
+    setIsSubmitting(false);
     if (!currentGameweek) {
       setPopupMessage("Трансфери зараз закриті. Дочекайся відкриття наступного GW адміністратором.");
       return;
@@ -458,55 +529,47 @@ export function SquadBuilder({
 
       <div className="squad-top-row">
       <section className="squad-profile panel">
-        <p className="eyebrow">Фентезі Команда</p>
-        <div className="squad-profile-row">
-          <div className="squad-avatar">
-            {userProfile?.image ? <img alt="" src={userProfile.image} /> : <span>{initials(userProfile)}</span>}
-          </div>
+        <div className="squad-profile-header">
           <div>
-            <div className="team-title-row">
-              <h1>{teamName}</h1>
-              <button className="icon-button" type="button" onClick={() => setIsEditingTeam((value) => !value)} aria-label="Редагувати команду">
-                <Pencil size={16} />
-              </button>
-            </div>
-            <p className="muted">
-              Менеджер: <strong>{userProfile?.username ?? "Гість"}</strong>
-              {userProfile?.email ? ` · ${userProfile.email}` : ""}
-            </p>
-            {isEditingTeam ? (
-              <div className="team-edit-panel">
-                <div className="team-edit-grid">
-                  <label>Назва команди<input className="input" value={teamName} onChange={(event) => setTeamName(event.target.value)} minLength={2} maxLength={40} /></label>
-                  <label>Нік менеджера<input className="input" name="username" defaultValue={userProfile?.username ?? ""} minLength={3} maxLength={24} /></label>
-                  <label className="file-field">Фото до 200 КБ<input className="input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" /></label>
-                </div>
-                <div className="team-edit-actions">
-                  <button className="button primary" type="submit" disabled={!isSignedIn || !hasProfile || !currentGameweek}>
-                    <Save size={18} />
-                    Зберегти дані
-                  </button>
-                  <button className="button" type="button" onClick={() => setIsEditingTeam(false)}>Скасувати</button>
-                </div>
+            <p className="eyebrow">Фентезі Команда</p>
+            <div className="squad-profile-row">
+              <div className="squad-avatar">
+                {userProfile?.image ? <img alt="" src={userProfile.image} /> : <span>{initials(userProfile)}</span>}
               </div>
-            ) : null}
+              <div>
+                <div className="team-title-row">
+                  <h1>{teamName}</h1>
+                  <button className="icon-button" type="button" onClick={() => setIsEditingTeam((value) => !value)} aria-label="Редагувати команду">
+                    <Pencil size={16} />
+                  </button>
+                </div>
+                <p className="muted">
+                  Менеджер: <strong>{userProfile?.username ?? "Гість"}</strong>
+                  {userProfile?.email ? ` · ${userProfile.email}` : ""}
+                </p>
+              </div>
+            </div>
           </div>
+          {publicTeamUrl ? <Link className="button" href={publicTeamUrl}>Публічна сторінка</Link> : null}
         </div>
+        {isEditingTeam ? (
+          <div className="team-edit-panel">
+            <div className="team-edit-grid">
+              <label>Назва команди<input className="input" value={teamName} onChange={(event) => setTeamName(event.target.value)} minLength={2} maxLength={40} /></label>
+              <label>Нік менеджера<input className="input" name="username" defaultValue={userProfile?.username ?? ""} minLength={3} maxLength={24} /></label>
+              <label className="file-field">Фото до 200 КБ<input className="input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+            </div>
+            <div className="team-edit-actions">
+              <button className="button primary" type="submit" disabled={!isSignedIn || !hasProfile || !currentGameweek}>
+                <Save size={18} />
+                Зберегти дані
+              </button>
+              <button className="button" type="button" onClick={() => setIsEditingTeam(false)}>Скасувати</button>
+            </div>
+          </div>
+        ) : null}
       </section>
 
-      <section className="deadline-banner squad-deadline-card">
-        {currentGameweek && currentDeadline ? (
-          <>
-            <div>
-              <strong>Дедлайн GW{currentGameweek}</strong>
-              <div className="muted">{currentStage ?? "-"}</div>
-            </div>
-            <DeadlineCountdown deadlineAt={currentDeadline} />
-          </>
-        ) : (
-          <strong>Дедлайн зараз недоступний</strong>
-        )}
-      </section>
       </div>
 
       <div className="topbar">
@@ -515,10 +578,15 @@ export function SquadBuilder({
           <p className="muted">Додавай гравців кнопкою або перетягуй їх на поле чи лавку.</p>
         </div>
         <div className="toolbar">
+          {hasUnsavedChanges ? <span className="unsaved-indicator"><AlertTriangle size={16} />Є незбережені зміни</span> : null}
           {initialTeamId ? <ShareSquadButton teamId={initialTeamId} /> : null}
-            <button className="button primary" type="submit" disabled={!isSignedIn || !hasProfile || !currentGameweek}>
+            <button
+              className="button primary"
+              type="submit"
+              disabled={!isSignedIn || !hasProfile || !currentGameweek || Boolean(initialTeamId && !hasUnsavedChanges)}
+            >
             <Save size={18} />
-            Зберегти
+            {initialTeamId && !hasUnsavedChanges ? "Збережено" : "Зберегти зміни"}
           </button>
         </div>
       </div>
@@ -624,6 +692,24 @@ export function SquadBuilder({
 
       <section className="panel player-catalog-panel">
         <h2>Каталог гравців</h2>
+        <div className="catalog-summary">
+          <strong>Знайдено: {filteredPlayers.length}</strong>
+          <button
+            className="button"
+            type="button"
+            onClick={() => {
+              setQuery("");
+              setPosition("");
+              setNation("");
+              setClub("");
+              setMinPrice("");
+              setAvailability("");
+            }}
+          >
+            <RotateCcw size={16} />
+            Скинути фільтри
+          </button>
+        </div>
         <div className="catalog-table-panel">
         <div className="filters">
           <div style={{ position: "relative" }}>
@@ -654,11 +740,18 @@ export function SquadBuilder({
             <option value="6">6-</option>
             <option value="5">5-</option>
           </select>
+          <select className="input" value={availability} onChange={(event) => setAvailability(event.target.value)}>
+            <option value="">Усі статуси</option>
+            <option value="AVAILABLE">Доступні</option>
+            <option value="DOUBTFUL">Під питанням</option>
+            <option value="OUT">Недоступні</option>
+            <option value="ELIMINATED">Вибули з турніру</option>
+          </select>
         </div>
         <table className="table">
           <thead><tr><th>Гравець</th><th>Поз.</th><th>Збірна</th><th>Клуб</th><th>Ціна</th><th></th></tr></thead>
           <tbody>
-            {filteredPlayers.map((player) => (
+            {visiblePlayers.map((player) => (
               <tr key={player.id} draggable={player.status === "AVAILABLE" || selectedIds.has(player.id)} onDragStart={(event) => event.dataTransfer.setData("text/plain", player.id)}>
                 <td>
                   <span className="catalog-player">
@@ -680,14 +773,27 @@ export function SquadBuilder({
                 <td>{player.club ?? player.clubOriginal ?? "-"}</td>
                 <td>{player.price.toFixed(1)}</td>
                 <td>
-                  <button className={selectedIds.has(player.id) ? "button warning" : "button"} type="button" disabled={!selectedIds.has(player.id) && player.status !== "AVAILABLE"} onClick={() => (selectedIds.has(player.id) ? removePlayer(player.id) : addPlayer(player.id))}>
-                    {selectedIds.has(player.id) ? "Вилучити" : player.status !== "AVAILABLE" ? "Недоступний" : "Додати"}
+                  <button
+                    className={selectedIds.has(player.id) ? "button selected-player-button" : "button"}
+                    type="button"
+                    disabled={selectedIds.has(player.id) || player.status !== "AVAILABLE"}
+                    onClick={() => addPlayer(player.id)}
+                  >
+                    {selectedIds.has(player.id) ? "Вже у складі" : player.status !== "AVAILABLE" ? "Недоступний" : "Додати"}
                   </button>
                 </td>
               </tr>
             ))}
+            {visiblePlayers.length === 0 ? <tr><td colSpan={6}>За вибраними фільтрами гравців не знайдено.</td></tr> : null}
           </tbody>
         </table>
+        {catalogPageCount > 1 ? (
+          <div className="catalog-pagination">
+            <button className="button" type="button" disabled={catalogPage === 1} onClick={() => setCatalogPage((page) => Math.max(1, page - 1))}>Назад</button>
+            <span className="badge">Сторінка {catalogPage} з {catalogPageCount}</span>
+            <button className="button" type="button" disabled={catalogPage === catalogPageCount} onClick={() => setCatalogPage((page) => Math.min(catalogPageCount, page + 1))}>Далі</button>
+          </div>
+        ) : null}
         </div>
       </section>
       </div>

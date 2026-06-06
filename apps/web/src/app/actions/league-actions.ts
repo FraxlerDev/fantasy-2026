@@ -10,6 +10,11 @@ function makeInviteCode() {
   return crypto.randomBytes(4).toString("base64url").toUpperCase().slice(0, 6);
 }
 
+function leaguesUrl(tab: string, params?: Record<string, string>) {
+  const search = new URLSearchParams({ tab, ...params });
+  return `/leagues?${search.toString()}`;
+}
+
 async function requireFantasyTeam() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
@@ -30,11 +35,12 @@ async function requireUser() {
 
 export async function createOrRenameLeague(formData: FormData) {
   const session = await requireUser();
+  const returnTab = String(formData.get("returnTab") ?? "create");
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const isOpen = String(formData.get("isOpen") ?? "") === "open";
-  if (name.length < 2 || name.length > 40) redirect("/leagues?error=league-name");
-  if (description.length > 240) redirect("/leagues?error=league-description");
+  if (name.length < 2 || name.length > 40) redirect(leaguesUrl(returnTab, { error: "league-name" }));
+  if (description.length > 240) redirect(leaguesUrl(returnTab, { error: "league-description" }));
 
   const existing = await prisma.league.findUnique({ where: { ownerId: session.user.id } });
   if (existing) {
@@ -67,18 +73,19 @@ export async function createOrRenameLeague(formData: FormData) {
   }
 
   revalidatePath("/leagues");
-  redirect("/leagues?saved=1");
+  redirect(leaguesUrl(returnTab, { saved: "1" }));
 }
 
 export async function joinLeague(formData: FormData) {
   const { team } = await requireFantasyTeam();
+  const returnTab = String(formData.get("returnTab") ?? "join");
   const inviteCode = String(formData.get("inviteCode") ?? "").trim().toUpperCase();
   const leagueId = String(formData.get("leagueId") ?? "").trim();
   const league = leagueId
     ? await prisma.league.findUnique({ where: { id: leagueId } })
     : await prisma.league.findUnique({ where: { inviteCode } });
-  if (!league) redirect("/leagues?error=invite");
-  if (leagueId && !league.isOpen) redirect("/leagues?error=closed");
+  if (!league) redirect(leaguesUrl(returnTab, { error: "invite" }));
+  if (leagueId && !league.isOpen) redirect(leaguesUrl(returnTab, { error: "closed" }));
 
   const existingMemberships = await prisma.leagueMember.count({ where: { fantasyTeamId: team.id } });
   const alreadyMember = await prisma.leagueMember.findUnique({
@@ -86,7 +93,7 @@ export async function joinLeague(formData: FormData) {
   });
 
   if (!alreadyMember && existingMemberships >= 6) {
-    redirect("/leagues?error=limit");
+    redirect(leaguesUrl(returnTab, { error: "limit" }));
   }
 
   if (!alreadyMember) {
@@ -102,13 +109,13 @@ export async function leaveLeague(formData: FormData) {
   const { team } = await requireFantasyTeam();
   const leagueId = String(formData.get("leagueId") ?? "");
   const league = await prisma.league.findUnique({ where: { id: leagueId } });
-  if (!league) redirect("/leagues");
-  if (league.ownerId === (await auth())?.user?.id) redirect("/leagues?error=owner-leave");
+  if (!league) redirect(leaguesUrl("mine"));
+  if (league.ownerId === (await auth())?.user?.id) redirect(leaguesUrl("mine", { error: "owner-leave" }));
 
   await prisma.leagueMember.deleteMany({ where: { leagueId, fantasyTeamId: team.id } });
   revalidatePath("/leagues");
   revalidatePath(`/leagues/${leagueId}`);
-  redirect("/leagues?left=1");
+  redirect(leaguesUrl("mine", { left: "1" }));
 }
 
 export async function removeLeagueMember(formData: FormData) {
@@ -118,22 +125,22 @@ export async function removeLeagueMember(formData: FormData) {
   const fantasyTeamId = String(formData.get("fantasyTeamId") ?? "");
 
   const league = await prisma.league.findUnique({ where: { id: leagueId } });
-  if (!league || league.ownerId !== session.user.id) redirect("/leagues?error=owner");
+  if (!league || league.ownerId !== session.user.id) redirect(leaguesUrl("mine", { error: "owner" }));
 
   await prisma.leagueMember.deleteMany({ where: { leagueId, fantasyTeamId } });
   revalidatePath("/leagues");
   revalidatePath(`/leagues/${leagueId}`);
-  redirect("/leagues?removed=1");
+  redirect(leaguesUrl("mine", { removed: "1" }));
 }
 
 export async function deleteOwnedLeague(formData: FormData) {
   const session = await requireUser();
   const leagueId = String(formData.get("leagueId") ?? "");
   const league = await prisma.league.findUnique({ where: { id: leagueId } });
-  if (!league || league.ownerId !== session.user.id) redirect("/leagues?error=owner");
+  if (!league || league.ownerId !== session.user.id) redirect(leaguesUrl("create", { error: "owner" }));
 
   await prisma.league.delete({ where: { id: league.id } });
   revalidatePath("/leagues");
   revalidatePath("/leaderboard");
-  redirect("/leagues?deleted=1");
+  redirect(leaguesUrl("mine", { deleted: "1" }));
 }

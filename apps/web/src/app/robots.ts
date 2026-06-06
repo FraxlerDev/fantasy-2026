@@ -6,8 +6,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/rules", "/matches", "/tournament", "/leaderboard", "/leagues", "/petitions", "/guides"],
-        disallow: ["/admin", "/login", "/squad", "/onboarding", "/after-login", "/teams", "/api"],
+        allow: ["/", "/rules", "/matches", "/tournament", "/leaderboard", "/leagues", "/petitions"],
+        disallow: ["/admin", "/login", "/squad", "/onboarding", "/after-login", "/teams", "/guides", "/api"],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
