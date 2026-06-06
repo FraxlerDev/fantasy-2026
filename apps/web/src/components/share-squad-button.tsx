@@ -7,8 +7,10 @@ export function ShareSquadButton({ teamId, version }: { teamId: string; version?
   const [copied, setCopied] = useState(false);
 
   async function copyTeamLink() {
-    const suffix = version ? `?v=${encodeURIComponent(String(version))}` : "";
-    await navigator.clipboard.writeText(`https://fantasy.fraxler.site/teams/${teamId}${suffix}`);
+    const cacheKey = version ? `${version}-${Date.now()}` : Date.now();
+    await navigator.clipboard.writeText(
+      `https://fantasy.fraxler.site/teams/${teamId}?share=${encodeURIComponent(String(cacheKey))}`,
+    );
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   }
