@@ -140,6 +140,7 @@ export function SquadBuilder({
   userProfile,
   initialTeamName,
   initialTeamId,
+  initialTeamVersion,
   publicTeamUrl,
   initialFormation,
   initialRoster,
@@ -157,6 +158,7 @@ export function SquadBuilder({
   userProfile?: SquadUserProfile;
   initialTeamName?: string;
   initialTeamId?: string;
+  initialTeamVersion?: string | number;
   publicTeamUrl?: string;
   initialFormation?: string;
   initialRoster: SavedRosterEntry[];
@@ -579,7 +581,7 @@ export function SquadBuilder({
         </div>
         <div className="toolbar">
           {hasUnsavedChanges ? <span className="unsaved-indicator"><AlertTriangle size={16} />Є незбережені зміни</span> : null}
-          {initialTeamId ? <ShareSquadButton teamId={initialTeamId} /> : null}
+          {initialTeamId ? <ShareSquadButton teamId={initialTeamId} version={initialTeamVersion} /> : null}
             <button
               className="button primary"
               type="submit"

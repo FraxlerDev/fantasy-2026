@@ -281,6 +281,7 @@ export default async function SquadPage({
           }}
           initialTeamName={fantasyTeam?.name ?? promoTeamName}
           initialTeamId={fantasyTeam?.id}
+          initialTeamVersion={fantasyTeam?.updatedAt.getTime()}
           publicTeamUrl={fantasyTeam ? `/teams/${fantasyTeam.id}` : undefined}
           initialFormation={fantasyTeam?.formation ?? "4-3-3"}
           initialRoster={initialRoster}

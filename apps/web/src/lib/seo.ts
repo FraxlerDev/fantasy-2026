@@ -12,9 +12,18 @@ type SeoOptions = {
   description?: string;
   path?: string;
   noIndex?: boolean;
+  image?: string;
+  imageAlt?: string;
 };
 
-export function createMetadata({ title, description = siteDescription, path = "/", noIndex = false }: SeoOptions = {}): Metadata {
+export function createMetadata({
+  title,
+  description = siteDescription,
+  path = "/",
+  noIndex = false,
+  image = ogImage,
+  imageAlt = "Фентезі до ЧС-2026",
+}: SeoOptions = {}): Metadata {
   const pageTitle = title ? `${title} | ${siteName}` : siteTitle;
   const url = new URL(path, siteUrl).toString();
 
@@ -37,10 +46,10 @@ export function createMetadata({ title, description = siteDescription, path = "/
       url,
       images: [
         {
-          url: ogImage,
+          url: image,
           width: 1200,
           height: 630,
-          alt: "Фентезі до ЧС-2026",
+          alt: imageAlt,
         },
       ],
     },
@@ -48,7 +57,7 @@ export function createMetadata({ title, description = siteDescription, path = "/
       card: "summary_large_image",
       title: pageTitle,
       description,
-      images: [ogImage],
+      images: [image],
     },
     robots: noIndex
       ? {

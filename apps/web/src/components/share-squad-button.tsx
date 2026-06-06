@@ -3,11 +3,12 @@
 import { Share2 } from "lucide-react";
 import { useState } from "react";
 
-export function ShareSquadButton({ teamId }: { teamId: string }) {
+export function ShareSquadButton({ teamId, version }: { teamId: string; version?: string | number }) {
   const [copied, setCopied] = useState(false);
 
   async function copyTeamLink() {
-    await navigator.clipboard.writeText(`https://fantasy.fraxler.site/teams/${teamId}`);
+    const suffix = version ? `?v=${encodeURIComponent(String(version))}` : "";
+    await navigator.clipboard.writeText(`https://fantasy.fraxler.site/teams/${teamId}${suffix}`);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   }

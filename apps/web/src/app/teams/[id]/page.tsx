@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: PublicTeamPageProps): Promise
       name: true,
       totalPoints: true,
       formation: true,
+      updatedAt: true,
       user: { select: { username: true } },
     },
   });
@@ -33,12 +34,15 @@ export async function generateMetadata({ params }: PublicTeamPageProps): Promise
   }
 
   const manager = team.user.username?.trim() || "Користувач";
+  const image = `/teams/${id}/opengraph-image?v=${team.updatedAt.getTime()}`;
 
   return createMetadata({
     title: team.name,
     description: `Фентезі-команда «${team.name}». Менеджер: ${manager}. Очки: ${team.totalPoints}. Схема: ${team.formation}.`,
     path: `/teams/${id}`,
     noIndex: true,
+    image,
+    imageAlt: `Склад команди ${team.name}`,
   });
 }
 
@@ -207,7 +211,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
               <h1>{team.name}</h1>
               <p className="muted">Менеджер: {team.user.username?.trim() || "Користувач"}</p>
             </div>
-            <ShareSquadButton teamId={team.id} />
+            <ShareSquadButton teamId={team.id} version={team.updatedAt.getTime()} />
           </div>
           <div className="grid cols-3" style={{ marginTop: 14 }}>
             <div className="card stat"><span className="badge">Очки GW{requestedGameweek}</span><strong>{selectedGameweekPoints}</strong></div>
