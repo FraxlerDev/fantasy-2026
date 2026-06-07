@@ -40,7 +40,7 @@ export default async function SquadPage({
   if (!session?.user?.id) redirect("/login");
   if (!session.user.username) redirect("/onboarding");
 
-  const [players, fantasyTeam, editableGameweek, nextGameweek, notifications, chatMessages] = await Promise.all([
+  const [players, fantasyTeam, editableGameweek, nextGameweek, notifications, chatMessages, currentUser] = await Promise.all([
     prisma.player.findMany({
       include: { nationalTeam: true },
       orderBy: [{ position: "asc" }, { price: "asc" }],
@@ -74,6 +74,10 @@ export default async function SquadPage({
       include: { author: { select: { username: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
+    }),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { username: true, email: true, image: true },
     }),
   ]);
 
@@ -275,9 +279,9 @@ export default async function SquadPage({
           currentStart={editableGameweek?.startAt.toISOString()}
           transferLimit={editableGameweek?.transferLimit}
           userProfile={{
-            username: session.user.username,
-            email: session.user.email,
-            image: session.user.image,
+            username: currentUser?.username ?? session.user.username,
+            email: currentUser?.email ?? session.user.email,
+            image: currentUser?.image ?? session.user.image,
           }}
           initialTeamName={fantasyTeam?.name ?? promoTeamName}
           initialTeamId={fantasyTeam?.id}
@@ -289,6 +293,8 @@ export default async function SquadPage({
           hasProfile
           error={params?.error}
           saved={params?.saved === "1"}
+          profileError={params?.profileError}
+          profileSaved={params?.profileSaved === "1"}
         />
       </div>
     </AppShell>

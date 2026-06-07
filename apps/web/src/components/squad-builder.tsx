@@ -5,7 +5,7 @@ import { AlertTriangle, Pencil, RotateCcw, Save, Search, UserRound, X } from "lu
 import Link from "next/link";
 import type { DragEvent, FormEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { saveSquad } from "../app/actions/squad-actions";
+import { saveSquad, updateSquadProfile } from "../app/actions/squad-actions";
 import { ShareSquadButton } from "./share-squad-button";
 
 export interface SquadPlayer {
@@ -88,7 +88,13 @@ const errorMessages: Record<string, string> = {
   "create-team-first": "Спочатку збережіть fantasy-команду.",
   "max-players-per-nation": "Не можна взяти більше 2 футболістів однієї збірної.",
   "budget-exceeded": "Загальна вартість команди не може перевищувати 100 монет.",
+  username: "Нік має містити 3-24 символи: літери, цифри, пробіли, дефіс або нижнє підкреслення.",
+  "username-taken": "Цей нік уже використовує інший користувач.",
+  avatar: "Фото має бути у форматі JPG, PNG або WebP і не перевищувати 200 КБ.",
+  "player-unavailable": "Недоступного гравця не можна додати до нового складу.",
 };
+
+const profileErrorCodes = new Set(["team-name", "username", "username-taken", "avatar", "create-team-first"]);
 
 function pitchRows(formation: string): Array<{ position: PlayerPosition; label: string; slots: number }> {
   const shape = formations[formation] ?? formations["4-3-3"];
@@ -148,6 +154,8 @@ export function SquadBuilder({
   hasProfile,
   error,
   saved,
+  profileError,
+  profileSaved,
 }: {
   players: SquadPlayer[];
   fixtures: SquadFixture[];
@@ -166,6 +174,8 @@ export function SquadBuilder({
   hasProfile: boolean;
   error?: string;
   saved?: boolean;
+  profileError?: string;
+  profileSaved?: boolean;
 }) {
   const initialStarters = initialRoster.filter((entry) => entry.slot === "STARTER").map((entry) => entry.playerId);
   const initialBench = initialRoster
@@ -177,7 +187,8 @@ export function SquadBuilder({
   const [starters, setStarters] = useState<string[]>(initialStarters);
   const [bench, setBench] = useState<string[]>(initialBench);
   const [captainId, setCaptainId] = useState(initialRoster.find((entry) => entry.isCaptain)?.playerId ?? "");
-  const [isEditingTeam, setIsEditingTeam] = useState(false);
+  const teamProfileError = profileError ?? (error && profileErrorCodes.has(error) ? error : undefined);
+  const [isEditingTeam, setIsEditingTeam] = useState(Boolean(teamProfileError));
   const [query, setQuery] = useState("");
   const [position, setPosition] = useState("");
   const [nation, setNation] = useState("");
@@ -434,6 +445,13 @@ export function SquadBuilder({
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     if (!isSignedIn || !hasProfile) return;
 
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    if (submitter?.dataset.submitIntent === "profile") {
+      allowNavigationRef.current = true;
+      setIsSubmitting(true);
+      return;
+    }
+
     const failedItems = validationItems.filter((item) => !item.ok);
     if (failedItems.length === 0 && currentGameweek) {
       allowNavigationRef.current = true;
@@ -565,14 +583,26 @@ export function SquadBuilder({
               <label className="file-field">Фото до 200 КБ<input className="input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" /></label>
             </div>
             <div className="team-edit-actions">
-              <button className="button primary" type="submit" disabled={!isSignedIn || !hasProfile || !currentGameweek}>
+              <button
+                className="button primary"
+                type="submit"
+                formAction={updateSquadProfile}
+                data-submit-intent="profile"
+                disabled={!isSignedIn || !hasProfile || !initialTeamId}
+              >
                 <Save size={18} />
                 Зберегти дані
               </button>
               <button className="button" type="button" onClick={() => setIsEditingTeam(false)}>Скасувати</button>
             </div>
+            {teamProfileError ? (
+              <div className="form-error team-edit-message">
+                {errorMessages[teamProfileError] ?? "Не вдалося зберегти дані команди."}
+              </div>
+            ) : null}
           </div>
         ) : null}
+        {profileSaved ? <div className="form-success team-edit-message">Дані команди збережено.</div> : null}
       </section>
 
       </div>
@@ -598,7 +628,7 @@ export function SquadBuilder({
 
       {!isSignedIn ? <div className="form-error">Увійди через Google, щоб зберегти команду.</div> : null}
       {isSignedIn && !hasProfile ? <div className="form-error">Заверши onboarding, щоб зберегти команду.</div> : null}
-      {error ? <div className="form-error">Помилка збереження: {errorMessages[error] ?? error}</div> : null}
+      {error && !profileErrorCodes.has(error) ? <div className="form-error">Помилка збереження: {errorMessages[error] ?? error}</div> : null}
       {clientError ? <div className="form-error">{clientError}</div> : null}
       {saved ? <div className="form-success">Команду збережено.</div> : null}
 

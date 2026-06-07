@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
 import { prisma } from "../../lib/prisma";
+import { isValidUsername } from "../../lib/username";
 
 export async function completeOnboarding(formData: FormData) {
   const session = await auth();
@@ -12,7 +13,7 @@ export async function completeOnboarding(formData: FormData) {
 
   const username = String(formData.get("username") ?? "").trim();
 
-  if (username.length < 3 || username.length > 24) {
+  if (!isValidUsername(username)) {
     redirect("/onboarding?error=username");
   }
 

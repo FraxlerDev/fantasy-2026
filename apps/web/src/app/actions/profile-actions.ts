@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
 import { prisma } from "../../lib/prisma";
+import { isValidUsername } from "../../lib/username";
 
 const maxAvatarSize = 200 * 1024;
 const allowedAvatarTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -17,7 +18,7 @@ export async function updateProfile(formData: FormData) {
   const username = String(formData.get("username") ?? "").trim();
   const avatar = formData.get("avatar");
 
-  if (username.length < 3 || username.length > 24 || !/^[a-zA-Z0-9_-]+$/.test(username)) {
+  if (!isValidUsername(username)) {
     redirect("/squad?profileError=username");
   }
 

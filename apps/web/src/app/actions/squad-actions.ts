@@ -8,6 +8,7 @@ import path from "node:path";
 import { auth } from "../../auth";
 import { getEditableGameweek } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
+import { isValidUsername } from "../../lib/username";
 
 const formations: Record<string, { DEF: number; MID: number; FWD: number }> = {
   "4-3-3": { DEF: 4, MID: 3, FWD: 3 },
@@ -21,6 +22,93 @@ const formations: Record<string, { DEF: number; MID: number; FWD: number }> = {
 
 const maxAvatarSize = 200 * 1024;
 const allowedAvatarTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+async function saveAvatar(userId: string, avatar: FormDataEntryValue | null) {
+  if (!(avatar instanceof File) || avatar.size === 0) return undefined;
+  if (avatar.size > maxAvatarSize || !allowedAvatarTypes.has(avatar.type)) {
+    redirect("/squad?profileError=avatar");
+  }
+
+  const ext = avatar.type === "image/png" ? "png" : avatar.type === "image/webp" ? "webp" : "jpg";
+  const dir = path.join(process.cwd(), "public", "user-photos");
+  await mkdir(dir, { recursive: true });
+  const fileName = `${userId}.${ext}`;
+  await writeFile(path.join(dir, fileName), Buffer.from(await avatar.arrayBuffer()));
+  return `/user-photos/${fileName}`;
+}
+
+export async function updateSquadProfile(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+
+  const teamName = String(formData.get("teamName") ?? "").trim();
+  const username = String(formData.get("username") ?? "").trim();
+  const avatar = formData.get("avatar");
+
+  if (teamName.length < 2 || teamName.length > 40) {
+    redirect("/squad?profileError=team-name");
+  }
+
+  const [currentUser, existingTeam] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { username: true },
+    }),
+    prisma.fantasyTeam.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true, name: true },
+    }),
+  ]);
+
+  if (!existingTeam) redirect("/squad?profileError=create-team-first");
+
+  const usernameChanged = Boolean(username && username !== currentUser?.username);
+  if (usernameChanged && !isValidUsername(username)) {
+    redirect("/squad?profileError=username");
+  }
+  if (usernameChanged) {
+    const duplicate = await prisma.user.findFirst({
+      where: { username, id: { not: session.user.id } },
+      select: { id: true },
+    });
+    if (duplicate) redirect("/squad?profileError=username-taken");
+  }
+
+  const uploadedAvatarUrl = await saveAvatar(session.user.id, avatar);
+
+  await prisma.$transaction(async (tx) => {
+    if (usernameChanged || uploadedAvatarUrl) {
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: {
+          ...(usernameChanged ? { username } : {}),
+          ...(uploadedAvatarUrl ? { image: uploadedAvatarUrl } : {}),
+        },
+      });
+    }
+
+    if (existingTeam.name !== teamName) {
+      await tx.fantasyTeam.update({
+        where: { id: existingTeam.id },
+        data: { name: teamName },
+      });
+      await tx.teamNameHistory.create({
+        data: {
+          fantasyTeamId: existingTeam.id,
+          oldName: existingTeam.name,
+          newName: teamName,
+          changedById: session.user.id,
+        },
+      });
+    }
+  });
+
+  revalidatePath("/squad");
+  revalidatePath(`/teams/${existingTeam.id}`);
+  revalidatePath("/leaderboard");
+  revalidatePath("/leagues");
+  redirect("/squad?profileSaved=1");
+}
 
 export async function saveSquad(formData: FormData) {
   const session = await auth();
@@ -142,24 +230,17 @@ export async function saveSquad(formData: FormData) {
     redirect("/squad?error=player-unavailable");
   }
 
-  let uploadedAvatarUrl: string | undefined;
-  if (avatar instanceof File && avatar.size > 0) {
-    if (avatar.size > maxAvatarSize || !allowedAvatarTypes.has(avatar.type)) {
-      redirect("/squad?error=avatar");
-    }
-    const ext = avatar.type === "image/png" ? "png" : avatar.type === "image/webp" ? "webp" : "jpg";
-    const dir = path.join(process.cwd(), "public", "user-photos");
-    await mkdir(dir, { recursive: true });
-    const fileName = `${session.user.id}.${ext}`;
-    await writeFile(path.join(dir, fileName), Buffer.from(await avatar.arrayBuffer()));
-    uploadedAvatarUrl = `/user-photos/${fileName}`;
-  }
+  const uploadedAvatarUrl = await saveAvatar(session.user.id, avatar);
+  const currentUser = username
+    ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { username: true } })
+    : null;
+  const usernameChanged = Boolean(username && username !== currentUser?.username);
 
-  if (username && (username.length < 3 || username.length > 24 || !/^[a-zA-Z0-9_-]+$/.test(username))) {
+  if (usernameChanged && !isValidUsername(username)) {
     redirect("/squad?error=username");
   }
 
-  if (username) {
+  if (usernameChanged) {
     const duplicate = await prisma.user.findFirst({
       where: { username, id: { not: session.user.id } },
       select: { id: true },
@@ -171,11 +252,11 @@ export async function saveSquad(formData: FormData) {
   const promoLeagueCode = cookieStore.get("promo_league_code")?.value?.trim().toUpperCase();
 
   await prisma.$transaction(async (tx) => {
-    if (username || uploadedAvatarUrl) {
+    if (usernameChanged || uploadedAvatarUrl) {
       await tx.user.update({
         where: { id: session.user.id },
         data: {
-          ...(username ? { username } : {}),
+          ...(usernameChanged ? { username } : {}),
           ...(uploadedAvatarUrl ? { image: uploadedAvatarUrl } : {}),
         },
       });

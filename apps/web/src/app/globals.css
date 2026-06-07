@@ -3285,6 +3285,10 @@ h3 {
   margin-top: 12px;
 }
 
+.team-edit-message {
+  margin-top: 10px;
+}
+
 .file-field input[type="file"] {
   min-width: 0;
   width: 100%;
