@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { isBotUserAgent } from "../../../lib/visit-analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +106,10 @@ export async function POST(request: Request) {
     }
 
     const userAgent = request.headers.get("user-agent") ?? "";
+    if (isBotUserAgent(userAgent)) {
+      return NextResponse.json({ visitId: null, ignored: true }, { status: 202 });
+    }
+
     const visit = await siteVisit.create({
       data: {
         visitorKey: visitorKey.slice(0, 80),

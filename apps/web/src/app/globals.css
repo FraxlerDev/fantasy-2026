@@ -2104,6 +2104,34 @@ h3 {
   gap: 12px;
 }
 
+.visit-filter-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.visit-filter-bar label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.visit-filter-bar select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+}
+
 .visit-stat-card {
   min-height: 108px;
   padding: 18px;
@@ -2124,6 +2152,105 @@ h3 {
   color: #102033;
   font-size: 30px;
   line-height: 1;
+}
+
+.visit-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.visit-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.visit-ranking-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.visit-ranking-card h3 {
+  margin: 0 0 14px;
+}
+
+.visit-ranking-list,
+.visit-funnel,
+.visit-daily-list {
+  display: grid;
+  gap: 8px;
+}
+
+.visit-ranking-row {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) minmax(70px, 1fr) 34px;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.visit-ranking-row > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visit-ranking-row > div {
+  height: 7px;
+  overflow: hidden;
+  background: var(--surface-strong);
+}
+
+.visit-ranking-row i {
+  display: block;
+  height: 100%;
+  background: var(--green);
+}
+
+.visit-ranking-row strong {
+  text-align: right;
+}
+
+.visit-funnel {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.visit-funnel > div {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-height: 100px;
+  padding: 12px;
+  border-left: 4px solid var(--green);
+  background: var(--surface);
+}
+
+.visit-funnel strong {
+  font-size: 28px;
+}
+
+.visit-funnel small {
+  color: var(--muted);
+}
+
+.visit-daily-list > div {
+  display: grid;
+  grid-template-columns: 1fr 110px 90px;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.visit-daily-list .visit-daily-head {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .visit-table-panel {
@@ -2154,7 +2281,7 @@ h3 {
 }
 
 .visit-table {
-  min-width: 1180px;
+  min-width: 1080px;
 }
 
 .visit-click-row {
@@ -4367,6 +4494,9 @@ h3 {
   .grid.cols-3,
   .group-grid,
   .visit-stat-grid,
+  .visit-analytics-grid,
+  .visit-secondary-grid,
+  .visit-filter-bar,
   .admin-match-browser,
   .form-inline,
   .filters,
@@ -4490,6 +4620,14 @@ h3 {
   .visit-detail-panel {
     position: static;
     max-height: none;
+  }
+
+  .visit-funnel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .visit-daily-list > div {
+    grid-template-columns: 1fr 90px 70px;
   }
 
   .admin-team-roster-grid {

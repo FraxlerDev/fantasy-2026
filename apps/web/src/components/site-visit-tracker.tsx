@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 const VISITOR_KEY = "fantasy_2026_visitor_key";
 
@@ -30,12 +31,19 @@ function postVisit(payload: Record<string, unknown>, useBeacon = false) {
 }
 
 export function SiteVisitTracker() {
+  const pathname = usePathname();
+  const previousUrlRef = useRef<string | null>(null);
+
   useEffect(() => {
-    const startedAt = Date.now();
     const visitorKey = getVisitorKey();
-    const path = `${window.location.pathname}${window.location.search}`;
-    const referrer = document.referrer || null;
+    const path = `${pathname}${window.location.search}`;
+    const referrer = (previousUrlRef.current ?? document.referrer) || null;
+    previousUrlRef.current = window.location.href;
     let visitId: string | null = null;
+    let activeSeconds = 0;
+    let lastTickAt = Date.now();
+    let lastActivityAt = Date.now();
+    const activityTimeoutMs = 60_000;
 
     fetch("/api/visits", {
       method: "POST",
@@ -44,46 +52,73 @@ export function SiteVisitTracker() {
       keepalive: true,
     })
       .then((response) => response.json())
-      .then((data: { visitId?: string }) => {
+      .then((data: { visitId?: string | null }) => {
         visitId = data.visitId ?? null;
       })
       .catch(() => null);
 
-    const heartbeat = window.setInterval(() => {
-      if (!visitId) return;
-      postVisit({
-        action: "update",
-        visitId,
-        durationSeconds: Math.max(1, Math.round((Date.now() - startedAt) / 1000)),
-      });
-    }, 15000);
+    const recordActivity = () => {
+      lastActivityAt = Date.now();
+    };
 
-    const finish = () => {
+    const countActiveTime = () => {
+      const now = Date.now();
+      const elapsedSeconds = Math.max(0, Math.min(15, (now - lastTickAt) / 1000));
+      const isActive =
+        document.visibilityState === "visible" &&
+        now - lastActivityAt <= activityTimeoutMs;
+
+      if (isActive) activeSeconds += elapsedSeconds;
+      lastTickAt = now;
+    };
+
+    const updateVisit = (useBeacon = false) => {
+      countActiveTime();
       if (!visitId) return;
       postVisit(
         {
           action: "update",
           visitId,
-          durationSeconds: Math.max(1, Math.round((Date.now() - startedAt) / 1000)),
+          durationSeconds: Math.max(0, Math.round(activeSeconds)),
         },
-        true,
+        useBeacon,
       );
     };
 
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") finish();
+    const heartbeat = window.setInterval(() => {
+      updateVisit();
+    }, 15000);
+
+    const finish = () => {
+      updateVisit(true);
     };
 
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        finish();
+      } else {
+        lastTickAt = Date.now();
+        recordActivity();
+      }
+    };
+
+    const activityEvents = ["pointerdown", "pointermove", "keydown", "scroll", "touchstart"] as const;
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, recordActivity, { passive: true });
+    });
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("pagehide", finish);
 
     return () => {
       window.clearInterval(heartbeat);
+      activityEvents.forEach((eventName) => {
+        window.removeEventListener(eventName, recordActivity);
+      });
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("pagehide", finish);
       finish();
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

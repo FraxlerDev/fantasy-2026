@@ -15,7 +15,11 @@ import {
 } from "lucide-react";
 import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
-import { AdminVisitStats, type AdminVisitRow } from "../../components/admin-visit-stats";
+import {
+  AdminVisitStats,
+  type AdminRawVisit,
+  type DailyMetric,
+} from "../../components/admin-visit-stats";
 import { DeleteNationalTeamPlayersButton } from "../../components/delete-national-team-players-button";
 import { AppShell } from "../../components/shell";
 import { requireAdmin } from "../../lib/admin";
@@ -23,6 +27,7 @@ import { ensureDefaultGameweeks } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
 import { createMetadata } from "../../lib/seo";
 import { buildAllGroupStandings, ensurePlayoffMatches, resolvePlayoffMatches } from "../../lib/tournament";
+import { isBotUserAgent } from "../../lib/visit-analytics";
 import {
   createGameweekSnapshotsAction,
   createFixture,
@@ -64,14 +69,10 @@ type SiteVisitRow = {
   countryCity: string | null;
   device: string | null;
   browserOs: string | null;
+  userAgent: string | null;
   durationSeconds: number;
   startedAt: Date;
   lastSeenAt: Date;
-};
-
-type AggregatedVisitRow = SiteVisitRow & {
-  visitCount: number;
-  pages: SiteVisitRow[];
 };
 
 function teamLabel(team: TeamLabel) {
@@ -126,6 +127,23 @@ function formatDuration(totalSeconds: number) {
 
 function visitStatus(lastSeenAt: Date) {
   return Date.now() - lastSeenAt.getTime() < 120_000 ? "Online" : "Offline";
+}
+
+function dailyMetrics(dates: Date[]): DailyMetric[] {
+  const formatter = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Kyiv",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const counts = new Map<string, number>();
+  dates.forEach((date) => {
+    const key = formatter.format(date);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  });
+  return [...counts.entries()]
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function positionLabel(position: string) {
@@ -263,8 +281,7 @@ export default async function AdminPage({
   const params = await searchParams;
   const selectedGameweek = params?.gw ? Number(params.gw) : undefined;
   const siteVisit = (prisma as unknown as { siteVisit?: any }).siteVisit;
-  const todayStart = startOfToday();
-  const [teams, players, allFixtures, gameweeks, fantasyTeams, todayVisitors, allVisitors, todayDuration, allDuration, recentVisits] = await Promise.all([
+  const [teams, players, allFixtures, gameweeks, fantasyTeams, users, recentVisits] = await Promise.all([
     prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }] }),
     prisma.player.findMany({
       include: { nationalTeam: true },
@@ -293,23 +310,9 @@ export default async function AdminPage({
       },
       orderBy: [{ createdAt: "asc" }],
     }),
-    siteVisit?.groupBy({
-      by: ["ip"],
-      where: { startedAt: { gte: todayStart } },
-    }).catch(() => []) ?? Promise.resolve([]),
-    siteVisit?.groupBy({
-      by: ["ip"],
-    }).catch(() => []) ?? Promise.resolve([]),
-    siteVisit?.aggregate({
-      where: { startedAt: { gte: todayStart } },
-      _sum: { durationSeconds: true },
-    }).catch(() => ({ _sum: { durationSeconds: 0 } })) ?? Promise.resolve({ _sum: { durationSeconds: 0 } }),
-    siteVisit?.aggregate({
-      _sum: { durationSeconds: true },
-    }).catch(() => ({ _sum: { durationSeconds: 0 } })) ?? Promise.resolve({ _sum: { durationSeconds: 0 } }),
+    prisma.user.findMany({ select: { createdAt: true }, orderBy: { createdAt: "asc" } }),
     siteVisit?.findMany({
       orderBy: { startedAt: "desc" },
-      take: 2000,
     }).catch(() => []) ?? Promise.resolve([]),
   ]);
   const playoffScores = await prisma.playoffMatch.findMany({ orderBy: { matchNo: "asc" } });
@@ -384,26 +387,11 @@ export default async function AdminPage({
     return groups;
   }, new Map());
 
-  const visitsByIp = (recentVisits as SiteVisitRow[]).reduce<Map<string, AggregatedVisitRow>>((groups, visit) => {
-    const key = visit.ip ?? `visitor:${visit.visitorKey}`;
-    const existing = groups.get(key);
-
-    if (!existing) {
-      groups.set(key, { ...visit, visitCount: 1, pages: [visit] });
-      return groups;
-    }
-
-    existing.durationSeconds += visit.durationSeconds;
-    existing.visitCount += 1;
-    existing.pages.push(visit);
-    if (visit.lastSeenAt > existing.lastSeenAt) {
-      existing.lastSeenAt = visit.lastSeenAt;
-    }
-    return groups;
-  }, new Map());
-  const uniqueVisitRows: AdminVisitRow[] = [...visitsByIp.entries()]
-    .map(([key, visit]) => ({
-      key,
+  const analyticsVisits: AdminRawVisit[] = (recentVisits as SiteVisitRow[])
+    .filter((visit) => !isBotUserAgent(visit.userAgent))
+    .map((visit) => ({
+      id: visit.id,
+      visitorKey: visit.visitorKey,
       site: visit.site,
       ip: visit.ip,
       countryCity: visit.countryCity,
@@ -415,19 +403,9 @@ export default async function AdminPage({
       path: visit.path,
       pageTitle: pageTitle(visit.path),
       referrer: visit.referrer,
-      visitCount: visit.visitCount,
-      pages: visit.pages
-        .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())
-        .map((page) => ({
-          id: page.id,
-          path: page.path,
-          title: pageTitle(page.path),
-          referrer: page.referrer,
-          startedAt: page.startedAt.toISOString(),
-          durationSeconds: page.durationSeconds,
-        })),
-    }))
-    .sort((a, b) => new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime());
+    }));
+  const registrationMetrics = dailyMetrics(users.map((user) => user.createdAt));
+  const teamCreationMetrics = dailyMetrics(fantasyTeams.map((team) => team.createdAt));
   const teamsWithRoster = fantasyTeams.filter((team) => team.rosterEntries.length > 0);
 
   return (
@@ -522,12 +500,11 @@ export default async function AdminPage({
             <a className="button" href="#">Закрити</a>
           </div>
           <AdminVisitStats
-            rows={uniqueVisitRows}
-            todayVisitors={todayVisitors.length}
-            todayDurationSeconds={todayDuration._sum.durationSeconds ?? 0}
-            allVisitors={allVisitors.length}
-            allDurationSeconds={allDuration._sum.durationSeconds ?? 0}
+            visits={analyticsVisits}
+            registrations={registrationMetrics}
+            teamsCreated={teamCreationMetrics}
           />
+          {/*
           <div className="admin-visits legacy-visit-table">
         <div className="visit-stat-grid">
           <div className="visit-stat-card">
@@ -594,6 +571,7 @@ export default async function AdminPage({
           </table>
         </div>
           </div>
+          */}
         </div>
       </section>
 
