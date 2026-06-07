@@ -551,7 +551,6 @@ export function SquadBuilder({
                 </div>
                 <p className="muted">
                   Менеджер: <strong>{userProfile?.username ?? "Гість"}</strong>
-                  {userProfile?.email ? ` · ${userProfile.email}` : ""}
                 </p>
               </div>
             </div>
