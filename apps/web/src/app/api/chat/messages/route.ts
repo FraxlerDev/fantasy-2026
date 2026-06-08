@@ -31,6 +31,8 @@ function serializeMessage(message: {
       email: string | null;
     };
   } | null;
+  likes: { id: string }[];
+  _count: { likes: number };
 }) {
   return {
     id: message.id,
@@ -49,21 +51,30 @@ function serializeMessage(message: {
       image: message.author.image,
       role: message.author.role,
     },
+    likeCount: message._count.likes,
+    likedByCurrentUser: message.likes.length > 0,
   };
 }
 
-const messageInclude = {
-  author: {
-    select: { id: true, username: true, email: true, image: true, role: true },
-  },
-  replyTo: {
-    select: {
-      id: true,
-      body: true,
-      author: { select: { username: true, email: true } },
+function messageInclude(currentUserId?: string) {
+  return {
+    author: {
+      select: { id: true, username: true, email: true, image: true, role: true },
     },
-  },
-} as const;
+    replyTo: {
+      select: {
+        id: true,
+        body: true,
+        author: { select: { username: true, email: true } },
+      },
+    },
+    likes: {
+      where: { userId: currentUserId ?? "__anonymous__" },
+      select: { id: true },
+    },
+    _count: { select: { likes: true } },
+  } as const;
+}
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -71,15 +82,33 @@ export async function GET(request: Request) {
   const after = searchParams.get("after");
   const afterDate = after ? new Date(after) : null;
 
-  const messages = await prisma.chatMessage.findMany({
-    where: {
-      isDeleted: false,
-      ...(afterDate && !Number.isNaN(afterDate.getTime()) ? { createdAt: { gt: afterDate } } : {}),
-    },
-    include: messageInclude,
-    orderBy: { createdAt: "desc" },
-    take: afterDate && !Number.isNaN(afterDate.getTime()) ? 80 : 50,
-  });
+  const hasAfter = Boolean(afterDate && !Number.isNaN(afterDate.getTime()));
+  const [messages, reactionMessages] = await Promise.all([
+    prisma.chatMessage.findMany({
+      where: {
+        isDeleted: false,
+        ...(hasAfter ? { createdAt: { gt: afterDate! } } : {}),
+      },
+      include: messageInclude(session?.user?.id),
+      orderBy: { createdAt: "desc" },
+      take: hasAfter ? 80 : 50,
+    }),
+    hasAfter
+      ? prisma.chatMessage.findMany({
+          where: { isDeleted: false },
+          select: {
+            id: true,
+            likes: {
+              where: { userId: session?.user?.id ?? "__anonymous__" },
+              select: { id: true },
+            },
+            _count: { select: { likes: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+        })
+      : Promise.resolve([]),
+  ]);
 
   const [banned, unreadCount] = session?.user?.id
     ? await Promise.all([
@@ -105,6 +134,11 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     messages: messages.reverse().map(serializeMessage),
+    reactions: reactionMessages.map((message) => ({
+      id: message.id,
+      likeCount: message._count.likes,
+      likedByCurrentUser: message.likes.length > 0,
+    })),
     unreadCount,
     currentUser: session?.user?.id
       ? {
@@ -170,7 +204,7 @@ export async function POST(request: Request) {
       body,
       ...(replyToId ? { replyToId } : {}),
     },
-    include: messageInclude,
+    include: messageInclude(session.user.id),
   });
 
   return NextResponse.json({ message: serializeMessage(message) }, { status: 201 });

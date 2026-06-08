@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, Reply, Send, Smile, Trash2, X } from "lucide-react";
+import { Ban, Heart, Reply, Send, Smile, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type ChatMessage = {
@@ -18,6 +18,8 @@ type ChatMessage = {
     image: string | null;
     role: string;
   };
+  likeCount: number;
+  likedByCurrentUser: boolean;
 };
 
 type CurrentUser = {
@@ -64,6 +66,7 @@ export function FloatingChat() {
   const [emojiQuery, setEmojiQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [likingMessageIds, setLikingMessageIds] = useState<Set<string>>(() => new Set());
   const [unreadCount, setUnreadCount] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -90,18 +93,28 @@ export function FloatingChat() {
       messages: ChatMessage[];
       currentUser: CurrentUser;
       unreadCount: number;
+      reactions: {
+        id: string;
+        likeCount: number;
+        likedByCurrentUser: boolean;
+      }[];
     };
     setCurrentUser(data.currentUser);
     if (!onlyNew && !isOpen) setUnreadCount(Math.min(99, data.unreadCount));
     setMessages((existing) => {
+      const reactions = new Map(data.reactions.map((reaction) => [reaction.id, reaction]));
+      const withFreshReactions = existing.map((message) => {
+        const reaction = reactions.get(message.id);
+        return reaction ? { ...message, ...reaction } : message;
+      });
       if (!onlyNew) return data.messages;
-      const known = new Set(existing.map((message) => message.id));
+      const known = new Set(withFreshReactions.map((message) => message.id));
       const next = data.messages.filter((message) => !known.has(message.id));
       if (next.length && !isOpen) setUnreadCount((count) => Math.min(99, count + next.length));
       if (next.length && isOpen && currentUser) {
         void fetch("/api/chat/messages", { method: "PATCH" });
       }
-      return next.length ? [...existing, ...next].slice(-80) : existing;
+      return next.length ? [...withFreshReactions, ...next].slice(-80) : withFreshReactions;
     });
   }
 
@@ -222,6 +235,37 @@ export function FloatingChat() {
     }
   }
 
+  async function toggleLike(messageId: string) {
+    if (!currentUser || likingMessageIds.has(messageId)) return;
+    setLikingMessageIds((current) => new Set(current).add(messageId));
+    setError(null);
+
+    const response = await fetch(`/api/chat/messages/${messageId}/like`, { method: "POST" });
+    const data = (await response.json().catch(() => null)) as {
+      error?: string;
+      liked?: boolean;
+      likeCount?: number;
+    } | null;
+
+    if (response.ok && typeof data?.liked === "boolean" && typeof data.likeCount === "number") {
+      setMessages((existing) =>
+        existing.map((message) =>
+          message.id === messageId
+            ? { ...message, likedByCurrentUser: data.liked!, likeCount: data.likeCount! }
+            : message,
+        ),
+      );
+    } else {
+      setError(data?.error ?? "Не вдалося оновити вподобайку.");
+    }
+
+    setLikingMessageIds((current) => {
+      const next = new Set(current);
+      next.delete(messageId);
+      return next;
+    });
+  }
+
   async function banUser(userId: string) {
     const reason = window.prompt("Причина блокування в чаті", "Модерація чату");
     if (reason === null) return;
@@ -276,24 +320,43 @@ export function FloatingChat() {
                       </div>
                     ) : null}
                     <p>{message.body}</p>
-                    <div className="chat-admin-actions">
-                      {currentUser ? (
-                        <button type="button" onClick={() => setReplyTo(message)}>
-                          <Reply size={13} />
-                          Відповісти
+                    <div className="chat-message-footer">
+                      <div className="chat-admin-actions">
+                        {currentUser ? (
+                          <button type="button" onClick={() => setReplyTo(message)}>
+                            <Reply size={13} />
+                            Відповісти
+                          </button>
+                        ) : null}
+                        {canDelete ? (
+                          <button type="button" onClick={() => void deleteMessage(message.id)}>
+                            <Trash2 size={13} />
+                            Видалити
+                          </button>
+                        ) : null}
+                        {currentUser?.isAdmin && message.author.id !== currentUser.id ? (
+                          <button type="button" onClick={() => void banUser(message.author.id)}>
+                            <Ban size={13} />
+                            Заблокувати
+                          </button>
+                        ) : null}
+                      </div>
+                      {currentUser && !own ? (
+                        <button
+                          className={`chat-like-button ${message.likedByCurrentUser ? "active" : ""}`}
+                          type="button"
+                          disabled={likingMessageIds.has(message.id)}
+                          onClick={() => void toggleLike(message.id)}
+                          aria-label={message.likedByCurrentUser ? "Прибрати вподобайку" : "Вподобати повідомлення"}
+                        >
+                          <Heart size={15} fill={message.likedByCurrentUser ? "currentColor" : "none"} />
+                          {message.likeCount > 0 ? <span>{message.likeCount}</span> : null}
                         </button>
-                      ) : null}
-                      {canDelete ? (
-                        <button type="button" onClick={() => void deleteMessage(message.id)}>
-                          <Trash2 size={13} />
-                          Видалити
-                        </button>
-                      ) : null}
-                      {currentUser?.isAdmin && message.author.id !== currentUser.id ? (
-                        <button type="button" onClick={() => void banUser(message.author.id)}>
-                          <Ban size={13} />
-                          Заблокувати
-                        </button>
+                      ) : message.likeCount > 0 ? (
+                        <span className="chat-like-button readonly">
+                          <Heart size={15} fill="currentColor" />
+                          <span>{message.likeCount}</span>
+                        </span>
                       ) : null}
                     </div>
                   </div>
