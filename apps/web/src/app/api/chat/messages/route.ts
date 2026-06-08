@@ -81,12 +81,31 @@ export async function GET(request: Request) {
     take: afterDate && !Number.isNaN(afterDate.getTime()) ? 80 : 50,
   });
 
-  const banned = session?.user?.id
-    ? Boolean(await prisma.chatBan.findUnique({ where: { userId: session.user.id }, select: { id: true } }))
-    : false;
+  const [banned, unreadCount] = session?.user?.id
+    ? await Promise.all([
+        prisma.chatBan
+          .findUnique({ where: { userId: session.user.id }, select: { id: true } })
+          .then(Boolean),
+        prisma.user
+          .findUnique({
+            where: { id: session.user.id },
+            select: { chatLastReadAt: true },
+          })
+          .then((user) =>
+            prisma.chatMessage.count({
+              where: {
+                isDeleted: false,
+                authorId: { not: session.user.id },
+                ...(user?.chatLastReadAt ? { createdAt: { gt: user.chatLastReadAt } } : {}),
+              },
+            }),
+          ),
+      ])
+    : [false, 0];
 
   return NextResponse.json({
     messages: messages.reverse().map(serializeMessage),
+    unreadCount,
     currentUser: session?.user?.id
       ? {
           id: session.user.id,
@@ -97,6 +116,21 @@ export async function GET(request: Request) {
         }
       : null,
   });
+}
+
+export async function PATCH() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Увійди, щоб позначити повідомлення прочитаними." }, { status: 401 });
+  }
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { chatLastReadAt: new Date() },
+  });
+
+  return NextResponse.json({ unreadCount: 0 });
 }
 
 export async function POST(request: Request) {

@@ -84,8 +84,13 @@ export function FloatingChat() {
     const suffix = onlyNew && lastMessageAt ? `?after=${encodeURIComponent(lastMessageAt)}` : "";
     const response = await fetch(`/api/chat/messages${suffix}`, { cache: "no-store" });
     if (!response.ok) return;
-    const data = (await response.json()) as { messages: ChatMessage[]; currentUser: CurrentUser };
+    const data = (await response.json()) as {
+      messages: ChatMessage[];
+      currentUser: CurrentUser;
+      unreadCount: number;
+    };
     setCurrentUser(data.currentUser);
+    if (!onlyNew && !isOpen) setUnreadCount(Math.min(99, data.unreadCount));
     setMessages((existing) => {
       if (!onlyNew) return data.messages;
       const known = new Set(existing.map((message) => message.id));
@@ -108,7 +113,10 @@ export function FloatingChat() {
     if (!isOpen) return;
     setUnreadCount(0);
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
-  }, [isOpen, messages.length]);
+    if (currentUser) {
+      void fetch("/api/chat/messages", { method: "PATCH" });
+    }
+  }, [isOpen, messages.length, currentUser]);
 
   useEffect(() => {
     function toggleFromNavigation() {
