@@ -2591,9 +2591,26 @@ h3 {
 
 .promo-form {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(160px, 0.8fr) 150px;
+  grid-template-columns: minmax(220px, 1fr) 150px;
   gap: 10px;
   margin-top: 22px;
+}
+
+.promo-form-signed-in {
+  grid-template-columns: minmax(230px, max-content);
+}
+
+.promo-team-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 13px 0 0;
+  font-size: 15px;
+}
+
+.promo-team-count strong {
+  color: var(--yellow);
+  font-size: 18px;
 }
 
 .promo-visual {
@@ -2653,10 +2670,27 @@ h3 {
 
 .promo-steps article {
   position: relative;
-  min-height: 230px;
-  padding: 30px 22px;
+  min-height: 178px;
+  padding: 26px 18px 20px;
   text-align: center;
   border-right: 1px solid var(--line);
+}
+
+.promo-steps article svg {
+  width: 24px;
+  height: 24px;
+}
+
+.promo-steps article h2 {
+  margin: 9px 0 6px;
+  font-size: 18px;
+}
+
+.promo-steps article p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 .promo-steps article:last-child {
@@ -2675,6 +2709,122 @@ h3 {
   background: var(--green);
   color: #fff;
   font-weight: 900;
+}
+
+.home-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.home-overview-grid > article {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+  color: var(--green);
+}
+
+.home-card-heading h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.home-deadline-card {
+  gap: 9px;
+}
+
+.home-deadline-gw {
+  font-size: 17px;
+}
+
+.home-card-link {
+  width: max-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: auto;
+  padding-top: 16px;
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.home-ranking-list,
+.home-popular-list {
+  display: grid;
+}
+
+.home-ranking-list a,
+.home-popular-list > div {
+  min-height: 42px;
+  display: grid;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid var(--line);
+}
+
+.home-ranking-list a {
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+}
+
+.home-popular-list > div {
+  grid-template-columns: 20px 38px minmax(0, 1fr) auto;
+}
+
+.home-ranking-list em,
+.home-popular-list em {
+  color: var(--muted);
+  font-style: normal;
+  font-weight: 800;
+}
+
+.home-popular-list .player-photo-wrap.small {
+  width: 34px;
+  height: 34px;
+}
+
+.home-quick-links {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.home-quick-links > a {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 16px 18px;
+  border-right: 1px solid var(--line);
+}
+
+.home-quick-links > a:last-child {
+  border-right: 0;
+}
+
+.home-quick-links > a:hover {
+  background: var(--surface);
+}
+
+.home-quick-links span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.home-quick-links small {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .fantasy-layout {
@@ -3402,6 +3552,7 @@ h3 {
   .promo-hero,
   .fantasy-layout,
   .promo-steps,
+  .home-overview-grid,
   .squad-builder-layout {
     grid-template-columns: 1fr;
   }
@@ -3430,11 +3581,39 @@ h3 {
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
+
+  .home-quick-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-quick-links > a:nth-child(2) {
+    border-right: 0;
+  }
+
+  .home-quick-links > a:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line);
+  }
 }
 
 @media (max-width: 900px) {
   .team-edit-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .home-quick-links {
+    grid-template-columns: 1fr;
+  }
+
+  .home-quick-links > a,
+  .home-quick-links > a:nth-child(2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .home-quick-links > a:last-child {
+    border-bottom: 0;
   }
 }
 
@@ -4643,6 +4822,14 @@ h3 {
     max-width: 100%;
   }
 
+  .promo-form-signed-in {
+    display: block;
+  }
+
+  .promo-team-count {
+    flex-wrap: wrap;
+  }
+
   .promo-poster {
     width: 100%;
     max-width: 100%;
@@ -4658,6 +4845,10 @@ h3 {
 
   .promo-steps {
     width: 100%;
+  }
+
+  .home-overview-grid {
+    grid-template-columns: 1fr;
   }
 
   .admin-modal {
