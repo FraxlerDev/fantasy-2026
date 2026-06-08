@@ -67,6 +67,8 @@ export function FloatingChat() {
   const [unreadCount, setUnreadCount] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
+  const initialScrollPendingRef = useRef(false);
+  const scrollAfterSendRef = useRef(false);
 
   const lastMessageAt = messages.at(-1)?.createdAt;
   const filteredEmojiGroups = useMemo(() => {
@@ -96,6 +98,9 @@ export function FloatingChat() {
       const known = new Set(existing.map((message) => message.id));
       const next = data.messages.filter((message) => !known.has(message.id));
       if (next.length && !isOpen) setUnreadCount((count) => Math.min(99, count + next.length));
+      if (next.length && isOpen && currentUser) {
+        void fetch("/api/chat/messages", { method: "PATCH" });
+      }
       return next.length ? [...existing, ...next].slice(-80) : existing;
     });
   }
@@ -110,13 +115,32 @@ export function FloatingChat() {
   }, [lastMessageAt, isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
-    setUnreadCount(0);
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
-    if (currentUser) {
-      void fetch("/api/chat/messages", { method: "PATCH" });
+    if (!isOpen) {
+      initialScrollPendingRef.current = false;
+      return;
     }
-  }, [isOpen, messages.length, currentUser]);
+
+    setUnreadCount(0);
+    initialScrollPendingRef.current = true;
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !currentUser?.id) return;
+    void fetch("/api/chat/messages", { method: "PATCH" });
+  }, [isOpen, currentUser?.id]);
+
+  useEffect(() => {
+    if (!isOpen || messages.length === 0) return;
+    if (!initialScrollPendingRef.current && !scrollAfterSendRef.current) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
+      initialScrollPendingRef.current = false;
+      scrollAfterSendRef.current = false;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isOpen, messages.length]);
 
   useEffect(() => {
     function toggleFromNavigation() {
@@ -179,6 +203,7 @@ export function FloatingChat() {
     }
 
     const data = (await response.json()) as { message: ChatMessage };
+    scrollAfterSendRef.current = true;
     setMessages((existing) => [...existing, data.message].slice(-80));
     setBody("");
     setReplyTo(null);
