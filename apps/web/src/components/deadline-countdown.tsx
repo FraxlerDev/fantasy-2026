@@ -16,16 +16,17 @@ function formatRemaining(ms: number) {
 
 export function DeadlineCountdown({ deadlineAt }: { deadlineAt: string }) {
   const deadline = useMemo(() => new Date(deadlineAt).getTime(), [deadlineAt]);
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
+    setNow(Date.now());
     const interval = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(interval);
   }, []);
 
   return (
     <span className="deadline-countdown">
-      До дедлайну: <strong>{formatRemaining(deadline - now)}</strong>
+      До дедлайну: <strong>{now === null ? "-- дн. --:--:--" : formatRemaining(deadline - now)}</strong>
     </span>
   );
 }

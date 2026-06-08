@@ -4,7 +4,9 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
+import { ChatMessagesHeading } from "../../components/chat-messages-heading";
 import { DeadlineCountdown } from "../../components/deadline-countdown";
+import { OpenFanSectorButton } from "../../components/open-fan-sector-button";
 import { AppShell } from "../../components/shell";
 import { SquadBuilder, type SavedRosterEntry, type SquadPlayer } from "../../components/squad-builder";
 import { getEditableGameweek, validateRosterForSnapshot } from "../../lib/gameweeks";
@@ -210,8 +212,8 @@ export default async function SquadPage({
             </>
           )}
 
-          <section className="grid cols-2 dashboard-grid">
-            <div className="panel">
+          <section className="dashboard-grid">
+            <div className="panel dashboard-deadline-panel">
               <h2>Найближчий дедлайн</h2>
               {nextGameweek ? (
                 <>
@@ -231,11 +233,8 @@ export default async function SquadPage({
               ) : null}
             </div>
 
-            <div className="panel">
-              <div className="dashboard-section-title">
-                <h2>Останні повідомлення</h2>
-                <Bell size={20} />
-              </div>
+            <div className="panel dashboard-messages-panel">
+              <ChatMessagesHeading />
               <div className="dashboard-activity">
                 {activity.map((item) => (
                   <Link href={item.href} key={item.id}>
@@ -245,6 +244,9 @@ export default async function SquadPage({
                   </Link>
                 ))}
                 {activity.length === 0 ? <p className="muted">Нових повідомлень поки немає.</p> : null}
+              </div>
+              <div className="dashboard-chat-action">
+                <OpenFanSectorButton />
               </div>
             </div>
           </section>

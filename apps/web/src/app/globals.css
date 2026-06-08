@@ -146,6 +146,34 @@
   margin: 0;
 }
 
+.dashboard-messages-title-mobile {
+  display: none;
+}
+
+.dashboard-messages-heading-meta {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.dashboard-unread-badge {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.dashboard-unread-badge.is-empty {
+  display: none;
+}
+
 .dashboard-activity {
   display: grid;
   margin-top: 14px;
@@ -164,6 +192,34 @@
   color: var(--muted);
   font-size: 12px;
   white-space: nowrap;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.55fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.dashboard-deadline-panel,
+.dashboard-messages-panel {
+  min-width: 0;
+}
+
+.dashboard-messages-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-chat-action {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.dashboard-chat-button {
+  width: max-content;
 }
 
 .dashboard-validity {
@@ -4496,6 +4552,7 @@ h3 {
 
   .grid.cols-2,
   .grid.cols-3,
+  .dashboard-grid,
   .group-grid,
   .visit-stat-grid,
   .visit-analytics-grid,
@@ -4624,6 +4681,33 @@ h3 {
   .visit-detail-panel {
     position: static;
     max-height: none;
+  }
+
+  .dashboard-chat-action {
+    justify-content: stretch;
+  }
+
+  .dashboard-chat-button {
+    width: 100%;
+  }
+
+  .dashboard-messages-panel {
+    min-height: 0;
+    padding: 15px 16px;
+  }
+
+  .dashboard-messages-title-desktop,
+  .dashboard-messages-bell,
+  .dashboard-messages-panel .dashboard-activity {
+    display: none;
+  }
+
+  .dashboard-messages-title-mobile {
+    display: inline;
+  }
+
+  .dashboard-unread-badge.is-empty {
+    display: inline-flex;
   }
 
   .visit-funnel {

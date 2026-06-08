@@ -40,6 +40,7 @@ const emojiGroups = [
 
 const CHAT_TOGGLE_EVENT = "fantasy:chat-toggle";
 const CHAT_UNREAD_EVENT = "fantasy:chat-unread";
+const CHAT_UNREAD_REQUEST_EVENT = "fantasy:chat-unread-request";
 
 function formatTime(value: string) {
   return new Intl.DateTimeFormat("uk-UA", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
@@ -65,6 +66,7 @@ export function FloatingChat() {
   const [isSending, setIsSending] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
 
   const lastMessageAt = messages.at(-1)?.createdAt;
   const filteredEmojiGroups = useMemo(() => {
@@ -123,6 +125,30 @@ export function FloatingChat() {
   useEffect(() => {
     window.dispatchEvent(new CustomEvent(CHAT_UNREAD_EVENT, { detail: unreadCount }));
   }, [unreadCount]);
+
+  useEffect(() => {
+    function reportUnread() {
+      window.dispatchEvent(new CustomEvent(CHAT_UNREAD_EVENT, { detail: unreadCount }));
+    }
+
+    window.addEventListener(CHAT_UNREAD_REQUEST_EVENT, reportUnread);
+    return () => window.removeEventListener(CHAT_UNREAD_REQUEST_EVENT, reportUnread);
+  }, [unreadCount]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function closeOnOutsideClick(event: PointerEvent) {
+      if (!window.matchMedia("(min-width: 981px)").matches) return;
+      if ((event.target as Element).closest?.(".nav-chat-button, .dashboard-chat-button")) return;
+      if (panelRef.current?.contains(event.target as Node)) return;
+      setIsOpen(false);
+      setEmojiOpen(false);
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
+  }, [isOpen]);
 
   async function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -184,7 +210,7 @@ export function FloatingChat() {
   return (
     <div className="floating-chat">
       {isOpen ? (
-        <section className="chat-panel" aria-label="Загальний чат">
+        <section ref={panelRef} className="chat-panel" aria-label="Загальний чат">
           <header className="chat-header">
             <div>
               <strong>Фан-сектор</strong>
