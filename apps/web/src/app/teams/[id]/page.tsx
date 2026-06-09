@@ -46,6 +46,8 @@ export async function generateMetadata({ params }: PublicTeamPageProps): Promise
     noIndex: true,
     image,
     imageAlt: `Склад команди ${team.name}`,
+    imageWidth: 1200,
+    imageHeight: 630,
   });
 }
 
