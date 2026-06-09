@@ -214,7 +214,7 @@ function pageTitle(path: string) {
   if (pathname === "/tournament") return "Турнір";
   if (pathname === "/leaderboard") return "Рейтинг";
   if (pathname === "/leagues") return "Ліги";
-  if (pathname === "/petitions") return "Поради / Петиції";
+  if (pathname === "/forum") return "Форум";
   if (pathname === "/login") return "Вхід";
   if (pathname === "/admin") return "Адмінка";
   if (pathname.startsWith("/teams/")) return "Сторінка команди";

@@ -57,6 +57,7 @@ model User {
   country       String?
   role          Role      @default(USER)
   chatLastReadAt DateTime?
+  forumLastReadAt DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -72,6 +73,10 @@ model User {
   chatMessageLikes ChatMessageLike[]
   chatBans ChatBan[] @relation("ChatBannedUser")
   createdChatBans ChatBan[] @relation("ChatBanCreator")
+  forumTopics ForumTopic[]
+  forumComments ForumComment[]
+  forumCommentLikes ForumCommentLike[]
+  forumPollVotes ForumPollVote[]
 }
 
 model Account {
@@ -455,6 +460,89 @@ model PetitionVote {
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([petitionId, userId])
+  @@index([userId])
+}
+
+model ForumTopic {
+  id          String   @id @default(cuid())
+  authorId    String
+  title       String   @db.VarChar(140)
+  description String   @db.Text
+  status      String   @default("ACTIVE")
+  pollClosed  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author   User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  options  ForumPollOption[]
+  votes    ForumPollVote[]
+  comments ForumComment[]
+
+  @@index([status, createdAt])
+  @@index([authorId])
+}
+
+model ForumPollOption {
+  id      String @id @default(cuid())
+  topicId String
+  label   String @db.VarChar(120)
+  order   Int
+
+  topic ForumTopic      @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  votes ForumPollVote[]
+
+  @@index([topicId, order])
+}
+
+model ForumPollVote {
+  id       String   @id @default(cuid())
+  topicId  String
+  optionId String
+  userId   String
+  createdAt DateTime @default(now())
+
+  topic  ForumTopic      @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  option ForumPollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, userId])
+  @@index([optionId])
+  @@index([userId])
+}
+
+model ForumComment {
+  id        String   @id @default(cuid())
+  topicId   String
+  authorId  String
+  parentId  String?
+  body      String   @db.VarChar(1000)
+  isDeleted Boolean  @default(false)
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  topic   ForumTopic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  author  User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent  ForumComment?  @relation("ForumCommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies ForumComment[] @relation("ForumCommentReplies")
+  likes   ForumCommentLike[]
+
+  @@index([topicId, createdAt])
+  @@index([authorId])
+  @@index([parentId])
+}
+
+model ForumCommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  comment ForumComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@index([commentId])
   @@index([userId])
 }
 

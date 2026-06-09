@@ -1,8 +1,9 @@
-import { BookOpen, CalendarDays, Flag, Megaphone, Shield, Table2, Trophy, Users, Wrench } from "lucide-react";
+import { BookOpen, CalendarDays, Flag, MessageSquareText, Shield, Table2, Trophy, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 import { signOutUser } from "../app/actions/auth-actions";
 import { auth } from "../auth";
 import { FanSectorNavButton } from "./fan-sector-nav-button";
+import { ForumUnreadBadge } from "./forum-unread-badge";
 
 const items = [
   { href: "/", label: "Головна", icon: Trophy },
@@ -10,7 +11,7 @@ const items = [
   { href: "/matches", label: "Матч-центр", icon: CalendarDays },
   { href: "/squad", label: "Мій склад", icon: Shield },
   { href: "/leagues", label: "Ліги", icon: Users },
-  { href: "/petitions", label: "Поради / Петиції", icon: Megaphone },
+  { href: "/forum", label: "Форум", icon: MessageSquareText },
   { href: "/rules", label: "Правила", icon: BookOpen },
   { href: "/leaderboard", label: "Рейтинг", icon: Table2 },
 ];
@@ -47,6 +48,7 @@ export async function Sidebar({ active = "/" }: { active?: string }) {
               <Link href={item.href} data-active={active === item.href}>
                 <item.icon size={18} />
                 {item.label}
+                {item.href === "/forum" ? <ForumUnreadBadge /> : null}
               </Link>
               {item.href === "/leaderboard" ? <FanSectorNavButton /> : null}
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, CalendarDays, Flag, Home, Megaphone, Shield, Table2, Trophy, Users } from "lucide-react";
+import { BookOpen, CalendarDays, Flag, Home, MessageSquareText, Shield, Table2, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 
 const items = [
@@ -9,7 +9,7 @@ const items = [
   { href: "/matches", label: "Матч-центр", icon: CalendarDays },
   { href: "/squad", label: "Мій склад", icon: Shield },
   { href: "/leagues", label: "Ліги", icon: Users },
-  { href: "/petitions", label: "Поради / Петиції", icon: Megaphone },
+  { href: "/forum", label: "Форум", icon: MessageSquareText },
   { href: "/rules", label: "Правила", icon: BookOpen },
   { href: "/leaderboard", label: "Рейтинг", icon: Table2 },
 ];

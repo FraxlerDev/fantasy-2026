@@ -128,7 +128,7 @@ export default async function SquadPage({
     ...notifications.map((item) => ({
       id: `notification-${item.id}`,
       message: item.message,
-      href: item.href ?? "/petitions",
+      href: item.href ?? "/forum",
       createdAt: item.createdAt,
       type: "notification" as const,
     })),
