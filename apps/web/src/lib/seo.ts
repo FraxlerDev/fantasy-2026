@@ -5,7 +5,7 @@ export const siteName = "Фентезі-футбол, ЧС з футболу 202
 export const siteTitle = "Фентезі до ЧС-2026 | Fantasy World Cup 2026 UA";
 export const siteDescription =
   "Збери команду з гравців ЧС-2026, обери капітана, змагайся з друзями у лігах і глобальному рейтингу.";
-export const ogImage = "/main-photo.png";
+export const ogImage = `${siteUrl}/main-photo.png`;
 
 type SeoOptions = {
   title?: string;
@@ -26,6 +26,7 @@ export function createMetadata({
 }: SeoOptions = {}): Metadata {
   const pageTitle = title ? `${title} | ${siteName}` : siteTitle;
   const url = new URL(path, siteUrl).toString();
+  const resolvedImage = new URL(image, siteUrl).toString();
 
   return {
     title: pageTitle,
@@ -46,7 +47,7 @@ export function createMetadata({
       url,
       images: [
         {
-          url: image,
+          url: resolvedImage,
           width: 1200,
           height: 630,
           alt: imageAlt,
@@ -57,7 +58,7 @@ export function createMetadata({
       card: "summary_large_image",
       title: pageTitle,
       description,
-      images: [image],
+      images: [resolvedImage],
     },
     robots: noIndex
       ? {
@@ -110,7 +111,7 @@ export function webApplicationJsonLd() {
     inLanguage: "uk-UA",
     isAccessibleForFree: true,
     description: siteDescription,
-    image: `${siteUrl}${ogImage}`,
+    image: ogImage,
     offers: {
       "@type": "Offer",
       price: "0",
