@@ -98,7 +98,15 @@ export default async function ForumPage({
                         {statusLabels[topic.status] ?? topic.status}
                       </span>
                       <span>{topic.author.username?.trim() || "Користувач"}</span>
-                      <time>{latestActivity.toLocaleString("uk-UA", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>
+                      <time>
+                        {latestActivity.toLocaleString("uk-UA", {
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          timeZone: "Europe/Kyiv",
+                        })}
+                      </time>
                     </div>
                     <h2>{topic.title}</h2>
                     <p>{topic.description}</p>

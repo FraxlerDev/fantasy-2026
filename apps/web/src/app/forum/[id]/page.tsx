@@ -66,7 +66,15 @@ export default async function ForumTopicPage({
             {statusLabels[topic.status]}
           </span>
           <span>{topic.author.username?.trim() || "Користувач"}</span>
-          <time>{topic.createdAt.toLocaleString("uk-UA", { day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit" })}</time>
+          <time>
+            {topic.createdAt.toLocaleString("uk-UA", {
+              day: "2-digit",
+              month: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "Europe/Kyiv",
+            })}
+          </time>
         </div>
         {isAdmin ? (
           <ForumTopicAdminEditor
