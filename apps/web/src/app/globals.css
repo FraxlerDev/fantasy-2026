@@ -530,17 +530,38 @@
   border-left: 4px solid var(--danger);
 }
 
-.dashboard-empty {
-  min-height: 320px;
-  display: grid;
-  place-items: center;
-  align-content: center;
+.dashboard-team-state {
+  min-height: 0;
+  display: flex;
+  align-items: center;
   gap: 10px;
-  text-align: center;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--green);
+  background: #f3f7f2;
+  text-align: left;
 }
 
-.dashboard-empty > svg {
+.dashboard-team-state > svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
   color: var(--green);
+}
+
+.dashboard-team-state strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.dashboard-team-state span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.dashboard-team-state.created {
+  background: #e9f6ed;
 }
 
 .dashboard-section-title,

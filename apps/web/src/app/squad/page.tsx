@@ -204,11 +204,6 @@ export default async function SquadPage({
                   <p className="muted">Створи першу команду, щоб відкрити статистику, трансфери й місце в рейтингу.</p>
                 </div>
               </div>
-              <section className="panel dashboard-empty">
-                <Shield size={42} />
-                <h2>Команду ще не створено</h2>
-                <p>Нижче можна обрати 15 футболістів, стартовий склад і капітана.</p>
-              </section>
             </>
           )}
 
@@ -228,6 +223,13 @@ export default async function SquadPage({
               ) : (
                 <p className="muted">Усі дедлайни турніру завершено.</p>
               )}
+              <div className={`dashboard-team-state ${fantasyTeam ? "created" : "missing"}`}>
+                {fantasyTeam ? <CheckCircle2 size={20} /> : <Shield size={20} />}
+                <strong>{fantasyTeam ? "Команда створена" : "Команду ще не створено"}</strong>
+                {!fantasyTeam ? (
+                  <span>Нижче можна обрати 15 футболістів, стартовий склад і капітана.</span>
+                ) : null}
+              </div>
               {fantasyTeam && !isValid ? (
                 <div className="form-error dashboard-validity">
                   {snapshotFailure?.reason ?? validationReason}
