@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Bell, CheckCircle2, CircleAlert, MessageCircle, Shield, Trophy } from "lucide-react";
+import { Bell, CheckCircle2, CircleAlert, Clock3, MessageCircle, Shield, Trophy } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
 import { ChatMessagesHeading } from "../../components/chat-messages-heading";
-import { DeadlineCountdown } from "../../components/deadline-countdown";
+import { HeroDeadlineCountdown } from "../../components/hero-deadline-countdown";
 import { OpenFanSectorButton } from "../../components/open-fan-sector-button";
 import { AppShell } from "../../components/shell";
 import { SquadBuilder, type SavedRosterEntry, type SquadPlayer } from "../../components/squad-builder";
@@ -214,15 +214,17 @@ export default async function SquadPage({
 
           <section className="dashboard-grid">
             <div className="panel dashboard-deadline-panel">
-              <h2>Найближчий дедлайн</h2>
               {nextGameweek ? (
-                <>
-                  <p>
-                    <strong>GW{nextGameweek.number}</strong> · {nextGameweek.stage}
-                  </p>
-                  <p className="muted">{formatDate(nextGameweek.deadlineAt)}</p>
-                  <DeadlineCountdown deadlineAt={nextGameweek.deadlineAt.toISOString()} />
-                </>
+                <div className="promo-deadline squad-deadline">
+                  <div className="promo-deadline-heading">
+                    <span className="promo-deadline-icon"><Clock3 size={19} /></span>
+                    <span>
+                      <small>Найближчий дедлайн</small>
+                      <strong>GW{nextGameweek.number} · {formatDate(nextGameweek.deadlineAt)}</strong>
+                    </span>
+                  </div>
+                  <HeroDeadlineCountdown deadlineAt={nextGameweek.deadlineAt.toISOString()} />
+                </div>
               ) : (
                 <p className="muted">Усі дедлайни турніру завершено.</p>
               )}

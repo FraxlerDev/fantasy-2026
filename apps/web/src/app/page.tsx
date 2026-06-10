@@ -5,15 +5,18 @@ import {
   CalendarDays,
   CheckCircle2,
   Clock3,
+  Eye,
   ListOrdered,
+  LogIn,
   Shield,
   Trophy,
   UserRound,
   Users,
 } from "lucide-react";
 import { auth } from "../auth";
-import { DeadlineCountdown } from "../components/deadline-countdown";
+import { HeroDeadlineCountdown } from "../components/hero-deadline-countdown";
 import { AppShell } from "../components/shell";
+import { validateRosterForSnapshot } from "../lib/gameweeks";
 import { prisma } from "../lib/prisma";
 import { createMetadata } from "../lib/seo";
 import { startFromPromo } from "./actions/promo-actions";
@@ -53,7 +56,7 @@ export default async function HomePage() {
     .filter((row) => row._count.playerId === 15)
     .map((row) => row.fantasyTeamId);
 
-  const [topTeams, popularPlayerCounts] = await Promise.all([
+  const [topTeams, popularPlayerCounts, viewerTeam] = await Promise.all([
     completeTeamIds.length
       ? prisma.fantasyTeam.findMany({
           where: { id: { in: completeTeamIds } },
@@ -70,7 +73,38 @@ export default async function HomePage() {
           take: 5,
         })
       : [],
+    session?.user?.id
+      ? prisma.fantasyTeam.findUnique({
+          where: { userId: session.user.id },
+          include: {
+            rosterEntries: {
+              include: {
+                player: {
+                  select: {
+                    position: true,
+                    price: true,
+                    nationalTeamId: true,
+                  },
+                },
+              },
+            },
+          },
+        })
+      : null,
   ]);
+
+  const viewerEntries = viewerTeam?.rosterEntries ?? [];
+  const viewerStarterCount = viewerEntries.filter((entry) => entry.slot === "STARTER").length;
+  const viewerHasCaptain = viewerEntries.some((entry) => entry.slot === "STARTER" && entry.isCaptain);
+  const viewerRosterValid = viewerTeam
+    ? validateRosterForSnapshot(viewerEntries, viewerTeam.formation) === null
+    : false;
+  const startChecklist = [
+    { label: "15 гравців у команді", done: viewerEntries.length === 15 },
+    { label: "11 гравців у старті", done: viewerStarterCount === 11 },
+    { label: "Капітан обраний зі старту", done: viewerHasCaptain },
+    { label: "Склад готовий до старту", done: viewerRosterValid },
+  ];
 
   const popularPlayers = popularPlayerCounts.length
     ? await prisma.player.findMany({
@@ -99,23 +133,34 @@ export default async function HomePage() {
             Збери команду з 15 гравців, обери стартові 11, постав капітана і
             змагайся у глобальному рейтингу або в лігах з друзями.
           </p>
+          {nextGameweek ? (
+            <div className="promo-deadline">
+              <div className="promo-deadline-heading">
+                <span className="promo-deadline-icon"><Clock3 size={19} /></span>
+                <span>
+                  <small>Найближчий дедлайн</small>
+                  <strong>GW{nextGameweek.number} · {formatDate(nextGameweek.deadlineAt)}</strong>
+                </span>
+              </div>
+              <HeroDeadlineCountdown deadlineAt={nextGameweek.deadlineAt.toISOString()} />
+            </div>
+          ) : null}
           {session?.user?.id ? (
             <div className="promo-form promo-form-signed-in">
-              <Link className="button primary" href="/squad">
+              <Link className="button primary promo-cta" href="/squad">
                 Перейти до мого складу
               </Link>
             </div>
           ) : (
             <form action={startFromPromo} className="promo-form">
-              <input
-                className="input"
-                name="teamName"
-                placeholder="Придумай назву команди"
-                maxLength={40}
-              />
-              <button className="button primary" type="submit">
-                Грати
+              <button className="button primary promo-cta" type="submit">
+                <LogIn size={18} />
+                Увійти та зібрати команду
               </button>
+              <Link className="button promo-catalog-link" href="/players">
+                <Eye size={18} />
+                Переглянути гравців і ціни
+              </Link>
             </form>
           )}
           <p className="promo-team-count">
@@ -129,46 +174,48 @@ export default async function HomePage() {
       <section className="promo-steps">
         <article>
           <span>1</span>
-          <Shield size={28} />
-          <h2>Збери команду мрії</h2>
-          <p>Використай бюджет 100 монет і склади ростер із 15 гравців.</p>
+          <LogIn size={28} />
+          <h2>Увійди через Google</h2>
+          <p>Швидкий вхід без окремого пароля та довгої реєстрації.</p>
         </article>
         <article>
           <span>2</span>
-          <Users size={28} />
-          <h2>Створюй або вступай у ліги</h2>
-          <p>Команда може грати без ліги, а приватні та відкриті ліги доступні окремо.</p>
+          <Shield size={28} />
+          <h2>Обери 15 гравців</h2>
+          <p>Розподіли бюджет 100 монет, визнач старт і капітана.</p>
         </article>
         <article>
           <span>3</span>
-          <ArrowRight size={28} />
-          <h2>Роби трансфери</h2>
-          <p>Керуй складом між турами за лімітами кожного GW.</p>
-        </article>
-        <article>
-          <span>4</span>
-          <CheckCircle2 size={28} />
+          <Trophy size={28} />
           <h2>Змагайся з друзями</h2>
-          <p>Після оновлення рейтингів дивись місце у лігах і глобальній таблиці.</p>
+          <p>Грай у глобальному рейтингу або створи власну лігу.</p>
         </article>
       </section>
 
       <section className="home-overview-grid">
-        <article className="panel home-deadline-card">
+        <article className="panel home-start-card">
           <div className="home-card-heading">
-            <Clock3 size={22} />
-            <h2>Найближчий дедлайн</h2>
+            <CheckCircle2 size={22} />
+            <h2>Важливо перед стартом</h2>
           </div>
-          {nextGameweek ? (
-            <>
-              <strong className="home-deadline-gw">GW{nextGameweek.number} · {nextGameweek.stage}</strong>
-              <span className="muted">{formatDate(nextGameweek.deadlineAt)}</span>
-              <DeadlineCountdown deadlineAt={nextGameweek.deadlineAt.toISOString()} />
-            </>
-          ) : (
-            <p className="muted">Усі дедлайни турніру завершено.</p>
-          )}
-          <Link className="home-card-link" href="/tournament">Усі дедлайни <ArrowRight size={16} /></Link>
+          <ul className="home-start-checklist">
+            {startChecklist.map((item) => (
+              <li className={session?.user?.id && item.done ? "done" : ""} key={item.label}>
+                <CheckCircle2 size={18} />
+                <span>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="home-start-note">
+            {session?.user?.id
+              ? viewerRosterValid
+                ? "Усе готово. Перевір склад ще раз до дедлайну."
+                : "Заверши склад і обов’язково натисни «Зберегти»."
+              : "Увійди, збери повний склад і збережи його до дедлайну."}
+          </p>
+          <Link className="home-card-link" href={session?.user?.id ? "/squad" : "/login"}>
+            {viewerRosterValid ? "Перевірити склад" : "Завершити склад"} <ArrowRight size={16} />
+          </Link>
         </article>
 
         <article className="panel">
@@ -229,6 +276,7 @@ export default async function HomePage() {
         <Link href="/leaderboard"><ListOrdered size={22} /><span><strong>Рейтинг</strong><small>Глобальна таблиця</small></span></Link>
         <Link href="/leagues"><Users size={22} /><span><strong>Ліги</strong><small>Грай разом із друзями</small></span></Link>
       </nav>
+
     </AppShell>
   );
 }
