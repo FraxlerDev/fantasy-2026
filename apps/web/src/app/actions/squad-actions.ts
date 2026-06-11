@@ -60,8 +60,6 @@ export async function updateSquadProfile(formData: FormData) {
     }),
   ]);
 
-  if (!existingTeam) redirect("/squad?profileError=create-team-first");
-
   const usernameChanged = Boolean(username && username !== currentUser?.username);
   if (usernameChanged && !isValidUsername(username)) {
     redirect("/squad?profileError=username");
@@ -76,7 +74,7 @@ export async function updateSquadProfile(formData: FormData) {
 
   const uploadedAvatarUrl = await saveAvatar(session.user.id, avatar);
 
-  await prisma.$transaction(async (tx) => {
+  const savedTeam = await prisma.$transaction(async (tx) => {
     if (usernameChanged || uploadedAvatarUrl) {
       await tx.user.update({
         where: { id: session.user.id },
@@ -87,8 +85,17 @@ export async function updateSquadProfile(formData: FormData) {
       });
     }
 
+    if (!existingTeam) {
+      return tx.fantasyTeam.create({
+        data: {
+          userId: session.user.id,
+          name: teamName,
+        },
+      });
+    }
+
     if (existingTeam.name !== teamName) {
-      await tx.fantasyTeam.update({
+      const updatedTeam = await tx.fantasyTeam.update({
         where: { id: existingTeam.id },
         data: { name: teamName },
       });
@@ -100,11 +107,14 @@ export async function updateSquadProfile(formData: FormData) {
           changedById: session.user.id,
         },
       });
+      return updatedTeam;
     }
+
+    return existingTeam;
   });
 
   revalidatePath("/squad");
-  revalidatePath(`/teams/${existingTeam.id}`);
+  revalidatePath(`/teams/${savedTeam.id}`);
   revalidatePath("/leaderboard");
   revalidatePath("/leagues");
   redirect("/squad?profileSaved=1");

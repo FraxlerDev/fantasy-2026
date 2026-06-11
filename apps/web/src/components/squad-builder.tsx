@@ -85,7 +85,6 @@ const errorMessages: Record<string, string> = {
   "formation-shape": "Стартовий склад не відповідає обраній схемі.",
   "deadline-closed": "Дедлайн найближчого туру вже закрито.",
   "transfer-limit": "Після першого збереження можна замінити максимум 3 гравців на тур.",
-  "create-team-first": "Спочатку збережіть fantasy-команду.",
   "max-players-per-nation": "Не можна взяти більше 2 футболістів однієї збірної.",
   "budget-exceeded": "Загальна вартість команди не може перевищувати 100 монет.",
   username: "Нік має містити 3-24 символи: літери, цифри, пробіли, дефіс або нижнє підкреслення.",
@@ -94,7 +93,7 @@ const errorMessages: Record<string, string> = {
   "player-unavailable": "Недоступного гравця не можна додати до нового складу.",
 };
 
-const profileErrorCodes = new Set(["team-name", "username", "username-taken", "avatar", "create-team-first"]);
+const profileErrorCodes = new Set(["team-name", "username", "username-taken", "avatar"]);
 
 function pitchRows(formation: string): Array<{ position: PlayerPosition; label: string; slots: number }> {
   const shape = formations[formation] ?? formations["4-3-3"];
@@ -588,7 +587,7 @@ export function SquadBuilder({
                 type="submit"
                 formAction={updateSquadProfile}
                 data-submit-intent="profile"
-                disabled={!isSignedIn || !hasProfile || !initialTeamId}
+                disabled={!isSignedIn || !hasProfile}
               >
                 <Save size={18} />
                 Зберегти дані
