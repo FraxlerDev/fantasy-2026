@@ -77,6 +77,7 @@ model User {
   forumComments ForumComment[]
   forumCommentLikes ForumCommentLike[]
   forumPollVotes ForumPollVote[]
+  leagueChatMessages LeagueChatMessage[]
 }
 
 model Account {
@@ -318,6 +319,7 @@ model League {
 
   owner   User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   members LeagueMember[]
+  chatMessages LeagueChatMessage[]
 }
 
 model LeagueMember {
@@ -331,6 +333,22 @@ model LeagueMember {
 
   @@unique([leagueId, fantasyTeamId])
   @@index([fantasyTeamId])
+}
+
+model LeagueChatMessage {
+  id        String   @id @default(cuid())
+  leagueId  String
+  authorId  String
+  body      String   @db.VarChar(500)
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([leagueId, createdAt])
+  @@index([authorId])
 }
 
 model Fixture {

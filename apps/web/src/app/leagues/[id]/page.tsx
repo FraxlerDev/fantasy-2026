@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Lock, Unlock, Users } from "lucide-react";
+import { CheckCircle2, Crown, Lock, Trophy, Unlock, UserCheck, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "../../../components/shell";
 import { CopyButton } from "../../../components/copy-button";
 import { DeleteLeagueButton } from "../../../components/delete-league-button";
+import { LeagueChat } from "../../../components/league-chat";
 import { auth } from "../../../auth";
 import { prisma } from "../../../lib/prisma";
 import { createMetadata } from "../../../lib/seo";
@@ -56,6 +57,16 @@ function buildFallbackRows(members: Array<{ fantasyTeam: RankingRow["fantasyTeam
   });
 }
 
+function scoreSnapshot(
+  entries: Array<{ playerId: string; slot: "STARTER" | "BENCH"; isCaptain: boolean }>,
+  playerPoints: Map<string, number>,
+) {
+  const starters = entries.filter((entry) => entry.slot === "STARTER");
+  const basePoints = starters.reduce((sum, entry) => sum + (playerPoints.get(entry.playerId) ?? 0), 0);
+  const captain = starters.find((entry) => entry.isCaptain);
+  return basePoints + (captain ? playerPoints.get(captain.playerId) ?? 0 : 0);
+}
+
 export async function generateMetadata({ params }: LeaguePageProps): Promise<Metadata> {
   const { id } = await params;
   const league = await prisma.league.findUnique({ where: { id }, select: { name: true, description: true } });
@@ -100,6 +111,66 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
   });
   const rows: RankingRow[] = storedRows.length > 0 ? storedRows : buildFallbackRows(league.members);
 
+  const latestScoredFixture = await prisma.fixture.findFirst({
+    where: { status: { in: ["POINTS_SAVED", "RANKINGS_UPDATED"] } },
+    orderBy: [{ gameweek: "desc" }, { kickoffAt: "desc" }],
+    select: { gameweek: true },
+  });
+  const leaderGameweek = latestScoredFixture?.gameweek ?? 1;
+  const [leaderFixtures, memberSnapshots] = await Promise.all([
+    prisma.fixture.findMany({
+      where: { gameweek: leaderGameweek },
+      select: {
+        playerPoints: { select: { playerId: true, points: true } },
+      },
+    }),
+    prisma.lineupSnapshot.findMany({
+      where: {
+        gameweek: leaderGameweek,
+        fantasyTeam: { leagueMembers: { some: { leagueId: league.id } } },
+      },
+      select: {
+        fantasyTeam: { select: { id: true, name: true } },
+        entries: {
+          select: {
+            playerId: true,
+            slot: true,
+            isCaptain: true,
+            player: { select: { name: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const playerPoints = new Map<string, number>();
+  for (const fixture of leaderFixtures) {
+    for (const point of fixture.playerPoints) {
+      playerPoints.set(point.playerId, (playerPoints.get(point.playerId) ?? 0) + point.points);
+    }
+  }
+
+  const gameweekLeaders = memberSnapshots
+    .map((snapshot) => ({
+      id: snapshot.fantasyTeam.id,
+      name: snapshot.fantasyTeam.name,
+      points: scoreSnapshot(snapshot.entries, playerPoints),
+    }))
+    .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, "uk"));
+  const bestTeam = gameweekLeaders[0] && gameweekLeaders[0].points > 0 ? gameweekLeaders[0] : null;
+
+  const captainScores = memberSnapshots
+    .flatMap((snapshot) =>
+      snapshot.entries
+        .filter((entry) => entry.slot === "STARTER" && entry.isCaptain)
+        .map((entry) => ({
+          name: entry.player.name,
+          points: playerPoints.get(entry.playerId) ?? 0,
+        })),
+    )
+    .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, "uk"));
+  const bestCaptain = captainScores[0] && captainScores[0].points > 0 ? captainScores[0] : null;
+
   return (
     <AppShell active="/leagues">
       <div className="topbar">
@@ -124,12 +195,14 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
             <tbody>
               <tr><td>Власник</td><td><strong>{league.owner.username?.trim() || "Користувач"}</strong></td></tr>
               <tr><td>Учасники</td><td><strong>{league.members.length}</strong></td></tr>
-              {isOwner ? <tr><td>Invite code</td><td><strong>{league.inviteCode}</strong></td></tr> : null}
+              {isOwner ? <tr><td>Код запрошення</td><td><strong>{league.inviteCode}</strong></td></tr> : null}
             </tbody>
           </table>
           <div className="toolbar" style={{ marginTop: 14 }}>
             {isOwner ? <CopyButton text={league.inviteCode} label="Скопіювати код" /> : null}
-            <CopyButton text={leagueUrl(league.id)} label="Скопіювати посилання" />
+            {isOwner || isMember || league.isOpen ? (
+              <CopyButton text={leagueUrl(league.id)} label="Скопіювати посилання" />
+            ) : null}
             {isOwner ? <Link className="button" href="/leagues">Редагувати</Link> : null}
           </div>
         </div>
@@ -142,7 +215,10 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
             <p className="muted">Спочатку створи і збережи команду на сторінці складу.</p>
           ) : isMember ? (
             <>
-              <p className="muted">Твоя команда вже бере участь у цій лізі.</p>
+              <p className="league-membership-status">
+                <CheckCircle2 size={18} />
+                Ви вже в лізі
+              </p>
               {!isOwner ? (
                 <form action={leaveLeague}>
                   <input type="hidden" name="leagueId" value={league.id} />
@@ -172,6 +248,24 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
         </div>
       </section>
 
+      <section className="league-round-leaders">
+        <article className="panel">
+          <Trophy size={22} />
+          <span>Лідер GW{leaderGameweek}</span>
+          <strong>{bestTeam?.name ?? "Ще не визначено"}</strong>
+        </article>
+        <article className="panel">
+          <Crown size={22} />
+          <span>Найбільше очок</span>
+          <strong>{bestTeam ? bestTeam.points : 0}</strong>
+        </article>
+        <article className="panel">
+          <UserCheck size={22} />
+          <span>Найкращий капітан</span>
+          <strong>{bestCaptain ? `${bestCaptain.name} · ${bestCaptain.points}` : "Ще не визначено"}</strong>
+        </article>
+      </section>
+
       <section className="panel" style={{ marginTop: 16 }}>
         <div className="topbar" style={{ marginBottom: 12 }}>
           <div>
@@ -194,8 +288,10 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr key={row.fantasyTeam.id}>
+            {rows.map((row) => {
+              const isOwnTeam = row.fantasyTeam.id === fantasyTeam?.id;
+              return (
+              <tr className={isOwnTeam ? "leaderboard-own-row" : ""} key={row.fantasyTeam.id}>
                 <td>{row.rank}</td>
                 <td>
                   <Link className="leaderboard-team-link" href={`/teams/${row.fantasyTeam.id}`}>
@@ -203,6 +299,7 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
                       {row.fantasyTeam.user.image ? <img src={row.fantasyTeam.user.image} alt="" /> : <span>{teamInitial(row.fantasyTeam.name)}</span>}
                     </span>
                     <span>{row.fantasyTeam.name}</span>
+                    {isOwnTeam ? <span className="own-team-badge">Ви</span> : null}
                   </Link>
                 </td>
                 <td>{row.fantasyTeam.user.username?.trim() || "Користувач"}</td>
@@ -219,13 +316,20 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
                   </td>
                 ) : null}
               </tr>
-            ))}
+              );
+            })}
             {rows.length === 0 ? (
               <tr><td colSpan={isOwner ? 5 : 4}>У цій лізі ще немає команд.</td></tr>
             ) : null}
           </tbody>
         </table>
       </section>
+
+      {isMember || isOwner ? (
+        <div className="league-chat-wrap">
+          <LeagueChat leagueId={league.id} leagueName={league.name} />
+        </div>
+      ) : null}
     </AppShell>
   );
 }

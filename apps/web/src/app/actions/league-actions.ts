@@ -130,7 +130,7 @@ export async function removeLeagueMember(formData: FormData) {
   await prisma.leagueMember.deleteMany({ where: { leagueId, fantasyTeamId } });
   revalidatePath("/leagues");
   revalidatePath(`/leagues/${leagueId}`);
-  redirect(leaguesUrl("mine", { removed: "1" }));
+  redirect(`/leagues/${leagueId}?removed=1`);
 }
 
 export async function deleteOwnedLeague(formData: FormData) {
