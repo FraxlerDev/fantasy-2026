@@ -109,7 +109,19 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
     include: { fantasyTeam: { include: { user: true } } },
     orderBy: [{ rank: "asc" }, { fantasyTeam: { createdAt: "asc" } }],
   });
-  const rows: RankingRow[] = storedRows.length > 0 ? storedRows : buildFallbackRows(league.members);
+  const storedPointsByTeam = new Map(
+    storedRows.map((row) => [row.fantasyTeamId, row.totalPoints]),
+  );
+  const rows: RankingRow[] = buildFallbackRows(
+    league.members.map((member) => ({
+      fantasyTeam: {
+        ...member.fantasyTeam,
+        totalPoints:
+          storedPointsByTeam.get(member.fantasyTeamId) ??
+          member.fantasyTeam.totalPoints,
+      },
+    })),
+  );
 
   const latestScoredFixture = await prisma.fixture.findFirst({
     where: { status: { in: ["POINTS_SAVED", "RANKINGS_UPDATED"] } },
