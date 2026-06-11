@@ -111,3 +111,38 @@ export async function POST(
 
   return NextResponse.json({ message: serializeMessage(message) }, { status: 201 });
 }
+
+export async function PATCH(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ unreadCount: 0 }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const access = await getLeagueAccess(id, session.user.id);
+  if (!access?.allowed) {
+    return NextResponse.json({ unreadCount: 0 }, { status: 403 });
+  }
+
+  await prisma.leagueChatRead.upsert({
+    where: {
+      leagueId_userId: {
+        leagueId: id,
+        userId: session.user.id,
+      },
+    },
+    create: {
+      leagueId: id,
+      userId: session.user.id,
+      lastReadAt: new Date(),
+    },
+    update: {
+      lastReadAt: new Date(),
+    },
+  });
+
+  return NextResponse.json({ unreadCount: 0 });
+}

@@ -4,6 +4,7 @@ import { signOutUser } from "../app/actions/auth-actions";
 import { auth } from "../auth";
 import { FanSectorNavButton } from "./fan-sector-nav-button";
 import { ForumUnreadBadge } from "./forum-unread-badge";
+import { LeagueUnreadBadge } from "./league-unread-badge";
 
 const items = [
   { href: "/", label: "Головна", icon: Trophy },
@@ -48,6 +49,7 @@ export async function Sidebar({ active = "/" }: { active?: string }) {
               <Link href={item.href} data-active={active === item.href}>
                 <item.icon size={18} />
                 {item.label}
+                {item.href === "/leagues" ? <LeagueUnreadBadge /> : null}
                 {item.href === "/forum" ? <ForumUnreadBadge /> : null}
               </Link>
               {item.href === "/leaderboard" ? <FanSectorNavButton /> : null}

@@ -2,6 +2,7 @@
 
 import { Send, Trash2, UserRound } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { LEAGUE_UNREAD_EVENT } from "./league-unread-badge";
 
 type LeagueChatMessage = {
   id: string;
@@ -44,6 +45,13 @@ export function LeagueChat({ leagueId, leagueName }: { leagueId: string; leagueN
     setMessages(data.messages);
     setCurrentUserId(data.currentUserId);
     setIsOwner(data.isOwner);
+
+    const readResponse = await fetch(`/api/leagues/${leagueId}/messages`, {
+      method: "PATCH",
+    });
+    if (readResponse.ok) {
+      window.dispatchEvent(new Event(LEAGUE_UNREAD_EVENT));
+    }
   }, [leagueId]);
 
   useEffect(() => {
