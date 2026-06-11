@@ -198,6 +198,7 @@ export function SquadBuilder({
   const [view, setView] = useState<"field" | "table">("field");
   const [clientError, setClientError] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
+  const [swapSourceId, setSwapSourceId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const allowNavigationRef = useRef(false);
 
@@ -319,6 +320,11 @@ export function SquadBuilder({
     return { counts, limits };
   }
 
+  function starterShapeMatches(ids = starters, currentFormation = formation) {
+    const { counts, limits } = countStarters(ids, currentFormation);
+    return counts.GK === limits.GK && counts.DEF === limits.DEF && counts.MID === limits.MID && counts.FWD === limits.FWD;
+  }
+
   function canStart(player: SquadPlayer, ids = starters, currentFormation = formation) {
     const { counts, limits } = countStarters(ids, currentFormation);
     return counts[player.position] < limits[player.position] && ids.length < 11;
@@ -363,6 +369,7 @@ export function SquadBuilder({
 
   function removePlayer(playerId: string) {
     setClientError("");
+    if (swapSourceId === playerId) setSwapSourceId("");
     const initialIds = new Set(initialRoster.map((entry) => entry.playerId));
     const removedInitialCount = initialRoster.filter((entry) => !selectedIds.has(entry.playerId)).length;
     if (!hasUnlimitedTransfers && initialIds.has(playerId) && selectedIds.has(playerId) && removedInitialCount >= (transferLimit ?? 0)) {
@@ -372,6 +379,53 @@ export function SquadBuilder({
     setStarters((current) => current.filter((id) => id !== playerId));
     setBench((current) => current.filter((id) => id !== playerId));
     if (captainId === playerId) setCaptainId("");
+  }
+
+  function playerSlot(playerId: string) {
+    if (starters.includes(playerId)) return "STARTER";
+    if (bench.includes(playerId)) return "BENCH";
+    return null;
+  }
+
+  function swapStarterAndBench(sourceId: string, targetId: string) {
+    const sourceSlot = playerSlot(sourceId);
+    const targetSlot = playerSlot(targetId);
+
+    if (!sourceSlot || !targetSlot || sourceSlot === targetSlot) {
+      setSwapSourceId(targetId);
+      return;
+    }
+
+    const starterId = sourceSlot === "STARTER" ? sourceId : targetId;
+    const benchId = sourceSlot === "BENCH" ? sourceId : targetId;
+    const nextStarters = starters.map((id) => (id === starterId ? benchId : id));
+
+    if (!starterShapeMatches(nextStarters)) {
+      setPopupMessage("Ця заміна порушує схему складу. Обери запасного відповідної позиції або зміни схему.");
+      setSwapSourceId("");
+      return;
+    }
+
+    setStarters(nextStarters);
+    setBench((current) => current.map((id) => (id === benchId ? starterId : id)));
+    if (captainId === starterId) setCaptainId("");
+    setSwapSourceId("");
+    setClientError("");
+  }
+
+  function selectSwapPlayer(playerId: string) {
+    if (!selectedIds.has(playerId)) return;
+    if (!swapSourceId) {
+      setSwapSourceId(playerId);
+      setClientError("Обери гравця з іншої частини складу, щоб поміняти їх місцями.");
+      return;
+    }
+    if (swapSourceId === playerId) {
+      setSwapSourceId("");
+      setClientError("");
+      return;
+    }
+    swapStarterAndBench(swapSourceId, playerId);
   }
 
   function movePlayer(playerId: string, target: "STARTER" | "BENCH") {
@@ -468,9 +522,10 @@ export function SquadBuilder({
   }
 
   function playerChip(player: SquadPlayer, label?: string) {
+    const isSwapSelected = swapSourceId === player.id;
     return (
       <div
-        className={`fantasy-shirt filled ${player.status !== "AVAILABLE" ? "unavailable" : ""}`}
+        className={`fantasy-shirt filled ${player.status !== "AVAILABLE" ? "unavailable" : ""} ${isSwapSelected ? "swap-selected" : ""}`}
         draggable
         key={player.id}
         onDragStart={(event) => event.dataTransfer.setData("text/plain", player.id)}
@@ -478,6 +533,15 @@ export function SquadBuilder({
       >
         <button className="remove-player-button" type="button" onClick={() => removePlayer(player.id)} aria-label={`Вилучити ${player.name}`}>
           <X size={13} />
+        </button>
+        <button
+          className="swap-player-button"
+          type="button"
+          onClick={() => selectSwapPlayer(player.id)}
+          aria-label={`Замінити ${player.name} зі старту або лавки`}
+          title="Поміняти старт і лавку"
+        >
+          <RotateCcw size={12} />
         </button>
         <span
           className="player-photo-wrap"
@@ -523,7 +587,7 @@ export function SquadBuilder({
         <div className="fixed-bench" onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, "BENCH")}>
           {Array.from({ length: 4 }, (_, index) => {
             const player = benchPlayers[index];
-            return player ? playerChip(player, "Лавка") : emptySlot(`bench-${index}`, "Лавка", "BENCH");
+            return player ? playerChip(player, positionLabels[player.position]) : emptySlot(`bench-${index}`, "Лавка", "BENCH");
           })}
         </div>
       </>

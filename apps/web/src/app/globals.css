@@ -4274,6 +4274,28 @@ h3 {
   z-index: 3;
 }
 
+.swap-player-button {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  line-height: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  background: #f2cf42;
+  color: #071f16;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 3;
+}
+
 .remove-player-button svg {
   display: block;
   width: 13px;
@@ -4281,8 +4303,21 @@ h3 {
 }
 
 .fantasy-shirt:hover .remove-player-button,
-.fantasy-shirt:focus-within .remove-player-button {
+.fantasy-shirt:focus-within .remove-player-button,
+.fantasy-shirt:hover .swap-player-button,
+.fantasy-shirt:focus-within .swap-player-button,
+.fantasy-shirt.swap-selected .swap-player-button {
   opacity: 1;
+}
+
+.fantasy-shirt.swap-selected {
+  outline: 2px solid #f2cf42;
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.fantasy-shirt.swap-selected .swap-player-button {
+  transform: scale(1.08);
 }
 
 .unavailable-mark {
