@@ -23,6 +23,12 @@ const formations: Record<string, { DEF: number; MID: number; FWD: number }> = {
 const maxAvatarSize = 200 * 1024;
 const allowedAvatarTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
+function samePlayerSet(left: string[], right: string[]) {
+  if (left.length !== right.length) return false;
+  const rightSet = new Set(right);
+  return left.every((id) => rightSet.has(id));
+}
+
 async function saveAvatar(userId: string, avatar: FormDataEntryValue | null) {
   if (!(avatar instanceof File) || avatar.size === 0) return undefined;
   if (avatar.size > maxAvatarSize || !allowedAvatarTypes.has(avatar.type)) {
@@ -223,19 +229,23 @@ export async function saveSquad(formData: FormData) {
   });
 
   const previousSnapshot = existingTeamWithSnapshot?.lineupSnapshots[0];
-  const previousPlayerIds =
-    previousSnapshot?.entries.map((entry) => entry.playerId) ??
-    existingTeamWithSnapshot?.rosterEntries.map((entry) => entry.playerId) ??
-    [];
+  const previousPlayerIds = previousSnapshot?.entries.map((entry) => entry.playerId) ?? [];
+  const currentSavedPlayerIds = existingTeamWithSnapshot?.rosterEntries.map((entry) => entry.playerId) ?? [];
   if (nextOpenGameweek.transferLimit !== null && previousPlayerIds.length > 0) {
     const previousIds = new Set(previousPlayerIds);
+    const savedIncomingTransfers = currentSavedPlayerIds.filter((playerId) => !previousIds.has(playerId)).length;
     const incomingTransfers = rosterIds.filter((playerId) => !previousIds.has(playerId)).length;
+    const rosterChanged = !samePlayerSet(rosterIds, currentSavedPlayerIds);
+    if (savedIncomingTransfers >= nextOpenGameweek.transferLimit && rosterChanged) {
+      redirect("/squad?error=transfer-limit-locked");
+    }
     if (incomingTransfers > nextOpenGameweek.transferLimit) {
       redirect("/squad?error=transfer-limit");
     }
   }
 
-  const unavailableNewPlayers = players.filter((player) => player.status !== "AVAILABLE" && !previousPlayerIds.includes(player.id));
+  const allowedUnavailableIds = new Set(previousPlayerIds.length > 0 ? previousPlayerIds : currentSavedPlayerIds);
+  const unavailableNewPlayers = players.filter((player) => player.status !== "AVAILABLE" && !allowedUnavailableIds.has(player.id));
   if (unavailableNewPlayers.length > 0) {
     redirect("/squad?error=player-unavailable");
   }

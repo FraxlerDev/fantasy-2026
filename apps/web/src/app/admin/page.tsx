@@ -314,7 +314,7 @@ export default async function AdminPage({
           },
           orderBy: [{ slot: "desc" }, { player: { position: "asc" } }, { player: { name: "asc" } }],
         },
-        lineupSnapshots: { select: { id: true, gameweek: true, createdAt: true, entries: { select: { id: true } } } },
+        lineupSnapshots: { select: { id: true, gameweek: true, createdAt: true, entries: { select: { id: true, playerId: true } } } },
         snapshotFailures: { select: { gameweek: true, reason: true, updatedAt: true } },
       },
       orderBy: [{ createdAt: "asc" }],
@@ -363,6 +363,28 @@ export default async function AdminPage({
   const csvPreview = players.slice(0, 5);
   const snapshotControl = gameweeks.map((gameweek) => {
     const snapshotTeams = fantasyTeams.filter((team) => team.lineupSnapshots.some((snapshot) => snapshot.gameweek === gameweek.number));
+    const transferTeams =
+      gameweek.transferLimit === null
+        ? []
+        : fantasyTeams
+            .map((team) => {
+              const baseSnapshot = team.lineupSnapshots
+                .filter((snapshot) => snapshot.gameweek < gameweek.number)
+                .sort((a, b) => b.gameweek - a.gameweek)[0];
+              if (!baseSnapshot || baseSnapshot.entries.length === 0) return null;
+              const baseIds = new Set(baseSnapshot.entries.map((entry) => entry.playerId));
+              const used = team.rosterEntries.filter((entry) => !baseIds.has(entry.playerId)).length;
+              if (used === 0) return null;
+              return {
+                id: team.id,
+                name: team.name,
+                manager: team.user.username ?? team.user.email ?? "Без менеджера",
+                used,
+                limit: gameweek.transferLimit ?? 0,
+                locked: used >= (gameweek.transferLimit ?? 0),
+              };
+            })
+            .filter((team): team is NonNullable<typeof team> => Boolean(team));
     const failedTeams = fantasyTeams
       .map((team) => ({
         id: team.id,
@@ -387,6 +409,7 @@ export default async function AdminPage({
       snapshotCount: snapshotTeams.length,
       failedTeams,
       missingTeams,
+      transferTeams,
       readyPercent: fantasyTeams.length ? Math.round((snapshotTeams.length / fantasyTeams.length) * 100) : 0,
     };
   });
@@ -676,7 +699,27 @@ export default async function AdminPage({
                 <div className="card stat"><span className="badge">Snapshot</span><strong>{item.snapshotCount}</strong></div>
                 <div className="card stat"><span className="badge">Невалідні</span><strong>{item.failedTeams.length}</strong></div>
                 <div className="card stat"><span className="badge">Без знімка</span><strong>{item.missingTeams.length}</strong></div>
+                <div className="card stat"><span className="badge">Трансфери</span><strong>{item.transferTeams.length}</strong></div>
               </div>
+
+              {item.transferTeams.length > 0 ? (
+                <div className="snapshot-list">
+                  <h3>Використані трансфери GW{item.gameweek.number}</h3>
+                  <table className="table compact-table">
+                    <thead><tr><th>Команда</th><th>Менеджер</th><th>Використано</th><th>Статус</th></tr></thead>
+                    <tbody>
+                      {item.transferTeams.map((team) => (
+                        <tr key={team.id}>
+                          <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.name}</a></td>
+                          <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.manager}</a></td>
+                          <td>{team.used}/{team.limit}</td>
+                          <td>{team.locked ? "Ліміт використано" : "Ще можна робити трансфери"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : null}
 
               {item.failedTeams.length > 0 ? (
                 <div className="snapshot-list">

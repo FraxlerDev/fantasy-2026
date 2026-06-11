@@ -109,18 +109,29 @@ export default async function SquadPage({
         orderBy: [{ kickoffAt: "asc" }, { matchNo: "asc" }],
       })
     : [];
+  const transferBaseSnapshot =
+    fantasyTeam && editableGameweek
+      ? await prisma.lineupSnapshot.findFirst({
+          where: {
+            fantasyTeamId: fantasyTeam.id,
+            gameweek: { lt: editableGameweek.number },
+          },
+          include: { entries: true },
+          orderBy: { gameweek: "desc" },
+        })
+      : null;
 
   const validationReason = fantasyTeam
     ? validateRosterForSnapshot(fantasyTeam.rosterEntries, fantasyTeam.formation)
     : null;
   const isValid = Boolean(fantasyTeam && !validationReason);
-  const previousIds = new Set(fantasyTeam?.lineupSnapshots[0]?.entries.map((entry) => entry.playerId) ?? []);
+  const previousIds = new Set(transferBaseSnapshot?.entries.map((entry) => entry.playerId) ?? []);
   const currentIds = new Set(fantasyTeam?.rosterEntries.map((entry) => entry.playerId) ?? []);
   const usedTransfers =
     previousIds.size > 0 ? [...currentIds].filter((playerId) => !previousIds.has(playerId)).length : 0;
   const transferText = !editableGameweek
     ? "Закриті"
-    : editableGameweek.transferLimit === null
+    : editableGameweek.transferLimit === null || previousIds.size === 0
       ? "Безліміт"
       : `${Math.max(0, editableGameweek.transferLimit - usedTransfers)} з ${editableGameweek.transferLimit}`;
 
@@ -284,6 +295,7 @@ export default async function SquadPage({
           currentDeadline={editableGameweek?.deadlineAt.toISOString()}
           currentStart={editableGameweek?.startAt.toISOString()}
           transferLimit={editableGameweek?.transferLimit}
+          transferBasePlayerIds={[...previousIds]}
           userProfile={{
             username: currentUser?.username ?? session.user.username,
             email: currentUser?.email ?? session.user.email,

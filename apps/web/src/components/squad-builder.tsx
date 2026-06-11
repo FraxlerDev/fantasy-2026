@@ -85,6 +85,7 @@ const errorMessages: Record<string, string> = {
   "formation-shape": "Стартовий склад не відповідає обраній схемі.",
   "deadline-closed": "Дедлайн найближчого туру вже закрито.",
   "transfer-limit": "Після першого збереження можна замінити максимум 3 гравців на тур.",
+  "transfer-limit-locked": "Ліміт трансферів цього GW уже використано. Можна міняти лише старт, лавку, схему і капітана.",
   "max-players-per-nation": "Не можна взяти більше 2 футболістів однієї збірної.",
   "budget-exceeded": "Загальна вартість команди не може перевищувати 100 монет.",
   username: "Нік має містити 3-24 символи: літери, цифри, пробіли, дефіс або нижнє підкреслення.",
@@ -142,6 +143,7 @@ export function SquadBuilder({
   currentDeadline,
   currentStart,
   transferLimit,
+  transferBasePlayerIds = [],
   userProfile,
   initialTeamName,
   initialTeamId,
@@ -162,6 +164,7 @@ export function SquadBuilder({
   currentDeadline?: string;
   currentStart?: string;
   transferLimit?: number | null;
+  transferBasePlayerIds?: string[];
   userProfile?: SquadUserProfile;
   initialTeamName?: string;
   initialTeamId?: string;
@@ -224,7 +227,17 @@ export function SquadBuilder({
   const budgetUsed = selectedPlayers.reduce((sum, player) => sum + player.price, 0);
   const balance = 100 - budgetUsed;
   const selectedNationCodes = new Set(selectedPlayers.map((player) => player.nationCode));
-  const hasUnlimitedTransfers = transferLimit === null;
+  const transferBaseIds = useMemo(() => new Set(transferBasePlayerIds), [transferBasePlayerIds]);
+  const initialSelectedIds = useMemo(() => new Set(initialRoster.map((entry) => entry.playerId)), [initialRoster]);
+  const hasLimitedTransfers = typeof transferLimit === "number" && transferBaseIds.size > 0;
+  const hasUnlimitedTransfers = transferLimit === null || (typeof transferLimit === "number" && transferBaseIds.size === 0);
+  const savedUsedTransfers = hasLimitedTransfers
+    ? [...initialSelectedIds].filter((playerId) => !transferBaseIds.has(playerId)).length
+    : 0;
+  const currentUsedTransfers = hasLimitedTransfers
+    ? [...selectedIds].filter((playerId) => !transferBaseIds.has(playerId)).length
+    : 0;
+  const transferRosterLocked = hasLimitedTransfers && savedUsedTransfers >= (transferLimit ?? 0);
   const nationCounts = selectedPlayers.reduce<Map<string, number>>((counts, player) => {
     counts.set(player.nationCode, (counts.get(player.nationCode) ?? 0) + 1);
     return counts;
@@ -333,6 +346,14 @@ export function SquadBuilder({
   function addPlayer(playerId: string) {
     const player = playerById.get(playerId);
     if (!player || selectedIds.has(playerId)) return;
+    if (transferRosterLocked) {
+      setPopupMessage("Ліміт трансферів цього GW уже використано. До наступного GW можна міняти лише старт, лавку, схему і капітана.");
+      return;
+    }
+    if (hasLimitedTransfers && !transferBaseIds.has(playerId) && currentUsedTransfers >= (transferLimit ?? 0)) {
+      setPopupMessage(`Ліміт трансферів цього GW уже вичерпано: ${transferLimit ?? 0} з ${transferLimit ?? 0}. Щоб додати цього гравця, потрібно дочекатися наступного GW.`);
+      return;
+    }
     if (selectedIds.size >= 15) {
       setPopupMessage("Склад уже повністю заповнено: обрано 15 гравців. Щоб додати іншого футболіста, спочатку вилучи когось зі складу.");
       return;
@@ -370,10 +391,8 @@ export function SquadBuilder({
   function removePlayer(playerId: string) {
     setClientError("");
     if (swapSourceId === playerId) setSwapSourceId("");
-    const initialIds = new Set(initialRoster.map((entry) => entry.playerId));
-    const removedInitialCount = initialRoster.filter((entry) => !selectedIds.has(entry.playerId)).length;
-    if (!hasUnlimitedTransfers && initialIds.has(playerId) && selectedIds.has(playerId) && removedInitialCount >= (transferLimit ?? 0)) {
-      setPopupMessage(`У трансферному вікні можна прибрати максимум ${transferLimit ?? 0} гравців зі збереженого складу.`);
+    if (transferRosterLocked) {
+      setPopupMessage("Ліміт трансферів цього GW уже використано. До наступного GW можна міняти лише старт, лавку, схему і капітана.");
       return;
     }
     setStarters((current) => current.filter((id) => id !== playerId));
@@ -426,6 +445,17 @@ export function SquadBuilder({
       return;
     }
     swapStarterAndBench(swapSourceId, playerId);
+  }
+
+  function isAddBlockedByTransfers(player: SquadPlayer) {
+    return transferRosterLocked || (hasLimitedTransfers && !transferBaseIds.has(player.id) && currentUsedTransfers >= (transferLimit ?? 0));
+  }
+
+  function addButtonLabel(player: SquadPlayer) {
+    if (selectedIds.has(player.id)) return "Вже у складі";
+    if (player.status !== "AVAILABLE") return "Недоступний";
+    if (isAddBlockedByTransfers(player)) return "Ліміт";
+    return "Додати";
   }
 
   function movePlayer(playerId: string, target: "STARTER" | "BENCH") {
@@ -745,7 +775,7 @@ export function SquadBuilder({
             <dt>Лавка</dt><dd>{bench.length}/4</dd>
             <dt>Вартість</dt><dd>{budgetUsed.toFixed(1)}</dd>
             <dt>Баланс</dt><dd>{balance.toFixed(1)}</dd>
-            <dt>Трансфери</dt><dd>{hasUnlimitedTransfers ? "Безліміт" : transferLimit ?? "-"}</dd>
+            <dt>Трансфери</dt><dd>{hasUnlimitedTransfers ? "Безліміт" : hasLimitedTransfers ? `${Math.max(0, (transferLimit ?? 0) - currentUsedTransfers)} з ${transferLimit}` : "-"}</dd>
             <dt>Схема</dt><dd>{formation}</dd>
           </dl>
 
@@ -877,10 +907,10 @@ export function SquadBuilder({
                   <button
                     className={selectedIds.has(player.id) ? "button selected-player-button" : "button"}
                     type="button"
-                    disabled={selectedIds.has(player.id) || player.status !== "AVAILABLE"}
+                    disabled={selectedIds.has(player.id) || player.status !== "AVAILABLE" || isAddBlockedByTransfers(player)}
                     onClick={() => addPlayer(player.id)}
                   >
-                    {selectedIds.has(player.id) ? "Вже у складі" : player.status !== "AVAILABLE" ? "Недоступний" : "Додати"}
+                    {addButtonLabel(player)}
                   </button>
                 </td>
               </tr>
