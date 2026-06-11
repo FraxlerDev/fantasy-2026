@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { auth } from "../auth";
 import { HeroDeadlineCountdown } from "../components/hero-deadline-countdown";
+import { InviteFriendsBanner } from "../components/invite-friends-banner";
 import { AppShell } from "../components/shell";
 import { validateRosterForSnapshot } from "../lib/gameweeks";
 import { prisma } from "../lib/prisma";
@@ -170,6 +171,8 @@ export default async function HomePage() {
         </div>
         <div className="promo-poster" aria-label="Постер Fantasy World Cup 2026" />
       </section>
+
+      {nextGameweek?.number === 1 ? <InviteFriendsBanner /> : null}
 
       <section className="promo-steps">
         <article>
