@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { playoffMatches } from "../../data/match-center";
 import { requireAdmin } from "../../lib/admin";
-import { createGameweekSnapshots, openGameweekTransfers } from "../../lib/gameweeks";
+import { closeGameweekTransfers, createGameweekSnapshots, openGameweekTransfers } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
 import { refreshLeaderboards } from "../../lib/rankings";
 
@@ -449,12 +449,20 @@ export async function createGameweekSnapshotsAction(formData: FormData) {
   const gameweek = Number(formData.get("gameweek") ?? 0);
   if (!gameweek) redirect("/admin?error=gameweek#gameweeks");
 
-  const result = await createGameweekSnapshots(gameweek);
+  const gameweekRecord = await prisma.gameweek.findUnique({
+    where: { number: gameweek },
+    select: { deadlineAt: true },
+  });
+  if (!gameweekRecord) redirect("/admin?error=gameweek#gameweeks");
+
+  const result = await createGameweekSnapshots(gameweek, {
+    finalize: gameweekRecord.deadlineAt <= new Date(),
+  });
 
   revalidatePath("/admin");
   revalidatePath("/squad");
   revalidatePath("/leaderboard");
-  redirect(`/admin?snapshots=${result.created}&snapshotFailed=${result.failed}&snapshotSkipped=${result.skipped ? "1" : "0"}#gameweeks`);
+  redirect(`/admin?snapshots=${result.created}&snapshotFailed=${result.failed}&snapshotFinalized=${result.finalized ? "1" : "0"}#gameweeks`);
 }
 
 export async function openGameweekTransfersAction(formData: FormData) {
@@ -471,4 +479,20 @@ export async function openGameweekTransfersAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/squad");
   redirect(`/admin?openedGw=${gameweek}#gameweeks`);
+}
+
+export async function closeGameweekTransfersAction(formData: FormData) {
+  await requireAdmin();
+  const gameweek = Number(formData.get("gameweek") ?? 0);
+  if (!gameweek) redirect("/admin?error=gameweek#gameweeks");
+
+  try {
+    await closeGameweekTransfers(gameweek);
+  } catch {
+    redirect("/admin?error=close-gameweek#gameweeks");
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/squad");
+  redirect(`/admin?closedGw=${gameweek}#gameweeks`);
 }

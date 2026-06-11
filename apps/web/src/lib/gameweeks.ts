@@ -12,13 +12,13 @@ const formations: Record<string, { DEF: number; MID: number; FWD: number }> = {
 };
 
 export const defaultGameweeks = [
-  { number: 1, name: "GW1", stage: "1 тур групового етапу", startAt: "2026-06-11T22:00:00+03:00", deadlineAt: "2026-06-11T20:30:00+03:00", transferLimit: null, transfersOpen: true },
-  { number: 2, name: "GW2", stage: "2 тур групового етапу", startAt: "2026-06-18T19:00:00+03:00", deadlineAt: "2026-06-18T17:30:00+03:00", transferLimit: 3, transfersOpen: false },
-  { number: 3, name: "GW3", stage: "3 тур групового етапу", startAt: "2026-06-24T22:00:00+03:00", deadlineAt: "2026-06-24T20:30:00+03:00", transferLimit: 3, transfersOpen: false },
-  { number: 4, name: "GW4", stage: "1/16 фіналу", startAt: "2026-06-28T22:00:00+03:00", deadlineAt: "2026-06-28T20:30:00+03:00", transferLimit: null, transfersOpen: false },
-  { number: 5, name: "GW5", stage: "1/8 фіналу", startAt: "2026-07-04T20:00:00+03:00", deadlineAt: "2026-07-04T18:30:00+03:00", transferLimit: 5, transfersOpen: false },
-  { number: 6, name: "GW6", stage: "1/4 фіналу", startAt: "2026-07-09T23:00:00+03:00", deadlineAt: "2026-07-09T21:30:00+03:00", transferLimit: 5, transfersOpen: false },
-  { number: 7, name: "GW7", stage: "1/2 фіналу, фінал і матч за 3 місце", startAt: "2026-07-14T22:00:00+03:00", deadlineAt: "2026-07-14T20:30:00+03:00", transferLimit: null, transfersOpen: false },
+  { number: 1, name: "GW1", stage: "1 тур групового етапу", startAt: "2026-06-11T22:00:00+03:00", deadlineAt: "2026-06-11T20:30:00+03:00", transferLimit: null, transfersOpen: true, transferWindowStatus: "OPEN_MANUAL" },
+  { number: 2, name: "GW2", stage: "2 тур групового етапу", startAt: "2026-06-18T19:00:00+03:00", deadlineAt: "2026-06-18T17:30:00+03:00", transferLimit: 3, transfersOpen: false, transferWindowStatus: "SCHEDULED" },
+  { number: 3, name: "GW3", stage: "3 тур групового етапу", startAt: "2026-06-24T22:00:00+03:00", deadlineAt: "2026-06-24T20:30:00+03:00", transferLimit: 3, transfersOpen: false, transferWindowStatus: "SCHEDULED" },
+  { number: 4, name: "GW4", stage: "1/16 фіналу", startAt: "2026-06-28T22:00:00+03:00", deadlineAt: "2026-06-28T20:30:00+03:00", transferLimit: null, transfersOpen: false, transferWindowStatus: "SCHEDULED" },
+  { number: 5, name: "GW5", stage: "1/8 фіналу", startAt: "2026-07-04T20:00:00+03:00", deadlineAt: "2026-07-04T18:30:00+03:00", transferLimit: 5, transfersOpen: false, transferWindowStatus: "SCHEDULED" },
+  { number: 6, name: "GW6", stage: "1/4 фіналу", startAt: "2026-07-09T23:00:00+03:00", deadlineAt: "2026-07-09T21:30:00+03:00", transferLimit: 5, transfersOpen: false, transferWindowStatus: "SCHEDULED" },
+  { number: 7, name: "GW7", stage: "1/2 фіналу, фінал і матч за 3 місце", startAt: "2026-07-14T22:00:00+03:00", deadlineAt: "2026-07-14T20:30:00+03:00", transferLimit: null, transfersOpen: false, transferWindowStatus: "SCHEDULED" },
 ] as const;
 
 type RosterEntryForValidation = {
@@ -52,10 +52,20 @@ export async function ensureDefaultGameweeks() {
         deadlineAt: new Date(gameweek.deadlineAt),
         transferLimit: gameweek.transferLimit,
         transfersOpen: gameweek.transfersOpen,
+        transferWindowStatus: gameweek.transferWindowStatus,
         status: gameweek.transfersOpen ? "OPEN" : "UPCOMING",
       },
     });
   }
+
+  await prisma.gameweek.updateMany({
+    where: { transfersOpen: true, transferWindowStatus: "SCHEDULED" },
+    data: { transferWindowStatus: "OPEN_MANUAL", status: "OPEN" },
+  });
+  await prisma.gameweek.updateMany({
+    where: { snapshotsFinalizedAt: { not: null } },
+    data: { transfersOpen: false, transferWindowStatus: "CLOSED_DEADLINE", status: "LOCKED" },
+  });
 }
 
 export function validateRosterForSnapshot(entries: RosterEntryForValidation[], formation: string) {
@@ -93,14 +103,15 @@ export function validateRosterForSnapshot(entries: RosterEntryForValidation[], f
   return null;
 }
 
-export async function createGameweekSnapshots(gameweekNumber: number) {
+export async function createGameweekSnapshots(
+  gameweekNumber: number,
+  options: { finalize?: boolean } = {},
+) {
   await ensureDefaultGameweeks();
 
   const gameweek = await prisma.gameweek.findUnique({ where: { number: gameweekNumber } });
   if (!gameweek) throw new Error(`GW${gameweekNumber} not found`);
-  if (gameweek.snapshotsCreatedAt) {
-    return { created: 0, failed: 0, skipped: true };
-  }
+  const finalize = options.finalize ?? gameweek.deadlineAt <= new Date();
 
   const teams = await prisma.fantasyTeam.findMany({
     include: {
@@ -115,16 +126,21 @@ export async function createGameweekSnapshots(gameweekNumber: number) {
   let failed = 0;
 
   await prisma.$transaction(async (tx) => {
-    await tx.gameweek.update({
-      where: { id: gameweek.id },
-      data: { status: "SNAPSHOTTING", transfersOpen: false },
-    });
+    if (finalize) {
+      await tx.gameweek.update({
+        where: { id: gameweek.id },
+        data: { status: "SNAPSHOTTING", transfersOpen: false, transferWindowStatus: "CLOSED_DEADLINE" },
+      });
+    }
 
     for (const team of teams) {
       const reason = validateRosterForSnapshot(team.rosterEntries, team.formation);
 
       if (reason) {
         failed += 1;
+        await tx.lineupSnapshot.deleteMany({
+          where: { fantasyTeamId: team.id, gameweek: gameweekNumber },
+        });
         await tx.lineupSnapshotFailure.upsert({
           where: { fantasyTeamId_gameweek: { fantasyTeamId: team.id, gameweek: gameweekNumber } },
           update: { reason },
@@ -156,11 +172,21 @@ export async function createGameweekSnapshots(gameweekNumber: number) {
 
     await tx.gameweek.update({
       where: { id: gameweek.id },
-      data: { status: "LOCKED", snapshotsCreatedAt: new Date(), transfersOpen: false },
+      data: finalize
+        ? {
+            status: "LOCKED",
+            snapshotsCreatedAt: new Date(),
+            snapshotsFinalizedAt: new Date(),
+            transfersOpen: false,
+            transferWindowStatus: "CLOSED_DEADLINE",
+          }
+        : {
+            snapshotsCreatedAt: new Date(),
+          },
     });
   });
 
-  return { created, failed, skipped: false };
+  return { created, failed, finalized: finalize };
 }
 
 export async function processDueGameweekSnapshots(now = new Date()) {
@@ -169,14 +195,17 @@ export async function processDueGameweekSnapshots(now = new Date()) {
   const dueGameweeks = await prisma.gameweek.findMany({
     where: {
       deadlineAt: { lte: now },
-      snapshotsCreatedAt: null,
+      snapshotsFinalizedAt: null,
     },
     orderBy: { number: "asc" },
   });
 
   const results = [];
   for (const gameweek of dueGameweeks) {
-    results.push({ gameweek: gameweek.number, ...(await createGameweekSnapshots(gameweek.number)) });
+    results.push({
+      gameweek: gameweek.number,
+      ...(await createGameweekSnapshots(gameweek.number, { finalize: true })),
+    });
   }
 
   return results;
@@ -189,14 +218,33 @@ export async function openGameweekTransfers(gameweekNumber: number) {
   if (!gameweek) throw new Error(`GW${gameweekNumber} not found`);
   if (gameweek.deadlineAt <= new Date()) throw new Error(`GW${gameweekNumber} deadline is closed`);
 
-  await prisma.gameweek.updateMany({
-    where: { number: { not: gameweekNumber }, transfersOpen: true },
-    data: { transfersOpen: false },
-  });
+  return prisma.$transaction(async (tx) => {
+    await tx.gameweek.updateMany({
+      where: { number: { not: gameweekNumber }, transfersOpen: true },
+      data: { transfersOpen: false, transferWindowStatus: "CLOSED_MANUAL", status: "UPCOMING" },
+    });
 
+    return tx.gameweek.update({
+      where: { number: gameweekNumber },
+      data: { transfersOpen: true, transferWindowStatus: "OPEN_MANUAL", status: "OPEN" },
+    });
+  });
+}
+
+export async function closeGameweekTransfers(gameweekNumber: number) {
+  await ensureDefaultGameweeks();
+
+  const gameweek = await prisma.gameweek.findUnique({ where: { number: gameweekNumber } });
+  if (!gameweek) throw new Error(`GW${gameweekNumber} not found`);
+
+  const deadlinePassed = gameweek.deadlineAt <= new Date();
   return prisma.gameweek.update({
     where: { number: gameweekNumber },
-    data: { transfersOpen: true, status: "OPEN" },
+    data: {
+      transfersOpen: false,
+      transferWindowStatus: deadlinePassed ? "CLOSED_DEADLINE" : "CLOSED_MANUAL",
+      status: deadlinePassed || gameweek.snapshotsFinalizedAt ? "LOCKED" : "UPCOMING",
+    },
   });
 }
 

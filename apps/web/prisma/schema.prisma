@@ -47,6 +47,13 @@ enum GameweekStatus {
   FINISHED
 }
 
+enum TransferWindowStatus {
+  SCHEDULED
+  OPEN_MANUAL
+  CLOSED_MANUAL
+  CLOSED_DEADLINE
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -423,8 +430,10 @@ model Gameweek {
   deadlineAt         DateTime
   transferLimit      Int?
   transfersOpen      Boolean        @default(false)
+  transferWindowStatus TransferWindowStatus @default(SCHEDULED)
   status             GameweekStatus @default(UPCOMING)
   snapshotsCreatedAt DateTime?
+  snapshotsFinalizedAt DateTime?
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 

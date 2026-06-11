@@ -22,6 +22,8 @@ import {
 } from "../../components/admin-visit-stats";
 import { DeleteNationalTeamPlayersButton } from "../../components/delete-national-team-players-button";
 import { AppShell } from "../../components/shell";
+import { SnapshotSubmitButton } from "../../components/snapshot-submit-button";
+import { TransferWindowButton } from "../../components/transfer-window-button";
 import { requireAdmin } from "../../lib/admin";
 import { ensureDefaultGameweeks } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
@@ -29,9 +31,7 @@ import { createMetadata } from "../../lib/seo";
 import { buildAllGroupStandings, ensurePlayoffMatches, resolvePlayoffMatches } from "../../lib/tournament";
 import { isBotUserAgent } from "../../lib/visit-analytics";
 import {
-  createGameweekSnapshotsAction,
   createFixture,
-  openGameweekTransfersAction,
   refreshRankingsAction,
   resetPlayoffScore,
   resetFixtureScore,
@@ -123,6 +123,13 @@ function formatDuration(totalSeconds: number) {
   if (hours > 0) return `${hours} год ${minutes} хв`;
   if (minutes > 0) return `${minutes} хв ${restSeconds} с`;
   return `${restSeconds} с`;
+}
+
+function transferWindowLabel(gameweek: { transfersOpen: boolean; transferWindowStatus: string; deadlineAt: Date }) {
+  if (gameweek.deadlineAt <= new Date() || gameweek.transferWindowStatus === "CLOSED_DEADLINE") return "Закриті дедлайном";
+  if (gameweek.transfersOpen) return "Відкриті вручну";
+  if (gameweek.transferWindowStatus === "CLOSED_MANUAL") return "Закриті вручну";
+  return "Очікують відкриття";
 }
 
 function visitStatus(lastSeenAt: Date) {
@@ -235,6 +242,7 @@ errorMessages["team-players-in-use"] = "Склад цієї збірної вж�
 errorMessages["team-players-delete"] = "Не вдалося видалити склад збірної.";
 errorMessages.gameweek = "Не вдалося визначити GW.";
 errorMessages["open-gameweek"] = "Не вдалося відкрити трансфери: дедлайн цього GW уже закритий або GW не існує.";
+errorMessages["close-gameweek"] = "Не вдалося закрити трансфери для цього GW.";
 errorMessages["playoff-score"] = "Для нічиєї після додаткового часу потрібно ввести різний рахунок серії пенальті.";
 errorMessages.tiebreak = "Перевір дисциплінарні очки та місце збірної у рейтингу FIFA.";
 
@@ -253,8 +261,9 @@ export default async function AdminPage({
     count?: string;
     snapshots?: string;
     snapshotFailed?: string;
-    snapshotSkipped?: string;
+    snapshotFinalized?: string;
     openedGw?: string;
+    closedGw?: string;
     playoffId?: string;
     playoffScore?: string;
     tiebreak?: string;
@@ -457,11 +466,13 @@ export default async function AdminPage({
           Зміни збережено.{params?.players ? ` Імпортовано рядків: ${params.count ?? "0"}.` : ""}
         </div>
       ) : null}
-      {params?.snapshots || params?.openedGw ? (
+      {params?.snapshots || params?.openedGw || params?.closedGw ? (
         <div className="form-success">
           {params.openedGw
             ? `Трансфери відкрито для GW${params.openedGw}.`
-            : `Snapshot створено: ${params.snapshots ?? "0"}, невалідних складів: ${params.snapshotFailed ?? "0"}${params.snapshotSkipped === "1" ? " (snapshot уже існував)." : "."}`}
+            : params.closedGw
+              ? `Трансфери закрито для GW${params.closedGw}. Snapshot залишився без змін.`
+            : `Snapshot оновлено: ${params.snapshots ?? "0"}, невалідних складів: ${params.snapshotFailed ?? "0"}. ${params.snapshotFinalized === "1" ? "Фінальний snapshot зафіксовано." : "Це попередній snapshot; трансфери залишаються відкритими."}`}
         </div>
       ) : null}
 
@@ -577,7 +588,7 @@ export default async function AdminPage({
 
       <section className="panel" id="gameweeks" style={{ marginBottom: 16 }}>
         <h2>Gameweeks, дедлайни і трансфери</h2>
-        <p className="muted">Snapshot створюється автоматично після дедлайну через cron, але тут можна створити його вручну або відкрити трансфери наступного GW.</p>
+        <p className="muted">До дедлайну snapshot можна оновлювати вручну необмежену кількість разів. У момент дедлайну система примусово перезаписує його поточними складами та фіксує як фінальний. Ручне відкриття або закриття трансферів snapshot не змінює.</p>
         <table className="table compact-table">
           <thead>
             <tr>
@@ -599,22 +610,46 @@ export default async function AdminPage({
                 <td>{gameweek.startAt.toLocaleString("uk-UA", { timeZone: "Europe/Kyiv", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</td>
                 <td>{gameweek.deadlineAt.toLocaleString("uk-UA", { timeZone: "Europe/Kyiv", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</td>
                 <td>{gameweek.transferLimit === null ? "unlimited" : gameweek.transferLimit}</td>
-                <td>{gameweek.transfersOpen ? "OPEN" : gameweek.status}</td>
-                <td>{gameweek.snapshotsCreatedAt ? "створено" : "-"}</td>
+                <td>{transferWindowLabel(gameweek)}</td>
+                <td>
+                  {gameweek.snapshotsCreatedAt ? (
+                    <span>
+                      <strong>{gameweek.snapshotsFinalizedAt ? "Фінальний" : "Попередній"}</strong>
+                      <br />
+                      <small>
+                        {gameweek.snapshotsCreatedAt.toLocaleString("uk-UA", {
+                          timeZone: "Europe/Kyiv",
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </small>
+                    </span>
+                  ) : "-"}
+                </td>
                 <td>
                   <div className="toolbar">
-                    <form action={createGameweekSnapshotsAction}>
-                      <input type="hidden" name="gameweek" value={gameweek.number} />
-                      <button className="button" type="submit" disabled={Boolean(gameweek.snapshotsCreatedAt)}>
-                        Snapshot
-                      </button>
-                    </form>
-                    <form action={openGameweekTransfersAction}>
-                      <input type="hidden" name="gameweek" value={gameweek.number} />
-                      <button className="button primary" type="submit" disabled={gameweek.deadlineAt <= new Date() || gameweek.transfersOpen}>
-                        Відкрити
-                      </button>
-                    </form>
+                    <SnapshotSubmitButton
+                      gameweek={gameweek.number}
+                      label={
+                        gameweek.deadlineAt <= new Date()
+                          ? "Перезаписати фінальний snapshot"
+                          : gameweek.snapshotsCreatedAt
+                            ? "Оновити snapshot"
+                            : "Snapshot"
+                      }
+                      confirmMessage={
+                        gameweek.deadlineAt <= new Date()
+                          ? `Перезаписати фінальний snapshot GW${gameweek.number} поточними складами? Попередні фінальні знімки буде замінено.`
+                          : `Snapshot GW${gameweek.number} буде оновлено поточними складами. Стан трансферів не зміниться. Продовжити?`
+                      }
+                    />
+                    <TransferWindowButton
+                      gameweek={gameweek.number}
+                      mode={gameweek.transfersOpen ? "close" : "open"}
+                      disabled={!gameweek.transfersOpen && gameweek.deadlineAt <= new Date()}
+                    />
                   </div>
                 </td>
               </tr>
