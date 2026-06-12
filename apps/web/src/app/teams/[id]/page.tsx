@@ -181,20 +181,36 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
 
   if (!team) notFound();
 
-  const [rank, fixtures] = await Promise.all([
+  const [rank, fixtures, gameweeks] = await Promise.all([
     prisma.leaderboardRow.findFirst({ where: { scope: "GLOBAL", fantasyTeamId: team.id } }),
     prisma.fixture.findMany({
       include: { homeTeam: true, awayTeam: true, playerPoints: true },
       orderBy: [{ gameweek: "asc" }, { kickoffAt: "asc" }, { matchNo: "asc" }],
     }),
+    prisma.gameweek.findMany({ orderBy: { number: "asc" } }),
   ]);
 
   const latestSnapshot = team.lineupSnapshots.at(-1);
   const parsedGameweek = Number(query?.gw ?? latestSnapshot?.gameweek ?? 1);
   const requestedGameweek = Number.isFinite(parsedGameweek) ? Math.min(7, Math.max(1, parsedGameweek)) : 1;
   const selectedSnapshot = team.lineupSnapshots.find((snapshot) => snapshot.gameweek === requestedGameweek);
-  const currentFormation = selectedSnapshot?.formation ?? team.formation;
-  const currentEntries = (selectedSnapshot?.entries ?? []) as LineupEntry[];
+  const selectedGameweek = gameweeks.find((gameweek) => gameweek.number === requestedGameweek);
+  const now = new Date();
+  const deadlinePassed = selectedGameweek ? selectedGameweek.deadlineAt <= now : false;
+  const isPreview = !selectedSnapshot && !deadlinePassed && team.rosterEntries.length > 0;
+  const isSnapshotProcessing =
+    !selectedSnapshot &&
+    deadlinePassed &&
+    !selectedGameweek?.snapshotsFinalizedAt;
+  const didNotParticipate =
+    !selectedSnapshot &&
+    deadlinePassed &&
+    Boolean(selectedGameweek?.snapshotsFinalizedAt);
+  const currentFormation = selectedSnapshot?.formation ?? (isPreview ? team.formation : "-");
+  const currentEntries = (
+    selectedSnapshot?.entries ??
+    (isPreview ? team.rosterEntries : [])
+  ) as LineupEntry[];
   const starters = currentEntries.filter((entry) => entry.slot === "STARTER");
   const bench = currentEntries.filter((entry) => entry.slot === "BENCH").sort((a, b) => (a.benchOrder ?? 99) - (b.benchOrder ?? 99));
   const playerPointTotals = new Map<string, number>();
@@ -211,18 +227,30 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
     }
   }
 
-  const gameweekRows = [...new Set(fixtures.map((fixture) => fixture.gameweek))].map((gameweek) => {
-    const snapshotEntries =
-      (team.lineupSnapshots.find((snapshot) => snapshot.gameweek === gameweek)?.entries as LineupEntry[] | undefined) ??
-      [];
-    const gwFixtures = fixtures.filter((fixture) => fixture.gameweek === gameweek);
+  const gameweekRows = gameweeks.map((gameweek) => {
+    const snapshot = team.lineupSnapshots.find((item) => item.gameweek === gameweek.number);
+    const snapshotEntries = (snapshot?.entries as LineupEntry[] | undefined) ?? [];
+    const gwFixtures = fixtures.filter((fixture) => fixture.gameweek === gameweek.number);
     const points = new Map<string, number>();
     for (const fixture of gwFixtures) {
       for (const point of fixture.playerPoints) {
         points.set(point.playerId, (points.get(point.playerId) ?? 0) + point.points);
       }
     }
-    return { gameweek, fixtures: gwFixtures.length, points: gameweekPoints(snapshotEntries, points) };
+    const status = snapshot
+      ? "Зараховано"
+      : gameweek.deadlineAt > now
+        ? "Очікується"
+        : gameweek.snapshotsFinalizedAt
+          ? "Не брала участі"
+          : "Snapshot обробляється";
+
+    return {
+      gameweek: gameweek.number,
+      fixtures: gwFixtures.length,
+      points: snapshot ? gameweekPoints(snapshotEntries, points) : 0,
+      status,
+    };
   });
 
   const selectedTeamCodes = new Set(currentEntries.map((entry) => entry.player.nationalTeam.nameUk));
@@ -266,16 +294,31 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
             );
           })}
         </nav>
-        {!selectedSnapshot ? (
+        {isPreview ? (
+          <div className="form-success snapshot-fallback-note">
+            Попередній склад. Остаточний склад буде зафіксовано після дедлайну під час snapshot GW{requestedGameweek}.
+          </div>
+        ) : null}
+        {isSnapshotProcessing ? (
+          <div className="form-success snapshot-fallback-note">
+            Snapshot GW{requestedGameweek} ще обробляється.
+          </div>
+        ) : null}
+        {didNotParticipate ? (
           <div className="form-error snapshot-fallback-note">
             Команда не брала участі в GW{requestedGameweek}.
+          </div>
+        ) : null}
+        {!selectedSnapshot && !isPreview && !deadlinePassed ? (
+          <div className="form-error snapshot-fallback-note">
+            Склад команди ще не збережено.
           </div>
         ) : null}
 
         <section className="grid cols-2" style={{ marginTop: 16 }}>
           <div className="panel">
             <h2>Склад GW{requestedGameweek}</h2>
-            {selectedSnapshot ? (
+            {selectedSnapshot || isPreview ? (
               <>
                 <div className="fixed-pitch public-fixed-pitch">
                   {starters.length > 0 ? (
@@ -307,7 +350,11 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
               </>
             ) : (
               <div className="snapshot-no-participation">
-                Команда не брала участі в GW{requestedGameweek}.
+                {isSnapshotProcessing
+                  ? `Snapshot GW${requestedGameweek} ще обробляється.`
+                  : didNotParticipate
+                    ? `Команда не брала участі в GW${requestedGameweek}.`
+                    : "Склад команди ще не збережено."}
               </div>
             )}
           </div>
@@ -315,13 +362,14 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
           <div className="panel">
             <h2>Очки по турах</h2>
             <table className="table compact-table">
-              <thead><tr><th>GW</th><th>Матчів</th><th>Очки</th></tr></thead>
+              <thead><tr><th>GW</th><th>Матчів</th><th>Очки</th><th>Статус</th></tr></thead>
               <tbody>
                 {gameweekRows.map((row) => (
                   <tr key={row.gameweek}>
                     <td>GW{row.gameweek}</td>
                     <td>{row.fixtures}</td>
                     <td><strong>{row.points}</strong></td>
+                    <td>{row.status}</td>
                   </tr>
                 ))}
               </tbody>
