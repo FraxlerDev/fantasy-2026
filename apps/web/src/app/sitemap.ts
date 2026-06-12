@@ -10,6 +10,8 @@ const publicRoutes = [
   { path: "/leagues", priority: 0.6, changeFrequency: "daily" as const },
   { path: "/forum", priority: 0.6, changeFrequency: "daily" as const },
   { path: "/players", priority: 0.8, changeFrequency: "daily" as const },
+  { path: "/player-rankings", priority: 0.7, changeFrequency: "hourly" as const },
+  { path: "/player-points", priority: 0.7, changeFrequency: "hourly" as const },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

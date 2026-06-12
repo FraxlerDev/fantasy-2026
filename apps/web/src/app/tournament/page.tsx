@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { CalendarDays, MapPin, Trophy, UserRound, Users } from "lucide-react";
+import { CalendarDays, MapPin, Trophy, Users } from "lucide-react";
 import Link from "next/link";
+import { PlayerRankingTable } from "../../components/player-ranking-table";
 import { AppShell } from "../../components/shell";
 import { DeadlineCountdown } from "../../components/deadline-countdown";
+import { getPlayerRanking } from "../../lib/player-rankings";
 import { prisma } from "../../lib/prisma";
 import { createMetadata } from "../../lib/seo";
 
@@ -23,26 +25,15 @@ function formatDate(date: Date) {
 }
 
 export default async function TournamentPage() {
-  const [teamsCount, playersCount, fixturesCount, gameweeks, popularPlayerCounts] = await Promise.all([
+  const [teamsCount, playersCount, fixturesCount, gameweeks, popularPlayers, pointsLeaders] = await Promise.all([
     prisma.nationalTeam.count(),
     prisma.player.count(),
     prisma.fixture.count(),
     prisma.gameweek.findMany({ orderBy: { number: "asc" } }),
-    prisma.rosterEntry.groupBy({
-      by: ["playerId"],
-      _count: { playerId: true },
-      orderBy: { _count: { playerId: "desc" } },
-      take: 20,
-    }),
+    getPlayerRanking("popularity"),
+    getPlayerRanking("points"),
   ]);
 
-  const popularPlayers = popularPlayerCounts.length
-    ? await prisma.player.findMany({
-        where: { id: { in: popularPlayerCounts.map((row) => row.playerId) } },
-        include: { nationalTeam: true },
-      })
-    : [];
-  const popularPlayersById = new Map(popularPlayers.map((player) => [player.id, player]));
   const nextGameweek = gameweeks.find((gameweek) => gameweek.deadlineAt > new Date()) ?? null;
   const activeGameweek = gameweeks.find((gameweek) => gameweek.transfersOpen) ?? nextGameweek;
   return (
@@ -94,50 +85,29 @@ export default async function TournamentPage() {
           </div>
         </section>
 
-        <section className="panel" style={{ marginTop: 16 }}>
-          <h2>Найпопулярніші гравці</h2>
-          <p className="muted">ТОП-20 гравців, яких найчастіше обирали у fantasy-команди.</p>
-          <table className="table compact-table">
-            <thead>
-              <tr><th>#</th><th>Гравець</th><th>Поз.</th><th>Збірна</th><th>Клуб</th><th>Виборів</th></tr>
-            </thead>
-            <tbody>
-              {popularPlayerCounts.map((row, index) => {
-                const player = popularPlayersById.get(row.playerId);
-                if (!player) return null;
+        <div className="grid cols-2 tournament-player-rankings" style={{ marginTop: 16 }}>
+          <section className="panel player-ranking-preview">
+            <h2>Найпопулярніші гравці</h2>
+            <p className="muted">ТОП-15 гравців, яких найчастіше обирали до фентезі-команд.</p>
+            <PlayerRankingTable
+              players={popularPlayers.slice(0, 15)}
+              valueLabel="Виборів"
+              emptyText="Гравців у складах ще немає."
+            />
+            <Link className="button player-ranking-link" href="/player-rankings">Увесь рейтинг</Link>
+          </section>
 
-                return (
-                  <tr key={row.playerId}>
-                    <td>{index + 1}</td>
-                    <td>
-                      <span className="catalog-player">
-                        <span className="player-photo-wrap small">
-                          {player.photoUrl ? (
-                            <img alt="" className="player-photo" src={player.photoUrl} />
-                          ) : (
-                            <span className="player-photo placeholder"><UserRound size={18} /></span>
-                          )}
-                          {player.nationalTeam.flagPath ? <img alt="" className="player-photo-flag" src={player.nationalTeam.flagPath} /> : null}
-                        </span>
-                        <strong>{player.name}</strong>
-                      </span>
-                    </td>
-                    <td>{player.position}</td>
-                    <td>
-                      <span className="team-with-flag">
-                        {player.nationalTeam.flagPath ? <img alt="" className="flag" src={player.nationalTeam.flagPath} /> : null}
-                        {player.nationalTeam.nameUk}
-                      </span>
-                    </td>
-                    <td>{player.club ?? "-"}</td>
-                    <td><strong>{row._count.playerId}</strong></td>
-                  </tr>
-                );
-              })}
-              {popularPlayerCounts.length === 0 ? <tr><td colSpan={6}>Гравців у складах ще немає.</td></tr> : null}
-            </tbody>
-          </table>
-        </section>
+          <section className="panel player-ranking-preview">
+            <h2>ТОП-15 гравців за очками</h2>
+            <p className="muted">Особисті очки гравців без капітанського подвоєння.</p>
+            <PlayerRankingTable
+              players={pointsLeaders.slice(0, 15)}
+              valueLabel="Очки"
+              emptyText="Очки гравцям ще не нараховані."
+            />
+            <Link className="button player-ranking-link" href="/player-points">Увесь рейтинг</Link>
+          </section>
+        </div>
 
       </div>
     </AppShell>

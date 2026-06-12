@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
-  CheckCircle2,
   Clock3,
   Eye,
   ListOrdered,
@@ -17,7 +16,7 @@ import { auth } from "../auth";
 import { HeroDeadlineCountdown } from "../components/hero-deadline-countdown";
 import { InviteFriendsBanner } from "../components/invite-friends-banner";
 import { AppShell } from "../components/shell";
-import { validateRosterForSnapshot } from "../lib/gameweeks";
+import { getPlayerRanking } from "../lib/player-rankings";
 import { prisma } from "../lib/prisma";
 import { createMetadata } from "../lib/seo";
 import { startFromPromo } from "./actions/promo-actions";
@@ -57,7 +56,7 @@ export default async function HomePage() {
     .filter((row) => row._count.playerId === 15)
     .map((row) => row.fantasyTeamId);
 
-  const [topTeams, popularPlayerCounts, viewerTeam] = await Promise.all([
+  const [topTeams, popularPlayerCounts, pointsLeaders] = await Promise.all([
     completeTeamIds.length
       ? prisma.fantasyTeam.findMany({
           where: { id: { in: completeTeamIds } },
@@ -74,38 +73,8 @@ export default async function HomePage() {
           take: 5,
         })
       : [],
-    session?.user?.id
-      ? prisma.fantasyTeam.findUnique({
-          where: { userId: session.user.id },
-          include: {
-            rosterEntries: {
-              include: {
-                player: {
-                  select: {
-                    position: true,
-                    price: true,
-                    nationalTeamId: true,
-                  },
-                },
-              },
-            },
-          },
-        })
-      : null,
+    getPlayerRanking("points"),
   ]);
-
-  const viewerEntries = viewerTeam?.rosterEntries ?? [];
-  const viewerStarterCount = viewerEntries.filter((entry) => entry.slot === "STARTER").length;
-  const viewerHasCaptain = viewerEntries.some((entry) => entry.slot === "STARTER" && entry.isCaptain);
-  const viewerRosterValid = viewerTeam
-    ? validateRosterForSnapshot(viewerEntries, viewerTeam.formation) === null
-    : false;
-  const startChecklist = [
-    { label: "15 гравців у команді", done: viewerEntries.length === 15 },
-    { label: "11 гравців у старті", done: viewerStarterCount === 11 },
-    { label: "Капітан обраний зі старту", done: viewerHasCaptain },
-    { label: "Склад готовий до старту", done: viewerRosterValid },
-  ];
 
   const popularPlayers = popularPlayerCounts.length
     ? await prisma.player.findMany({
@@ -196,29 +165,32 @@ export default async function HomePage() {
       </section>
 
       <section className="home-overview-grid">
-        <article className="panel home-start-card">
+        <article className="panel">
           <div className="home-card-heading">
-            <CheckCircle2 size={22} />
-            <h2>Важливо перед стартом</h2>
+            <Trophy size={22} />
+            <h2>TOP-5 гравців за очками</h2>
           </div>
-          <ul className="home-start-checklist">
-            {startChecklist.map((item) => (
-              <li className={session?.user?.id && item.done ? "done" : ""} key={item.label}>
-                <CheckCircle2 size={18} />
-                <span>{item.label}</span>
-              </li>
+          <div className="home-popular-list">
+            {pointsLeaders.slice(0, 5).map((player, index) => (
+              <div key={player.id}>
+                <span>{index + 1}</span>
+                <span className="player-photo-wrap small">
+                  {player.photoUrl ? (
+                    <img alt="" className="player-photo" src={player.photoUrl} />
+                  ) : (
+                    <span className="player-photo placeholder"><UserRound size={17} /></span>
+                  )}
+                  {player.nationalTeam.flagPath ? (
+                    <img alt="" className="player-photo-flag" src={player.nationalTeam.flagPath} />
+                  ) : null}
+                </span>
+                <strong>{player.name}</strong>
+                <em>{player.value}</em>
+              </div>
             ))}
-          </ul>
-          <p className="home-start-note">
-            {session?.user?.id
-              ? viewerRosterValid
-                ? "Усе готово. Перевір склад ще раз до дедлайну."
-                : "Заверши склад і обов’язково натисни «Зберегти»."
-              : "Увійди, збери повний склад і збережи його до дедлайну."}
-          </p>
-          <Link className="home-card-link" href={session?.user?.id ? "/squad" : "/login"}>
-            {viewerRosterValid ? "Перевірити склад" : "Завершити склад"} <ArrowRight size={16} />
-          </Link>
+            {pointsLeaders.length === 0 ? <p className="muted">Очки гравцям ще не нараховані.</p> : null}
+          </div>
+          <Link className="home-card-link" href="/player-points">Увесь рейтинг <ArrowRight size={16} /></Link>
         </article>
 
         <article className="panel">
@@ -269,7 +241,7 @@ export default async function HomePage() {
             })}
             {popularPlayerCounts.length === 0 ? <p className="muted">Виборів гравців поки немає.</p> : null}
           </div>
-          <Link className="home-card-link" href="/tournament">TOP-20 гравців <ArrowRight size={16} /></Link>
+          <Link className="home-card-link" href="/player-rankings">Увесь рейтинг <ArrowRight size={16} /></Link>
         </article>
       </section>
 

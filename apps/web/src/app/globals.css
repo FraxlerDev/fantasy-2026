@@ -14,6 +14,31 @@
   --shadow: 0 14px 40px rgba(32, 48, 39, 0.08);
 }
 
+@media (max-width: 1180px) {
+  .tournament-player-rankings {
+    grid-template-columns: 1fr;
+  }
+
+  .player-ranking-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .player-ranking-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .player-ranking-table {
+    min-width: 610px;
+  }
+}
+
 .forum-nav-badge {
   min-width: 21px;
   height: 21px;
@@ -1267,6 +1292,74 @@ h3 {
 
 .catalog-player .player-photo-wrap {
   flex: 0 0 auto;
+}
+
+.tournament-player-rankings {
+  align-items: start;
+}
+
+.player-ranking-preview {
+  min-width: 0;
+}
+
+.player-ranking-preview .table-scroll {
+  overflow: visible;
+}
+
+.player-ranking-link {
+  margin-top: 16px;
+}
+
+.player-ranking-page {
+  display: grid;
+  gap: 16px;
+}
+
+.player-ranking-page > h1,
+.player-ranking-page > p {
+  margin: 0;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.breadcrumbs a {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.breadcrumbs strong {
+  color: var(--ink);
+}
+
+.player-ranking-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(170px, 220px) minmax(190px, 260px) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.player-ranking-table th:last-child,
+.player-ranking-table td:last-child {
+  width: 88px;
+  text-align: right;
+}
+
+.section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.section-heading-row h2 {
+  margin: 0;
 }
 
 .table td.team-with-flag {
