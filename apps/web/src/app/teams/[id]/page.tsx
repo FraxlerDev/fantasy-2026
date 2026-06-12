@@ -194,7 +194,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
   const requestedGameweek = Number.isFinite(parsedGameweek) ? Math.min(7, Math.max(1, parsedGameweek)) : 1;
   const selectedSnapshot = team.lineupSnapshots.find((snapshot) => snapshot.gameweek === requestedGameweek);
   const currentFormation = selectedSnapshot?.formation ?? team.formation;
-  const currentEntries = (selectedSnapshot?.entries.length ? selectedSnapshot.entries : team.rosterEntries) as LineupEntry[];
+  const currentEntries = (selectedSnapshot?.entries ?? []) as LineupEntry[];
   const starters = currentEntries.filter((entry) => entry.slot === "STARTER");
   const bench = currentEntries.filter((entry) => entry.slot === "BENCH").sort((a, b) => (a.benchOrder ?? 99) - (b.benchOrder ?? 99));
   const playerPointTotals = new Map<string, number>();
@@ -214,7 +214,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
   const gameweekRows = [...new Set(fixtures.map((fixture) => fixture.gameweek))].map((gameweek) => {
     const snapshotEntries =
       (team.lineupSnapshots.find((snapshot) => snapshot.gameweek === gameweek)?.entries as LineupEntry[] | undefined) ??
-      (team.rosterEntries as LineupEntry[]);
+      [];
     const gwFixtures = fixtures.filter((fixture) => fixture.gameweek === gameweek);
     const points = new Map<string, number>();
     for (const fixture of gwFixtures) {
@@ -267,41 +267,49 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
           })}
         </nav>
         {!selectedSnapshot ? (
-          <div className="form-success snapshot-fallback-note">
-            Для GW{requestedGameweek} snapshot ще немає — показано поточний збережений склад.
+          <div className="form-error snapshot-fallback-note">
+            Команда не брала участі в GW{requestedGameweek}.
           </div>
         ) : null}
 
         <section className="grid cols-2" style={{ marginTop: 16 }}>
           <div className="panel">
             <h2>Склад GW{requestedGameweek}</h2>
-            <div className="fixed-pitch public-fixed-pitch">
-              {starters.length > 0 ? (
-                pitchRows(currentFormation).map((row) => {
-                  const rowPlayers = starters.filter((entry) => entry.player.position === row.position);
-                  return (
-                    <div className={`fixed-pitch-row slots-${row.slots}`} key={row.position}>
-                      {Array.from({ length: row.slots }, (_, index) => {
-                        const entry = rowPlayers[index];
-                        return entry ? playerCard(entry, playerPointTotals, playerGameweekStatuses) : <div className="fantasy-shirt empty public-empty-slot" key={`${row.position}-${index}`} />;
-                      })}
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="drop-empty">Команда ще без гравців</div>
-              )}
-            </div>
-            <div className="fixed-bench public-fixed-bench">
-              {bench.length > 0 ? (
-                Array.from({ length: 4 }, (_, index) => {
-                  const entry = bench[index];
-                  return entry ? playerCard(entry, playerPointTotals, playerGameweekStatuses) : <div className="fantasy-shirt empty public-empty-slot" key={`bench-${index}`} />;
-                })
-              ) : (
-                <div className="drop-empty small">Лавка порожня</div>
-              )}
-            </div>
+            {selectedSnapshot ? (
+              <>
+                <div className="fixed-pitch public-fixed-pitch">
+                  {starters.length > 0 ? (
+                    pitchRows(currentFormation).map((row) => {
+                      const rowPlayers = starters.filter((entry) => entry.player.position === row.position);
+                      return (
+                        <div className={`fixed-pitch-row slots-${row.slots}`} key={row.position}>
+                          {Array.from({ length: row.slots }, (_, index) => {
+                            const entry = rowPlayers[index];
+                            return entry ? playerCard(entry, playerPointTotals, playerGameweekStatuses) : <div className="fantasy-shirt empty public-empty-slot" key={`${row.position}-${index}`} />;
+                          })}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="drop-empty">Команда ще без гравців</div>
+                  )}
+                </div>
+                <div className="fixed-bench public-fixed-bench">
+                  {bench.length > 0 ? (
+                    Array.from({ length: 4 }, (_, index) => {
+                      const entry = bench[index];
+                      return entry ? playerCard(entry, playerPointTotals, playerGameweekStatuses) : <div className="fantasy-shirt empty public-empty-slot" key={`bench-${index}`} />;
+                    })
+                  ) : (
+                    <div className="drop-empty small">Лавка порожня</div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="snapshot-no-participation">
+                Команда не брала участі в GW{requestedGameweek}.
+              </div>
+            )}
           </div>
 
           <div className="panel">

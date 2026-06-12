@@ -362,6 +362,14 @@ export default async function AdminPage({
   const pointMap = new Map(activeFixture?.playerPoints.map((point) => [point.playerId, point]) ?? []);
   const fixturePlayers = activeFixture ? [...activeFixture.homeTeam.players, ...activeFixture.awayTeam.players] : [];
   const csvPreview = players.slice(0, 5);
+  const firstGameweekByTeam = new Map(
+    fantasyTeams.map((team) => [
+      team.id,
+      team.lineupSnapshots.length > 0
+        ? Math.min(...team.lineupSnapshots.map((snapshot) => snapshot.gameweek))
+        : null,
+    ]),
+  );
   const snapshotControl = gameweeks.map((gameweek) => {
     const snapshotTeams = fantasyTeams.filter((team) => team.lineupSnapshots.some((snapshot) => snapshot.gameweek === gameweek.number));
     const transferTeams =
@@ -393,6 +401,7 @@ export default async function AdminPage({
         manager: team.user.username ?? team.user.email ?? "Без менеджера",
         formation: team.formation,
         rosterEntries: team.rosterEntries,
+        firstGameweek: firstGameweekByTeam.get(team.id) ?? null,
         reason: team.snapshotFailures.find((failure) => failure.gameweek === gameweek.number)?.reason,
       }))
       .filter((team) => team.reason);
@@ -403,7 +412,12 @@ export default async function AdminPage({
           !team.lineupSnapshots.some((snapshot) => snapshot.gameweek === gameweek.number) &&
           !team.snapshotFailures.some((failure) => failure.gameweek === gameweek.number),
       )
-      .map((team) => ({ id: team.id, name: team.name, manager: team.user.username ?? team.user.email ?? "Без менеджера" }));
+      .map((team) => ({
+        id: team.id,
+        name: team.name,
+        manager: team.user.username ?? team.user.email ?? "Без менеджера",
+        firstGameweek: firstGameweekByTeam.get(team.id) ?? null,
+      }));
 
     return {
       gameweek,
@@ -726,12 +740,13 @@ export default async function AdminPage({
                 <div className="snapshot-list">
                   <h3>Невалідні склади</h3>
                   <table className="table compact-table">
-                    <thead><tr><th>Команда</th><th>Менеджер</th><th>Причина</th></tr></thead>
+                    <thead><tr><th>Команда</th><th>Менеджер</th><th>Перший GW</th><th>Причина</th></tr></thead>
                     <tbody>
                       {item.failedTeams.map((team) => (
                         <tr key={team.id}>
                           <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.name}</a></td>
                           <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.manager}</a></td>
+                          <td>{team.firstGameweek ? `GW${team.firstGameweek}` : "Ще не бере участі"}</td>
                           <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.reason}</a></td>
                         </tr>
                       ))}
@@ -744,12 +759,13 @@ export default async function AdminPage({
                 <div className="snapshot-list">
                   <h3>Команди зі збереженим складом, але без snapshot/помилки</h3>
                   <table className="table compact-table">
-                    <thead><tr><th>Команда</th><th>Менеджер</th></tr></thead>
+                    <thead><tr><th>Команда</th><th>Менеджер</th><th>Перший GW</th></tr></thead>
                     <tbody>
                       {item.missingTeams.map((team) => (
                         <tr key={team.id}>
                           <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.name}</a></td>
                           <td><a className="snapshot-team-link" href={`#admin-team-${team.id}`}>{team.manager}</a></td>
+                          <td>{team.firstGameweek ? `GW${team.firstGameweek}` : "Ще не бере участі"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -774,7 +790,10 @@ export default async function AdminPage({
                 <div>
                   <p className="eyebrow">Перегляд складу</p>
                   <h2>{team.name}</h2>
-                  <p className="muted">Менеджер: {team.user.username ?? team.user.email ?? "Без менеджера"} · Схема: {team.formation}</p>
+                  <p className="muted">
+                    Менеджер: {team.user.username ?? team.user.email ?? "Без менеджера"} · Схема: {team.formation} · Перший GW:{" "}
+                    {firstGameweekByTeam.get(team.id) ? `GW${firstGameweekByTeam.get(team.id)}` : "ще не бере участі"}
+                  </p>
                 </div>
                 <a className="button" href="#gameweeks">Закрити</a>
               </div>

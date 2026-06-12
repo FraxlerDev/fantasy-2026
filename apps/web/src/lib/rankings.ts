@@ -24,7 +24,7 @@ function toRankedRows<T extends RankedInput>(rows: T[]) {
 
 export async function refreshLeaderboards() {
   const teams = await prisma.fantasyTeam.findMany({
-    where: { lineupSnapshots: { some: {} } },
+    where: { rosterEntries: { some: {} } },
     include: {
       user: true,
       lineupSnapshots: {
