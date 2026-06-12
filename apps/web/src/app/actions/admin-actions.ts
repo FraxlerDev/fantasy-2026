@@ -282,19 +282,56 @@ export async function saveFixturePoints(formData: FormData) {
   const players = [...fixture.homeTeam.players, ...fixture.awayTeam.players];
   await prisma.$transaction(async (tx) => {
     for (const player of players) {
+      const didNotPlay = formData.get(`didNotPlay:${player.id}`) === "on";
+      const redCard = !didNotPlay && formData.get(`redCard:${player.id}`) === "on";
       const raw = String(formData.get(`points:${player.id}`) ?? "0").trim();
-      const points = raw === "" ? 0 : Number.parseInt(raw, 10);
+      const parsedPoints = raw === "" ? 0 : Number.parseInt(raw, 10);
+      const points = didNotPlay || Number.isNaN(parsedPoints) ? 0 : parsedPoints;
       await tx.matchPlayerPoint.upsert({
         where: { fixtureId_playerId: { fixtureId, playerId: player.id } },
-        update: { points: Number.isNaN(points) ? 0 : points },
-        create: { fixtureId, playerId: player.id, points: Number.isNaN(points) ? 0 : points },
+        update: { points, didPlay: !didNotPlay, redCard },
+        create: { fixtureId, playerId: player.id, points, didPlay: !didNotPlay, redCard },
       });
+
+      if (redCard) {
+        await tx.player.update({
+          where: { id: player.id },
+          data: {
+            status: "OUT",
+            unavailableReason: "Червона картка",
+            suspendedUntilGameweek: fixture.gameweek + 1,
+          },
+        });
+      } else if (player.suspendedUntilGameweek === fixture.gameweek + 1) {
+        const otherActiveRedCards = await tx.matchPlayerPoint.count({
+          where: {
+            playerId: player.id,
+            fixtureId: { not: fixtureId },
+            redCard: true,
+            fixture: { gameweek: fixture.gameweek },
+          },
+        });
+        if (otherActiveRedCards === 0) {
+          await tx.player.update({
+            where: { id: player.id },
+            data: {
+              status: "AVAILABLE",
+              unavailableReason: null,
+              suspendedUntilGameweek: null,
+            },
+          });
+        }
+      }
     }
 
     await tx.fixture.update({ where: { id: fixtureId }, data: { status: "POINTS_SAVED" } });
   });
 
   revalidatePath("/admin");
+  revalidatePath("/squad");
+  revalidatePath("/teams");
+  revalidatePath("/leaderboard");
+  revalidatePath("/leagues");
   redirect(`/admin?fixtureId=${fixtureId}&points=saved`);
 }
 

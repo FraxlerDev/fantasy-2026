@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
+import { AdminPlayerPointInputs } from "../../components/admin-player-point-inputs";
 import {
   AdminVisitStats,
   type AdminRawVisit,
@@ -358,7 +359,7 @@ export default async function AdminPage({
     : null;
 
   const fixturesByGroup = groupFixtures(fixtures);
-  const pointMap = new Map(activeFixture?.playerPoints.map((point) => [point.playerId, point.points]) ?? []);
+  const pointMap = new Map(activeFixture?.playerPoints.map((point) => [point.playerId, point]) ?? []);
   const fixturePlayers = activeFixture ? [...activeFixture.homeTeam.players, ...activeFixture.awayTeam.players] : [];
   const csvPreview = players.slice(0, 5);
   const snapshotControl = gameweeks.map((gameweek) => {
@@ -1056,7 +1057,7 @@ export default async function AdminPage({
                 <input type="hidden" name="fixtureId" value={activeFixture.id} />
                 <table className="table">
                   <thead>
-                    <tr><th>Гравець</th><th>Збірна</th><th>Позиція</th><th>Очки</th></tr>
+                    <tr><th>Гравець</th><th>Збірна</th><th>Позиція</th><th>Очки</th><th>Не грав</th><th>Червона картка</th></tr>
                   </thead>
                   <tbody>
                     {fixturePlayers.map((player) => (
@@ -1064,9 +1065,12 @@ export default async function AdminPage({
                         <td>{player.name}</td>
                         <td>{player.nationalTeamId === activeFixture.homeTeamId ? teamLabel(activeFixture.homeTeam) : teamLabel(activeFixture.awayTeam)}</td>
                         <td>{player.position}</td>
-                        <td>
-                          <input className="input points-input" name={`points:${player.id}`} type="number" step={1} defaultValue={pointMap.get(player.id) ?? 0} />
-                        </td>
+                        <AdminPlayerPointInputs
+                          playerId={player.id}
+                          initialPoints={pointMap.get(player.id)?.points ?? 0}
+                          initialDidPlay={pointMap.get(player.id)?.didPlay ?? true}
+                          initialRedCard={pointMap.get(player.id)?.redCard ?? false}
+                        />
                       </tr>
                     ))}
                   </tbody>

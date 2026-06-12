@@ -109,6 +109,28 @@ export default async function SquadPage({
         orderBy: [{ kickoffAt: "asc" }, { matchNo: "asc" }],
       })
     : [];
+  const latestPointsFixture = await prisma.fixture.findFirst({
+    where: { playerPoints: { some: {} } },
+    select: { gameweek: true },
+    orderBy: [{ gameweek: "desc" }, { kickoffAt: "desc" }],
+  });
+  const latestPointFixtures = latestPointsFixture
+    ? await prisma.fixture.findMany({
+        where: { gameweek: latestPointsFixture.gameweek },
+        include: { playerPoints: true },
+      })
+    : [];
+  const latestPlayerPointMap = new Map<string, { points: number; didPlay: boolean; redCard: boolean }>();
+  for (const fixture of latestPointFixtures) {
+    for (const point of fixture.playerPoints) {
+      const current = latestPlayerPointMap.get(point.playerId);
+      latestPlayerPointMap.set(point.playerId, {
+        points: (current?.points ?? 0) + point.points,
+        didPlay: Boolean(current?.didPlay || point.didPlay),
+        redCard: Boolean(current?.redCard || point.redCard),
+      });
+    }
+  }
   const transferBaseSnapshot =
     fantasyTeam && editableGameweek
       ? await prisma.lineupSnapshot.findFirst({
@@ -296,6 +318,8 @@ export default async function SquadPage({
           currentStart={editableGameweek?.startAt.toISOString()}
           transferLimit={editableGameweek?.transferLimit}
           transferBasePlayerIds={[...previousIds]}
+          pointsGameweek={latestPointsFixture?.gameweek}
+          playerGameweekStats={[...latestPlayerPointMap.entries()].map(([playerId, stats]) => ({ playerId, ...stats }))}
           userProfile={{
             username: currentUser?.username ?? session.user.username,
             email: currentUser?.email ?? session.user.email,

@@ -219,6 +219,17 @@ export async function openGameweekTransfers(gameweekNumber: number) {
   if (gameweek.deadlineAt <= new Date()) throw new Error(`GW${gameweekNumber} deadline is closed`);
 
   return prisma.$transaction(async (tx) => {
+    await tx.player.updateMany({
+      where: {
+        suspendedUntilGameweek: { lt: gameweekNumber },
+      },
+      data: {
+        status: "AVAILABLE",
+        unavailableReason: null,
+        suspendedUntilGameweek: null,
+      },
+    });
+
     await tx.gameweek.updateMany({
       where: { number: { not: gameweekNumber }, transfersOpen: true },
       data: { transfersOpen: false, transferWindowStatus: "CLOSED_MANUAL", status: "UPCOMING" },

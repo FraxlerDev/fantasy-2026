@@ -1221,6 +1221,42 @@ h3 {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
+.player-photo-points.captain-points {
+  background: #ff8a24;
+  color: #111;
+}
+
+.captain-points-mark,
+.match-status-mark {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: #fff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: help;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.24);
+}
+
+.captain-points-mark {
+  top: 22px;
+  right: 4px;
+}
+
+.match-status-mark {
+  top: 22px;
+  left: 4px;
+}
+
+.match-status-mark.red-card {
+  border-radius: 4px;
+}
+
 .catalog-player {
   display: inline-flex;
   align-items: center;
@@ -2132,6 +2168,19 @@ h3 {
 
 .points-input {
   width: 92px;
+}
+
+.admin-point-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.admin-point-check input {
+  width: 18px;
+  height: 18px;
 }
 
 .deadline-banner {

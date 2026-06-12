@@ -49,6 +49,13 @@ export interface SquadUserProfile {
   image?: string | null;
 }
 
+export interface SquadPlayerGameweekStat {
+  playerId: string;
+  points: number;
+  didPlay: boolean;
+  redCard: boolean;
+}
+
 const formations: Record<string, { DEF: number; MID: number; FWD: number }> = {
   "4-3-3": { DEF: 4, MID: 3, FWD: 3 },
   "3-4-3": { DEF: 3, MID: 4, FWD: 3 },
@@ -144,6 +151,8 @@ export function SquadBuilder({
   currentStart,
   transferLimit,
   transferBasePlayerIds = [],
+  pointsGameweek,
+  playerGameweekStats = [],
   userProfile,
   initialTeamName,
   initialTeamId,
@@ -165,6 +174,8 @@ export function SquadBuilder({
   currentStart?: string;
   transferLimit?: number | null;
   transferBasePlayerIds?: string[];
+  pointsGameweek?: number;
+  playerGameweekStats?: SquadPlayerGameweekStat[];
   userProfile?: SquadUserProfile;
   initialTeamName?: string;
   initialTeamId?: string;
@@ -220,6 +231,10 @@ export function SquadBuilder({
   const hasUnsavedChanges = currentSquadSignature !== initialSquadSignature;
 
   const playerById = useMemo(() => new Map(players.map((player) => [player.id, player])), [players]);
+  const playerGameweekStatById = useMemo(
+    () => new Map(playerGameweekStats.map((stat) => [stat.playerId, stat])),
+    [playerGameweekStats],
+  );
   const selectedIds = useMemo(() => new Set([...starters, ...bench]), [starters, bench]);
   const selectedPlayers = players.filter((player) => selectedIds.has(player.id));
   const starterPlayers = players.filter((player) => starters.includes(player.id)).sort(byPositionOrder);
@@ -553,6 +568,13 @@ export function SquadBuilder({
 
   function playerChip(player: SquadPlayer, label?: string) {
     const isSwapSelected = swapSourceId === player.id;
+    const gameweekStat = playerGameweekStatById.get(player.id);
+    const basePoints = gameweekStat?.points ?? 0;
+    const displayedPoints = player.id === captainId ? basePoints * 2 : basePoints;
+    const pointsTitle =
+      player.id === captainId
+        ? `GW${pointsGameweek ?? ""}: очки подвоєні за капітанство — ${basePoints} × 2 = ${displayedPoints}`
+        : `GW${pointsGameweek ?? ""}: ${displayedPoints} очок`;
     return (
       <div
         className={`fantasy-shirt filled ${player.status !== "AVAILABLE" ? "unavailable" : ""} ${isSwapSelected ? "swap-selected" : ""}`}
@@ -577,9 +599,32 @@ export function SquadBuilder({
           className="player-photo-wrap"
         >
           {player.photoUrl ? <img alt="" className="player-photo" src={player.photoUrl} /> : <span className="player-photo placeholder"><UserRound size={24} /></span>}
+          {gameweekStat ? (
+            <span className={`player-photo-points ${player.id === captainId ? "captain-points" : ""}`} title={pointsTitle}>
+              {displayedPoints}
+            </span>
+          ) : null}
           {player.nationFlagPath ? <img alt="" className="player-photo-flag" src={player.nationFlagPath} /> : null}
         </span>
         {player.id === captainId ? <span className="captain-mark">К</span> : null}
+        {player.id === captainId && gameweekStat ? (
+          <span className="captain-points-mark" title={`Очки подвоєні за капітанство: ${basePoints} × 2`}>
+            🔥
+          </span>
+        ) : null}
+        {gameweekStat && !gameweekStat.didPlay ? (
+          <span className="match-status-mark did-not-play" title="Не грав у цьому GW — 0 очок">
+            ⛔
+          </span>
+        ) : null}
+        {gameweekStat?.redCard ? (
+          <span
+            className="match-status-mark red-card"
+            title="Червона картка — гравець не гратиме в наступному турі, його доцільно замінити"
+          >
+            🟥
+          </span>
+        ) : null}
         <strong>{player.name}</strong>
         <em>{label ?? shortPositionLabels[player.position]}</em>
         <span className="player-price-badge">{player.price.toFixed(1)}</span>

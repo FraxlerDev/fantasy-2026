@@ -69,6 +69,11 @@ type LineupEntry = {
   };
 };
 
+type PlayerGameweekStatus = {
+  didPlay: boolean;
+  redCard: boolean;
+};
+
 const formationShapes: Record<string, { DEF: number; MID: number; FWD: number }> = {
   "4-3-3": { DEF: 4, MID: 3, FWD: 3 },
   "3-4-3": { DEF: 3, MID: 4, FWD: 3 },
@@ -105,17 +110,32 @@ function teamName(team: { nameUk: string; flagPath: string | null }) {
   );
 }
 
-function playerCard(entry: LineupEntry, points: Map<string, number>, label = positionLabels[entry.player.position]) {
-  const playerPoints = points.get(entry.playerId) ?? 0;
+function playerCard(
+  entry: LineupEntry,
+  points: Map<string, number>,
+  statuses: Map<string, PlayerGameweekStatus>,
+  label = positionLabels[entry.player.position],
+) {
+  const basePoints = points.get(entry.playerId) ?? 0;
+  const playerPoints = entry.isCaptain ? basePoints * 2 : basePoints;
+  const matchStatus = statuses.get(entry.playerId);
 
   return (
     <div className={`fantasy-shirt filled public-team-shirt ${entry.player.status !== "AVAILABLE" ? "unavailable" : ""}`} key={entry.id}>
       <span className="player-photo-wrap">
         {entry.player.photoUrl ? <img alt="" className="player-photo" src={entry.player.photoUrl} /> : <span className="player-photo placeholder" />}
-        <span className="player-photo-points">{playerPoints}</span>
+        <span
+          className={`player-photo-points ${entry.isCaptain ? "captain-points" : ""}`}
+          title={entry.isCaptain ? `Очки подвоєні за капітанство: ${basePoints} × 2 = ${playerPoints}` : `${playerPoints} очок`}
+        >
+          {playerPoints}
+        </span>
         {entry.player.nationalTeam.flagPath ? <img alt="" className="player-photo-flag" src={entry.player.nationalTeam.flagPath} /> : null}
       </span>
       {entry.isCaptain ? <span className="captain-mark">К</span> : null}
+      {entry.isCaptain ? <span className="captain-points-mark" title={`Очки подвоєні за капітанство: ${basePoints} × 2`}>🔥</span> : null}
+      {matchStatus && !matchStatus.didPlay ? <span className="match-status-mark did-not-play" title="Не грав у цьому GW — 0 очок">⛔</span> : null}
+      {matchStatus?.redCard ? <span className="match-status-mark red-card" title="Червона картка — гравець пропустить наступний тур, його доцільно замінити">🟥</span> : null}
       <strong>{entry.player.name}</strong>
       <em>{label} | {entry.player.club ?? "-"}</em>
       <span className="player-price-badge">{Number(entry.player.price).toFixed(1)}</span>
@@ -178,10 +198,16 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
   const starters = currentEntries.filter((entry) => entry.slot === "STARTER");
   const bench = currentEntries.filter((entry) => entry.slot === "BENCH").sort((a, b) => (a.benchOrder ?? 99) - (b.benchOrder ?? 99));
   const playerPointTotals = new Map<string, number>();
+  const playerGameweekStatuses = new Map<string, PlayerGameweekStatus>();
 
   for (const fixture of fixtures.filter((item) => item.gameweek === requestedGameweek)) {
     for (const point of fixture.playerPoints) {
       playerPointTotals.set(point.playerId, (playerPointTotals.get(point.playerId) ?? 0) + point.points);
+      const currentStatus = playerGameweekStatuses.get(point.playerId);
+      playerGameweekStatuses.set(point.playerId, {
+        didPlay: Boolean(currentStatus?.didPlay || point.didPlay),
+        redCard: Boolean(currentStatus?.redCard || point.redCard),
+      });
     }
   }
 
@@ -257,7 +283,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
                     <div className={`fixed-pitch-row slots-${row.slots}`} key={row.position}>
                       {Array.from({ length: row.slots }, (_, index) => {
                         const entry = rowPlayers[index];
-                        return entry ? playerCard(entry, playerPointTotals) : <div className="fantasy-shirt empty public-empty-slot" key={`${row.position}-${index}`} />;
+                        return entry ? playerCard(entry, playerPointTotals, playerGameweekStatuses) : <div className="fantasy-shirt empty public-empty-slot" key={`${row.position}-${index}`} />;
                       })}
                     </div>
                   );
@@ -270,7 +296,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
               {bench.length > 0 ? (
                 Array.from({ length: 4 }, (_, index) => {
                   const entry = bench[index];
-                  return entry ? playerCard(entry, playerPointTotals, "Лавка") : <div className="fantasy-shirt empty public-empty-slot" key={`bench-${index}`} />;
+                  return entry ? playerCard(entry, playerPointTotals, playerGameweekStatuses) : <div className="fantasy-shirt empty public-empty-slot" key={`bench-${index}`} />;
                 })
               ) : (
                 <div className="drop-empty small">Лавка порожня</div>

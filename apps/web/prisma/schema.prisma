@@ -198,6 +198,7 @@ model Player {
   squadStatus    String         @default("TEST")
   price          Decimal        @db.Decimal(5, 1)
   status         PlayerStatus   @default(AVAILABLE)
+  suspendedUntilGameweek Int?
   createdAt      DateTime       @default(now())
 
   nationalTeam  NationalTeam  @relation(fields: [nationalTeamId], references: [id], onDelete: Cascade)
@@ -446,6 +447,8 @@ model MatchPlayerPoint {
   playerId      String
   fantasyTeamId String?
   points        Int      @default(0)
+  didPlay       Boolean  @default(true)
+  redCard       Boolean  @default(false)
   updatedAt     DateTime @updatedAt
 
   fixture     Fixture      @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
