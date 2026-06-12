@@ -2047,6 +2047,55 @@ h3 {
   white-space: pre-wrap;
 }
 
+.chat-edited-mark {
+  display: inline-block;
+  margin-left: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.chat-edit-composer {
+  display: grid;
+  gap: 6px;
+}
+
+.chat-edit-composer textarea {
+  width: 100%;
+  min-height: 74px;
+  resize: vertical;
+  padding: 8px;
+  border: 1px solid var(--green);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.chat-edit-composer > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chat-edit-composer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--green-2);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.chat-edit-composer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .chat-reply-preview,
 .chat-reply-composer {
   display: grid;

@@ -16,6 +16,7 @@ function serializeMessage(message: {
   id: string;
   body: string;
   createdAt: Date;
+  updatedAt: Date;
   author: {
     id: string;
     username: string | null;
@@ -38,6 +39,7 @@ function serializeMessage(message: {
     id: message.id,
     body: message.body,
     createdAt: message.createdAt.toISOString(),
+    edited: message.updatedAt.getTime() > message.createdAt.getTime() + 10,
     replyTo: message.replyTo
       ? {
           id: message.replyTo.id,
@@ -98,6 +100,9 @@ export async function GET(request: Request) {
           where: { isDeleted: false },
           select: {
             id: true,
+            body: true,
+            createdAt: true,
+            updatedAt: true,
             likes: {
               where: { userId: session?.user?.id ?? "__anonymous__" },
               select: { id: true },
@@ -105,7 +110,7 @@ export async function GET(request: Request) {
             _count: { select: { likes: true } },
           },
           orderBy: { createdAt: "desc" },
-          take: 50,
+          take: 80,
         })
       : Promise.resolve([]),
   ]);
@@ -136,6 +141,8 @@ export async function GET(request: Request) {
     messages: messages.reverse().map(serializeMessage),
     reactions: reactionMessages.map((message) => ({
       id: message.id,
+      body: message.body,
+      edited: message.updatedAt.getTime() > message.createdAt.getTime() + 10,
       likeCount: message._count.likes,
       likedByCurrentUser: message.likes.length > 0,
     })),

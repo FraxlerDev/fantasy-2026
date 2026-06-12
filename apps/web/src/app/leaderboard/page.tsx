@@ -5,7 +5,18 @@ import { auth } from "../../auth";
 import { prisma } from "../../lib/prisma";
 import { createMetadata } from "../../lib/seo";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 30;
+
+function compareTeamNames(a: { name: string }, b: { name: string }) {
+  return a.name.localeCompare(b.name, "uk", { sensitivity: "base" });
+}
+
+function compareRankedTeams(
+  a: { id: string; name: string; points: number },
+  b: { id: string; name: string; points: number },
+) {
+  return b.points - a.points || compareTeamNames(a, b) || a.id.localeCompare(b.id);
+}
 
 export const metadata: Metadata = createMetadata({
   title: "Рейтинг фентезі-команд",
@@ -152,7 +163,7 @@ export default async function LeaderboardPage({
   });
 
   const rankedRows = assignRanks(
-    rawRows.sort((a, b) => b.points - a.points || a.createdAt.getTime() - b.createdAt.getTime()),
+    rawRows.sort(compareRankedTeams),
   );
   let previousRankByTeam = new Map<string, number>();
 
@@ -161,14 +172,14 @@ export default async function LeaderboardPage({
       const snapshot = team.lineupSnapshots.find((item) => item.gameweek === selectedGameweek - 1);
       return {
         id: team.id,
+        name: team.name,
         points: snapshot
           ? scoreEntries(snapshot.entries as ScoringEntry[], pointsByGameweek.get(selectedGameweek - 1) ?? new Map())
           : 0,
-        createdAt: team.createdAt,
       };
     });
     previousRankByTeam = new Map(
-      assignRanks(previousRows.sort((a, b) => b.points - a.points || a.createdAt.getTime() - b.createdAt.getTime()))
+      assignRanks(previousRows.sort(compareRankedTeams))
         .map((row) => [row.id, row.rank]),
     );
   }

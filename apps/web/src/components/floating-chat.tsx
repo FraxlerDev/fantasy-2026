@@ -1,12 +1,13 @@
 "use client";
 
-import { Ban, Heart, Reply, Send, Smile, Trash2, X } from "lucide-react";
+import { Ban, Heart, Pencil, Reply, Save, Send, Smile, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type ChatMessage = {
   id: string;
   body: string;
   createdAt: string;
+  edited: boolean;
   replyTo: {
     id: string;
     body: string;
@@ -66,6 +67,9 @@ export function FloatingChat() {
   const [emojiQuery, setEmojiQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingBody, setEditingBody] = useState("");
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [likingMessageIds, setLikingMessageIds] = useState<Set<string>>(() => new Set());
   const [unreadCount, setUnreadCount] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
@@ -95,6 +99,8 @@ export function FloatingChat() {
       unreadCount: number;
       reactions: {
         id: string;
+        body: string;
+        edited: boolean;
         likeCount: number;
         likedByCurrentUser: boolean;
       }[];
@@ -105,7 +111,14 @@ export function FloatingChat() {
       const reactions = new Map(data.reactions.map((reaction) => [reaction.id, reaction]));
       const withFreshReactions = existing.map((message) => {
         const reaction = reactions.get(message.id);
-        return reaction ? { ...message, ...reaction } : message;
+        const replyReaction = message.replyTo ? reactions.get(message.replyTo.id) : null;
+        return {
+          ...(reaction ? { ...message, ...reaction } : message),
+          replyTo:
+            message.replyTo && replyReaction
+              ? { ...message.replyTo, body: replyReaction.body }
+              : message.replyTo,
+        };
       });
       if (!onlyNew) return data.messages;
       const known = new Set(withFreshReactions.map((message) => message.id));
@@ -229,10 +242,63 @@ export function FloatingChat() {
     if (response.ok) {
       setMessages((existing) => existing.filter((message) => message.id !== messageId));
       if (replyTo?.id === messageId) setReplyTo(null);
+      if (editingMessageId === messageId) {
+        setEditingMessageId(null);
+        setEditingBody("");
+      }
     } else {
       const data = (await response.json().catch(() => null)) as { error?: string } | null;
       setError(data?.error ?? "Не вдалося видалити повідомлення.");
     }
+  }
+
+  function startEditing(message: ChatMessage) {
+    setEditingMessageId(message.id);
+    setEditingBody(message.body);
+    setReplyTo(null);
+    setEmojiOpen(false);
+    setError(null);
+  }
+
+  function cancelEditing() {
+    setEditingMessageId(null);
+    setEditingBody("");
+    setError(null);
+  }
+
+  async function saveEdit(messageId: string) {
+    const text = editingBody.trim();
+    if (!text || isSavingEdit) return;
+
+    setIsSavingEdit(true);
+    setError(null);
+    const response = await fetch(`/api/chat/messages/${messageId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ body: text }),
+    });
+    const data = (await response.json().catch(() => null)) as {
+      error?: string;
+      message?: { id: string; body: string; edited: boolean };
+    } | null;
+
+    if (response.ok && data?.message) {
+      setMessages((existing) =>
+        existing.map((message) =>
+          message.id === messageId
+            ? { ...message, body: data.message!.body, edited: data.message!.edited }
+            : message.replyTo?.id === messageId
+              ? { ...message, replyTo: { ...message.replyTo, body: data.message!.body } }
+              : message,
+        ),
+      );
+      setEditingMessageId(null);
+      setEditingBody("");
+    } else {
+      setError(data?.error ?? "Не вдалося зберегти зміни.");
+    }
+
+    setIsSavingEdit(false);
   }
 
   async function toggleLike(messageId: string) {
@@ -319,7 +385,35 @@ export function FloatingChat() {
                         <span>{shortText(message.replyTo.body)}</span>
                       </div>
                     ) : null}
-                    <p>{message.body}</p>
+                    {editingMessageId === message.id ? (
+                      <div className="chat-edit-composer">
+                        <textarea
+                          value={editingBody}
+                          onChange={(event) => setEditingBody(event.target.value)}
+                          maxLength={500}
+                          autoFocus
+                        />
+                        <div>
+                          <button
+                            type="button"
+                            disabled={!editingBody.trim() || isSavingEdit}
+                            onClick={() => void saveEdit(message.id)}
+                          >
+                            <Save size={13} />
+                            Зберегти
+                          </button>
+                          <button type="button" disabled={isSavingEdit} onClick={cancelEditing}>
+                            <X size={13} />
+                            Скасувати
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p>
+                        {message.body}
+                        {message.edited ? <span className="chat-edited-mark">редаговано</span> : null}
+                      </p>
+                    )}
                     <div className="chat-message-footer">
                       <div className="chat-admin-actions">
                         {currentUser ? (
@@ -332,6 +426,12 @@ export function FloatingChat() {
                           <button type="button" onClick={() => void deleteMessage(message.id)}>
                             <Trash2 size={13} />
                             Видалити
+                          </button>
+                        ) : null}
+                        {own && editingMessageId !== message.id ? (
+                          <button type="button" onClick={() => startEditing(message)}>
+                            <Pencil size={13} />
+                            Редагувати
                           </button>
                         ) : null}
                         {currentUser?.isAdmin && message.author.id !== currentUser.id ? (
