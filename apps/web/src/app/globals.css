@@ -1761,6 +1761,38 @@ h3 {
   pointer-events: none;
 }
 
+.leaderboard-pagination,
+.leaderboard-page-numbers {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.leaderboard-pagination {
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.leaderboard-page-link {
+  min-width: 38px;
+  justify-content: center;
+  padding-inline: 10px;
+}
+
+.leaderboard-page-link.active {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+  pointer-events: none;
+}
+
+.leaderboard-page-ellipsis {
+  min-width: 22px;
+  color: var(--muted);
+  text-align: center;
+}
+
 .validation-list {
   display: grid;
   gap: 8px;

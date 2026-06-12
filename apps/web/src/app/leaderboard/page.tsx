@@ -57,15 +57,7 @@ function TeamLink({ id, name, image }: { id: string; name: string; image?: strin
 }
 
 function assignRanks<T extends { id: string; points: number }>(rows: T[]) {
-  let previousPoints: number | null = null;
-  let previousRank = 0;
-
-  return rows.map((row, index) => {
-    const rank = previousPoints === row.points ? previousRank : index + 1;
-    previousPoints = row.points;
-    previousRank = rank;
-    return { ...row, rank };
-  });
+  return rows.map((row, index) => ({ ...row, rank: index + 1 }));
 }
 
 function scoreEntries(entries: ScoringEntry[], points: Map<string, number>) {
@@ -91,6 +83,41 @@ function leaderboardUrl({
   if (page && page > 1) params.set("page", String(page));
   if (query) params.set("q", query);
   return `/leaderboard?${params.toString()}`;
+}
+
+function paginationItems(currentPage: number, totalPages: number): Array<number | "ellipsis"> {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  if (currentPage <= 4) {
+    return [1, 2, 3, 4, 5, 6, "ellipsis", totalPages];
+  }
+
+  if (currentPage >= totalPages - 3) {
+    return [
+      1,
+      "ellipsis",
+      totalPages - 5,
+      totalPages - 4,
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ];
+  }
+
+  return [
+    1,
+    "ellipsis",
+    currentPage - 2,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    currentPage + 2,
+    "ellipsis",
+    totalPages,
+  ];
 }
 
 export default async function LeaderboardPage({
@@ -204,6 +231,7 @@ export default async function LeaderboardPage({
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const visibleRows = filteredRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pageItems = paginationItems(safePage, totalPages);
 
   return (
     <AppShell active="/leaderboard">
@@ -211,7 +239,7 @@ export default async function LeaderboardPage({
         <div>
           <p className="eyebrow">Глобальний рейтинг</p>
           <h1>Таблиця сезону</h1>
-          <p className="muted">У рейтингу показуються команди зі збереженим складом. Однакові очки дають однакове місце.</p>
+          <p className="muted">У рейтингу показуються команди зі збереженим складом. За однакової кількості очок вище розташовується команда, назва якої йде першою за алфавітом.</p>
         </div>
       </div>
 
@@ -290,15 +318,30 @@ export default async function LeaderboardPage({
             ) : null}
           </tbody>
         </table>
-        <div className="toolbar" style={{ marginTop: 14 }}>
+        <nav className="leaderboard-pagination" aria-label="Пагінація рейтингу">
           {safePage > 1 ? (
             <Link className="button" href={leaderboardUrl({ tab: activeTab, gw: selectedGameweek, page: safePage - 1, query })}>Назад</Link>
           ) : <span className="button disabled-link">Назад</span>}
-          <span className="badge">Сторінка {safePage} з {totalPages}</span>
+          <span className="leaderboard-page-numbers">
+            {pageItems.map((item, index) =>
+              item === "ellipsis" ? (
+                <span className="leaderboard-page-ellipsis" key={`ellipsis-${index}`}>…</span>
+              ) : (
+                <Link
+                  aria-current={item === safePage ? "page" : undefined}
+                  className={`button leaderboard-page-link ${item === safePage ? "active" : ""}`}
+                  href={leaderboardUrl({ tab: activeTab, gw: selectedGameweek, page: item, query })}
+                  key={item}
+                >
+                  {item}
+                </Link>
+              ),
+            )}
+          </span>
           {safePage < totalPages ? (
             <Link className="button" href={leaderboardUrl({ tab: activeTab, gw: selectedGameweek, page: safePage + 1, query })}>Далі</Link>
           ) : <span className="button disabled-link">Далі</span>}
-        </div>
+        </nav>
       </section>
     </AppShell>
   );

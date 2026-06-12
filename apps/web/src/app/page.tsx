@@ -60,8 +60,6 @@ export default async function HomePage() {
     completeTeamIds.length
       ? prisma.fantasyTeam.findMany({
           where: { id: { in: completeTeamIds } },
-          orderBy: [{ totalPoints: "desc" }, { createdAt: "asc" }],
-          take: 5,
         })
       : [],
     completeTeamIds.length
@@ -84,14 +82,15 @@ export default async function HomePage() {
     : [];
   const popularPlayersById = new Map(popularPlayers.map((player) => [player.id, player]));
 
-  let previousPoints: number | null = null;
-  let previousRank = 0;
-  const topRows = topTeams.map((team, index) => {
-    const rank = previousPoints === team.totalPoints ? previousRank : index + 1;
-    previousPoints = team.totalPoints;
-    previousRank = rank;
-    return { ...team, rank };
-  });
+  const topRows = topTeams
+    .sort(
+      (a, b) =>
+        b.totalPoints - a.totalPoints ||
+        a.name.localeCompare(b.name, "uk", { sensitivity: "base" }) ||
+        a.id.localeCompare(b.id),
+    )
+    .slice(0, 5)
+    .map((team, index) => ({ ...team, rank: index + 1 }));
 
   return (
     <AppShell active="/">
