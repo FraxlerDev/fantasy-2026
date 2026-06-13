@@ -11,14 +11,8 @@ type LineupEntry = {
 };
 
 function toRankedRows<T extends RankedInput>(rows: T[]) {
-  let previousPoints: number | null = null;
-  let previousRank = 0;
-
   return rows.map((row, index) => {
-    const rank = previousPoints === row.totalPoints ? previousRank : index + 1;
-    previousPoints = row.totalPoints;
-    previousRank = rank;
-    return { ...row, rank };
+    return { ...row, rank: index + 1 };
   });
 }
 
@@ -96,9 +90,10 @@ export async function refreshLeaderboards() {
       teams
         .map((team) => ({
           fantasyTeamId: team.id,
+          teamName: team.name,
           totalPoints: totals.get(team.id) ?? 0,
         }))
-        .sort((a, b) => b.totalPoints - a.totalPoints),
+        .sort((a, b) => b.totalPoints - a.totalPoints || a.teamName.localeCompare(b.teamName, "uk")),
     );
 
     if (globalRows.length > 0) {
@@ -114,7 +109,7 @@ export async function refreshLeaderboards() {
     }
 
     const leagues = await tx.league.findMany({
-      include: { members: true },
+      include: { members: { include: { fantasyTeam: { select: { name: true } } } } },
     });
 
     for (const league of leagues) {
@@ -122,9 +117,10 @@ export async function refreshLeaderboards() {
         league.members
           .map((member) => ({
             fantasyTeamId: member.fantasyTeamId,
+            teamName: member.fantasyTeam.name,
             totalPoints: totals.get(member.fantasyTeamId) ?? 0,
           }))
-          .sort((a, b) => b.totalPoints - a.totalPoints),
+          .sort((a, b) => b.totalPoints - a.totalPoints || a.teamName.localeCompare(b.teamName, "uk")),
       );
 
       if (leagueRows.length > 0) {

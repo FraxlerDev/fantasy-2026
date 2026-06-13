@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Lock, Plus, Search, Unlock, Users } from "lucide-react";
+import { Plus, Search, Users } from "lucide-react";
 import Link from "next/link";
 import { AppShell } from "../../components/shell";
 import { auth } from "../../auth";
@@ -11,7 +11,6 @@ import {
   createOrRenameLeague,
   joinLeague,
   leaveLeague,
-  removeLeagueMember,
 } from "../actions/league-actions";
 
 export const metadata: Metadata = createMetadata({
@@ -58,32 +57,6 @@ function memberLabel(count: number) {
 function leagueUrl(leagueId: string) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fantasy.fraxler.site";
   return `${baseUrl.replace(/\/$/, "")}/leagues/${leagueId}`;
-}
-
-function rankedMembers(
-  members: Array<{
-    fantasyTeam: {
-      id: string;
-      name: string;
-      totalPoints: number;
-      user: { username: string | null };
-    };
-  }>,
-) {
-  const sorted = [...members].sort(
-    (a, b) =>
-      b.fantasyTeam.totalPoints - a.fantasyTeam.totalPoints ||
-      a.fantasyTeam.name.localeCompare(b.fantasyTeam.name, "uk"),
-  );
-  let previousPoints: number | null = null;
-  let previousRank = 0;
-
-  return sorted.map((member, index) => {
-    const rank = previousPoints === member.fantasyTeam.totalPoints ? previousRank : index + 1;
-    previousPoints = member.fantasyTeam.totalPoints;
-    previousRank = rank;
-    return { rank, ...member.fantasyTeam };
-  });
 }
 
 export default async function LeaguesPage({
@@ -179,40 +152,16 @@ export default async function LeaguesPage({
                 <article className="card">
                   <div className="topbar">
                     <div>
-                      <span className="badge">Власна ліга</span>
                       <h3><Link href={`/leagues/${ownedLeague.id}`}>{ownedLeague.name}</Link></h3>
                       <p className="muted">
-                        {ownedLeague.isOpen ? <Unlock size={14} /> : <Lock size={14} />}{" "}
-                        {ownedLeague.isOpen ? "Відкрита" : "Закрита"} · {memberLabel(ownedLeague.members.length)}
+                        Власник: {session.user.username?.trim() || "Користувач"} · {memberLabel(ownedLeague.members.length)}
                       </p>
                     </div>
-                    <Link className="button" href="/leagues?tab=create">Редагувати</Link>
+                    <div className="toolbar">
+                      <Link className="button" href={`/leagues/${ownedLeague.id}`}>Переглянути</Link>
+                      <Link className="button" href="/leagues?tab=create">Редагувати</Link>
+                    </div>
                   </div>
-                  <table className="table compact-table league-ranking-table">
-                    <thead><tr><th>Місце</th><th>Команда</th><th>Менеджер</th><th>Очки</th><th /></tr></thead>
-                    <tbody>
-                      {rankedMembers(ownedLeague.members).slice(0, 10).map((row) => (
-                        <tr key={row.id}>
-                          <td>{row.rank}</td>
-                          <td>
-                            <Link href={`/teams/${row.id}`}>{row.name}</Link>
-                            <small className="league-mobile-manager">{row.user.username?.trim() || "Користувач"}</small>
-                          </td>
-                          <td>{row.user.username?.trim() || "Користувач"}</td>
-                          <td><strong>{row.totalPoints}</strong></td>
-                          <td>
-                            {row.id !== fantasyTeam?.id ? (
-                              <form action={removeLeagueMember}>
-                                <input type="hidden" name="leagueId" value={ownedLeague.id} />
-                                <input type="hidden" name="fantasyTeamId" value={row.id} />
-                                <button className="button" type="submit">Видалити</button>
-                              </form>
-                            ) : null}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </article>
               ) : null}
 
@@ -231,22 +180,6 @@ export default async function LeaguesPage({
                       <button className="button" type="submit">Вийти</button>
                     </form>
                   </div>
-                  <table className="table compact-table league-ranking-table">
-                    <thead><tr><th>Місце</th><th>Команда</th><th>Менеджер</th><th>Очки</th></tr></thead>
-                    <tbody>
-                      {rankedMembers(membership.league.members).slice(0, 10).map((row) => (
-                        <tr key={row.id}>
-                          <td>{row.rank}</td>
-                          <td>
-                            <Link href={`/teams/${row.id}`}>{row.name}</Link>
-                            <small className="league-mobile-manager">{row.user.username?.trim() || "Користувач"}</small>
-                          </td>
-                          <td>{row.user.username?.trim() || "Користувач"}</td>
-                          <td><strong>{row.totalPoints}</strong></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </article>
               ))}
             </div>

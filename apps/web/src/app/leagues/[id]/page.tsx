@@ -46,14 +46,9 @@ function leagueUrl(leagueId: string) {
 
 function buildFallbackRows(members: Array<{ fantasyTeam: RankingRow["fantasyTeam"] }>): RankingRow[] {
   const sorted = [...members].sort((a, b) => b.fantasyTeam.totalPoints - a.fantasyTeam.totalPoints || a.fantasyTeam.name.localeCompare(b.fantasyTeam.name, "uk"));
-  let previousPoints: number | null = null;
-  let previousRank = 0;
 
   return sorted.map((member, index) => {
-    const rank = previousPoints === member.fantasyTeam.totalPoints ? previousRank : index + 1;
-    previousPoints = member.fantasyTeam.totalPoints;
-    previousRank = rank;
-    return { rank, totalPoints: member.fantasyTeam.totalPoints, fantasyTeam: member.fantasyTeam };
+    return { rank: index + 1, totalPoints: member.fantasyTeam.totalPoints, fantasyTeam: member.fantasyTeam };
   });
 }
 
@@ -282,7 +277,7 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
         <div className="topbar" style={{ marginBottom: 12 }}>
           <div>
             <h2>Таблиця ліги</h2>
-            <p className="muted">Однакові очки дають однакове місце.</p>
+            <p className="muted">За однакової кількості очок вище розташована команда, назва якої йде раніше за алфавітом.</p>
           </div>
           <span className="badge">
             <Users size={14} />
