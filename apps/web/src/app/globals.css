@@ -1392,7 +1392,24 @@ h3 {
 }
 
 .admin-player-group {
-  padding-top: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+}
+
+.admin-player-group > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.admin-player-group-content {
+  display: grid;
+  gap: 10px;
+  padding: 0 12px 12px;
 }
 
 .admin-team-players {
@@ -1414,6 +1431,15 @@ h3 {
   display: flex;
   justify-content: flex-end;
   padding: 0 12px 12px;
+}
+
+.admin-point-check.compact {
+  justify-content: center;
+  min-width: 24px;
+}
+
+.admin-point-check.compact input {
+  margin: 0;
 }
 
 .inline-edit > summary {
@@ -2858,6 +2884,142 @@ h3 {
   margin: 0;
 }
 
+.fixture-points-modal {
+  z-index: 95;
+}
+
+.fixture-points-content {
+  width: min(1540px, 100%);
+  max-height: calc(100vh - 24px);
+  padding: 12px 14px;
+  overflow: auto;
+}
+
+.fixture-points-content .admin-modal-heading {
+  margin-bottom: 8px;
+}
+
+.fixture-points-content .admin-modal-heading h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+}
+
+.fixture-score-label {
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+}
+
+.fixture-modal-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.fixture-modal-score .score-form {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) auto minmax(130px, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+  margin: 0;
+  padding: 8px;
+}
+
+.fixture-modal-score .score-form > span {
+  align-self: center;
+  padding-top: 18px;
+  font-weight: 900;
+}
+
+.fixture-modal-score .points-input {
+  width: 100%;
+}
+
+.fixture-points-form {
+  display: grid;
+  gap: 8px;
+}
+
+.fixture-squads-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fixture-squad-column {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.fixture-squad-column > h3 {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  margin: 0;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-strong);
+  font-size: 14px;
+}
+
+.fixture-points-table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 11px;
+}
+
+.fixture-points-table th,
+.fixture-points-table td {
+  height: 25px;
+  padding: 2px 4px;
+  vertical-align: middle;
+}
+
+.fixture-points-table th:first-child,
+.fixture-points-table td:first-child {
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fixture-points-table th:nth-child(2),
+.fixture-points-table td:nth-child(2) {
+  width: 42px;
+}
+
+.fixture-points-table th:nth-child(3),
+.fixture-points-table td:nth-child(3) {
+  width: 58px;
+}
+
+.fixture-points-table th:nth-child(4),
+.fixture-points-table td:nth-child(4),
+.fixture-points-table th:nth-child(5),
+.fixture-points-table td:nth-child(5) {
+  width: 54px;
+  text-align: center;
+}
+
+.fixture-points-table .points-input {
+  width: 48px;
+  height: 22px;
+  min-height: 0;
+  padding: 1px 4px;
+  font-size: 11px;
+}
+
+.fixture-points-submit {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .visit-stat-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3963,6 +4125,14 @@ h3 {
   align-items: center;
   gap: 10px;
   min-width: 0;
+}
+
+.leaderboard-team-main {
+  min-width: 0;
+}
+
+.leaderboard-mobile-manager {
+  display: none;
 }
 
 .leaderboard-own-row {
@@ -5551,7 +5721,7 @@ h3 {
 
 .match-list-row {
   display: grid;
-  grid-template-columns: 54px 130px 560px 110px 34px;
+  grid-template-columns: 130px 560px 110px 34px;
   align-items: center;
   gap: 12px;
   justify-content: start;
@@ -6250,6 +6420,28 @@ h3 {
     flex-direction: column;
   }
 
+  .fixture-points-content {
+    max-height: calc(100vh - 20px);
+  }
+
+  .fixture-modal-score,
+  .fixture-modal-score .score-form {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .fixture-modal-score .score-form > span {
+    display: none;
+  }
+
+  .fixture-squads-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fixture-points-table {
+    min-width: 0;
+  }
+
   .visit-split {
     grid-template-columns: 1fr;
   }
@@ -6371,16 +6563,7 @@ h3 {
   }
 
   .match-list-row {
-    grid-template-columns: 44px minmax(0, 1fr) 64px 34px;
-  }
-
-  .match-stage {
-    grid-column: 2;
-  }
-
-  .match-list-teams {
-    grid-column: 1 / -1;
-    grid-row: 2;
+    grid-template-columns: 90px minmax(0, 1fr) 64px 34px;
   }
 
   .stadium-map,
@@ -6401,6 +6584,85 @@ h3 {
 }
 
 @media (max-width: 620px) {
+  .leaderboard-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 12px;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 8px 4px;
+  }
+
+  .leaderboard-table th:first-child,
+  .leaderboard-table td:first-child {
+    width: 34px;
+    text-align: center;
+  }
+
+  .leaderboard-table th:nth-child(3),
+  .leaderboard-table td:nth-child(3) {
+    display: none;
+  }
+
+  .leaderboard-table th:last-child,
+  .leaderboard-table td:last-child {
+    width: 54px;
+    text-align: right;
+  }
+
+  .leaderboard-table th:nth-last-child(2):not(:nth-child(2)),
+  .leaderboard-table td:nth-last-child(2):not(:nth-child(2)) {
+    width: 44px;
+    text-align: center;
+  }
+
+  .leaderboard-team-cell {
+    width: 100%;
+    gap: 5px;
+  }
+
+  .leaderboard-team-main,
+  .leaderboard-team-link,
+  .leaderboard-team-link > span:last-child {
+    min-width: 0;
+  }
+
+  .leaderboard-team-link {
+    gap: 6px;
+  }
+
+  .leaderboard-team-link > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .leaderboard-team-photo {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+
+  .leaderboard-mobile-manager {
+    display: block;
+    margin: 2px 0 0 30px;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .leaderboard-table .own-team-badge {
+    min-height: 19px;
+    padding: 0 5px;
+    font-size: 10px;
+  }
+
   .squad-page .player-catalog-panel,
   .squad-page .catalog-table-panel {
     overflow-x: hidden;
@@ -6622,27 +6884,59 @@ h3 {
 
   .match-list-row {
     display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) 32px;
-    gap: 6px;
-    padding: 10px;
+    grid-template-columns: minmax(0, 1fr) auto 34px;
+    gap: 8px;
+    padding: 12px 10px;
+  }
+
+  .match-stage {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    text-align: center;
   }
 
   .match-list-row > time {
-    grid-column: 2;
+    grid-column: 1 / 3;
+    grid-row: 3;
+    justify-self: center;
+    color: var(--muted);
+    font-size: 13px;
   }
 
   .match-list-teams {
-    grid-template-columns: 1fr auto;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
   }
 
+  .match-list-teams .match-team:first-child,
   .match-list-teams .match-team:last-child {
-    grid-column: 1;
-    justify-self: start;
+    grid-column: auto;
   }
 
   .match-list-teams > strong {
-    grid-column: 2;
-    grid-row: 1 / 3;
+    grid-column: auto;
+    grid-row: auto;
+    min-width: 34px;
+  }
+
+  .match-list-teams .match-team {
+    font-size: 14px;
+  }
+
+  .match-list-teams .match-team:first-child {
+    justify-content: flex-start;
+  }
+
+  .match-list-teams .match-team:last-child {
+    justify-content: flex-start;
+  }
+
+  .match-list-row .stadium-inline-button {
+    grid-column: 3;
+    grid-row: 3;
+    justify-self: end;
   }
 
   .stadium-list-card {

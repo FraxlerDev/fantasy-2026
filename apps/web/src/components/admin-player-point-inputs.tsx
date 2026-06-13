@@ -7,11 +7,13 @@ export function AdminPlayerPointInputs({
   initialPoints,
   initialDidPlay,
   initialRedCard,
+  compact = false,
 }: {
   playerId: string;
   initialPoints: number;
   initialDidPlay: boolean;
   initialRedCard: boolean;
+  compact?: boolean;
 }) {
   const [points, setPoints] = useState(String(initialDidPlay ? initialPoints : 0));
   const [didNotPlay, setDidNotPlay] = useState(!initialDidPlay);
@@ -32,7 +34,7 @@ export function AdminPlayerPointInputs({
         {didNotPlay ? <input name={`points:${playerId}`} type="hidden" value="0" /> : null}
       </td>
       <td>
-        <label className="admin-point-check">
+        <label className={`admin-point-check ${compact ? "compact" : ""}`} title="Не грав">
           <input
             name={`didNotPlay:${playerId}`}
             type="checkbox"
@@ -45,11 +47,11 @@ export function AdminPlayerPointInputs({
               }
             }}
           />
-          Не грав
+          {compact ? null : "Не грав"}
         </label>
       </td>
       <td>
-        <label className="admin-point-check">
+        <label className={`admin-point-check ${compact ? "compact" : ""}`} title="Червона картка">
           <input
             name={`redCard:${playerId}`}
             type="checkbox"
@@ -59,7 +61,7 @@ export function AdminPlayerPointInputs({
               if (event.target.checked) setDidNotPlay(false);
             }}
           />
-          Червона картка
+          {compact ? null : "Червона картка"}
         </label>
       </td>
     </>

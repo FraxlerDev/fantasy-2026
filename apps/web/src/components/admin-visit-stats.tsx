@@ -305,6 +305,45 @@ export function AdminVisitStats({ visits, registrations, teamsCreated }: Props) 
     metrics.filter((metric) => !selectedStart || new Date(`${metric.date}T23:59:59Z`) >= selectedStart);
   const dailyRegistrations = filterDaily(registrations);
   const dailyTeams = filterDaily(teamsCreated);
+  const dailyTraffic = useMemo(() => {
+    if (now === null) return [];
+
+    const formatter = new Intl.DateTimeFormat("sv-SE", {
+      timeZone: "Europe/Kyiv",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const metrics = new Map<string, { sessions: number; pageViews: number }>();
+    const lastVisitByVisitor = new Map<string, number>();
+    const sessionTimeoutMs = 30 * 60 * 1000;
+    [...visits]
+      .sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime())
+      .forEach((visit) => {
+        const date = formatter.format(new Date(visit.startedAt));
+        const item = metrics.get(date) ?? { sessions: 0, pageViews: 0 };
+        const visitor = visit.visitorKey || visit.ip || visit.id;
+        const startedAt = new Date(visit.startedAt).getTime();
+        const sessionKey = `${date}:${visitor}`;
+        const previousVisitAt = lastVisitByVisitor.get(sessionKey);
+        if (previousVisitAt === undefined || startedAt - previousVisitAt > sessionTimeoutMs) {
+          item.sessions += 1;
+        }
+        lastVisitByVisitor.set(sessionKey, startedAt);
+        item.pageViews += 1;
+        metrics.set(date, item);
+      });
+    return Array.from({ length: 14 }, (_, index) => {
+      const offsetDays = 13 - index;
+      const date = formatter.format(new Date(now - offsetDays * 24 * 60 * 60 * 1000));
+      const item = metrics.get(date);
+      return {
+        date,
+        sessions: item?.sessions ?? 0,
+        pageViews: item?.pageViews ?? 0,
+      };
+    });
+  }, [now, visits]);
   const dailyDates = [...new Set([...dailyRegistrations, ...dailyTeams].map((item) => item.date))]
     .sort()
     .slice(-14);
@@ -384,6 +423,32 @@ export function AdminVisitStats({ visits, registrations, teamsCreated }: Props) 
       </div>
 
       <div className="visit-secondary-grid">
+        <section className="visit-ranking-card">
+          <h3>Відвідування за останні 14 днів</h3>
+          {dailyTraffic.length ? (
+            <div className="table-wrap">
+              <table className="table compact-table visit-daily-traffic">
+                <thead>
+                  <tr>
+                    <th>Дата</th>
+                    <th>Сесії</th>
+                    <th>Перегляди сторінок</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dailyTraffic.map((metric) => (
+                    <tr key={metric.date}>
+                      <td>{formatShortDate(metric.date)}</td>
+                      <td><strong>{metric.sessions}</strong></td>
+                      <td><strong>{metric.pageViews}</strong></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : <p className="muted">Даних за цей період немає.</p>}
+        </section>
+
         <section className="visit-ranking-card">
           <h3>Воронка користувача</h3>
           <div className="visit-funnel">

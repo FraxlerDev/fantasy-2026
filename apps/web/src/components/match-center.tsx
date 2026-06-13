@@ -602,7 +602,6 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
                 <h3>{day}</h3>
                 {dayMatches.map((match) => (
                   <article className="match-list-row" key={match.id}>
-                    <span className="match-number">#{match.matchNo}</span>
                     <span className="match-stage">{match.groupName ?? stageTitles[match.stage] ?? match.stage}</span>
                     <div className="match-list-teams">
                       <TeamButton team={match.home} fallback={match.homeLabel} onSelect={setSelectedTeamId} />

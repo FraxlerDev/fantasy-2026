@@ -16,11 +16,6 @@ import {
 import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
 import { AdminPlayerPointInputs } from "../../components/admin-player-point-inputs";
-import {
-  AdminVisitStats,
-  type AdminRawVisit,
-  type DailyMetric,
-} from "../../components/admin-visit-stats";
 import { DeleteNationalTeamPlayersButton } from "../../components/delete-national-team-players-button";
 import { AppShell } from "../../components/shell";
 import { SnapshotSubmitButton } from "../../components/snapshot-submit-button";
@@ -30,7 +25,6 @@ import { ensureDefaultGameweeks } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
 import { createMetadata } from "../../lib/seo";
 import { buildAllGroupStandings, ensurePlayoffMatches, resolvePlayoffMatches } from "../../lib/tournament";
-import { isBotUserAgent } from "../../lib/visit-analytics";
 import {
   createFixture,
   refreshRankingsAction,
@@ -60,22 +54,6 @@ type FixtureListItem = {
   homeTeam: TeamLabel;
   awayTeam: TeamLabel;
 };
-type SiteVisitRow = {
-  id: string;
-  visitorKey: string;
-  site: string;
-  path: string;
-  referrer: string | null;
-  ip: string | null;
-  countryCity: string | null;
-  device: string | null;
-  browserOs: string | null;
-  userAgent: string | null;
-  durationSeconds: number;
-  startedAt: Date;
-  lastSeenAt: Date;
-};
-
 function teamLabel(team: TeamLabel) {
   return (
     <span className="team-with-flag">
@@ -98,60 +76,11 @@ function groupFixtures(fixtures: FixtureListItem[]) {
   }, new Map());
 }
 
-function startOfToday() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
-
-function formatAdminDate(date: Date) {
-  return date.toLocaleString("uk-UA", {
-    timeZone: "Europe/Kyiv",
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
-
-function formatDuration(totalSeconds: number) {
-  const seconds = Math.max(0, Math.round(totalSeconds));
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const restSeconds = seconds % 60;
-
-  if (hours > 0) return `${hours} год ${minutes} хв`;
-  if (minutes > 0) return `${minutes} хв ${restSeconds} с`;
-  return `${restSeconds} с`;
-}
-
 function transferWindowLabel(gameweek: { transfersOpen: boolean; transferWindowStatus: string; deadlineAt: Date }) {
   if (gameweek.deadlineAt <= new Date() || gameweek.transferWindowStatus === "CLOSED_DEADLINE") return "Закриті дедлайном";
   if (gameweek.transfersOpen) return "Відкриті вручну";
   if (gameweek.transferWindowStatus === "CLOSED_MANUAL") return "Закриті вручну";
   return "Очікують відкриття";
-}
-
-function visitStatus(lastSeenAt: Date) {
-  return Date.now() - lastSeenAt.getTime() < 120_000 ? "Online" : "Offline";
-}
-
-function dailyMetrics(dates: Date[]): DailyMetric[] {
-  const formatter = new Intl.DateTimeFormat("sv-SE", {
-    timeZone: "Europe/Kyiv",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  const counts = new Map<string, number>();
-  dates.forEach((date) => {
-    const key = formatter.format(date);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  });
-  return [...counts.entries()]
-    .map(([date, count]) => ({ date, count }))
-    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function positionLabel(position: string) {
@@ -210,24 +139,6 @@ function rosterDiagnostics(team: {
     { label: `Старт відповідає схемі ${team.formation}`, ok: formationOk, value: `${starterCounts.DEF}-${starterCounts.MID}-${starterCounts.FWD}` },
     { label: "Капітан обраний зі старту", ok: captainOk, value: captainOk ? "OK" : "Немає" },
   ];
-}
-
-function pageTitle(path: string) {
-  const pathname = path.split("?")[0] || "/";
-  if (pathname === "/") return "Головна";
-  if (pathname === "/squad") return "Склад";
-  if (pathname === "/rules") return "Правила";
-  if (pathname === "/calendar") return "Календар";
-  if (pathname === "/matches") return "Матч-центр";
-  if (pathname === "/tournament") return "Турнір";
-  if (pathname === "/leaderboard") return "Рейтинг";
-  if (pathname === "/leagues") return "Ліги";
-  if (pathname === "/forum") return "Форум";
-  if (pathname === "/login") return "Вхід";
-  if (pathname === "/admin") return "Адмінка";
-  if (pathname.startsWith("/teams/")) return "Сторінка команди";
-  if (pathname.startsWith("/api/")) return "API";
-  return pathname;
 }
 
 const errorMessages: Record<string, string> = {
@@ -290,8 +201,7 @@ export default async function AdminPage({
 
   const params = await searchParams;
   const selectedGameweek = params?.gw ? Number(params.gw) : undefined;
-  const siteVisit = (prisma as unknown as { siteVisit?: any }).siteVisit;
-  const [teams, players, allFixtures, gameweeks, fantasyTeams, users, recentVisits] = await Promise.all([
+  const [teams, players, allFixtures, gameweeks, fantasyTeams] = await Promise.all([
     prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }] }),
     prisma.player.findMany({
       include: { nationalTeam: true },
@@ -320,10 +230,6 @@ export default async function AdminPage({
       },
       orderBy: [{ createdAt: "asc" }],
     }),
-    prisma.user.findMany({ select: { createdAt: true }, orderBy: { createdAt: "asc" } }),
-    siteVisit?.findMany({
-      orderBy: { startedAt: "desc" },
-    }).catch(() => []) ?? Promise.resolve([]),
   ]);
   const playoffScores = await prisma.playoffMatch.findMany({ orderBy: { matchNo: "asc" } });
   const tournamentTeams = teams.map((team) => ({
@@ -346,7 +252,7 @@ export default async function AdminPage({
   const activePlayoff = resolvedPlayoff.find((match) => match.id === activePlayoffId) ?? resolvedPlayoff[0] ?? null;
 
   const fixtures = selectedGameweek ? allFixtures.filter((fixture) => fixture.gameweek === selectedGameweek) : allFixtures;
-  const activeFixtureId = params?.fixtureId ?? fixtures[0]?.id;
+  const activeFixtureId = params?.fixtureId;
   const activeFixture = activeFixtureId
     ? await prisma.fixture.findUnique({
         where: { id: activeFixtureId },
@@ -360,7 +266,6 @@ export default async function AdminPage({
 
   const fixturesByGroup = groupFixtures(fixtures);
   const pointMap = new Map(activeFixture?.playerPoints.map((point) => [point.playerId, point]) ?? []);
-  const fixturePlayers = activeFixture ? [...activeFixture.homeTeam.players, ...activeFixture.awayTeam.players] : [];
   const csvPreview = players.slice(0, 5);
   const firstGameweekByTeam = new Map(
     fantasyTeams.map((team) => [
@@ -434,25 +339,6 @@ export default async function AdminPage({
     return groups;
   }, new Map());
 
-  const analyticsVisits: AdminRawVisit[] = (recentVisits as SiteVisitRow[])
-    .filter((visit) => !isBotUserAgent(visit.userAgent))
-    .map((visit) => ({
-      id: visit.id,
-      visitorKey: visit.visitorKey,
-      site: visit.site,
-      ip: visit.ip,
-      countryCity: visit.countryCity,
-      device: visit.device,
-      browserOs: visit.browserOs,
-      durationSeconds: visit.durationSeconds,
-      startedAt: visit.startedAt.toISOString(),
-      lastSeenAt: visit.lastSeenAt.toISOString(),
-      path: visit.path,
-      pageTitle: pageTitle(visit.path),
-      referrer: visit.referrer,
-    }));
-  const registrationMetrics = dailyMetrics(users.map((user) => user.createdAt));
-  const teamCreationMetrics = dailyMetrics(fantasyTeams.map((team) => team.createdAt));
   const teamsWithRoster = fantasyTeams.filter((team) => team.rosterEntries.length > 0);
 
   return (
@@ -464,7 +350,7 @@ export default async function AdminPage({
           <p className="muted">Турнір, склади, результати та системні інструменти в одному місці.</p>
         </div>
         <div className="toolbar">
-          <a className="button" href="#visits-modal">
+          <a className="button" href="/admin/statistics">
             <BarChart3 size={18} />
             Статистика
           </a>
@@ -494,7 +380,7 @@ export default async function AdminPage({
         <div className="admin-nav-group">
           <span>Система</span>
           <a href="#rankings"><ListChecks size={16} />Рейтинги</a>
-          <a href="#visits-modal"><BarChart3 size={16} />Відвідування</a>
+          <a href="/admin/statistics"><BarChart3 size={16} />Відвідування</a>
         </div>
       </nav>
 
@@ -539,89 +425,6 @@ export default async function AdminPage({
           <strong>{fantasyTeams.length}</strong>
           <small>{teamsWithRoster.length} зі складом</small>
         </a>
-      </section>
-
-      <section className="admin-modal" id="visits-modal" aria-label="Статистика користувачів сайту">
-        <a className="admin-modal-backdrop" href="#" aria-label="Закрити статистику" />
-        <div className="admin-modal-content">
-          <div className="admin-modal-heading">
-            <h2>Статистика користувачів сайту</h2>
-            <a className="button" href="#">Закрити</a>
-          </div>
-          <AdminVisitStats
-            visits={analyticsVisits}
-            registrations={registrationMetrics}
-            teamsCreated={teamCreationMetrics}
-          />
-          {/*
-          <div className="admin-visits legacy-visit-table">
-        <div className="visit-stat-grid">
-          <div className="visit-stat-card">
-            <span>Користувачів сьогодні</span>
-            <strong>{todayVisitors.length}</strong>
-          </div>
-          <div className="visit-stat-card">
-            <span>Тривалість сьогодні</span>
-            <strong>{formatDuration(todayDuration._sum.durationSeconds ?? 0)}</strong>
-          </div>
-          <div className="visit-stat-card">
-            <span>Користувачів за весь час</span>
-            <strong>{allVisitors.length}</strong>
-          </div>
-          <div className="visit-stat-card">
-            <span>Тривалість за весь час</span>
-            <strong>{formatDuration(allDuration._sum.durationSeconds ?? 0)}</strong>
-          </div>
-        </div>
-
-        <div className="visit-table-panel">
-          <div className="visit-table-heading">
-            <h2>Статистика користувачів сайту</h2>
-            <span className="muted">Унікальних IP: {uniqueVisitRows.length}</span>
-          </div>
-          <table className="table compact-table visit-table">
-            <thead>
-              <tr>
-                <th>Час входу</th>
-                <th>Статус</th>
-                <th>Сайт</th>
-                <th>IP</th>
-                <th>Країна / місто</th>
-                <th>Пристрій</th>
-                <th>Браузер / ОС</th>
-                <th>Тривалість</th>
-                <th>Сторінка</th>
-                <th>Referrer</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(recentVisits as SiteVisitRow[]).map((visit) => {
-                const status = visitStatus(visit.lastSeenAt);
-                return (
-                  <tr key={visit.id}>
-                    <td>{formatAdminDate(visit.startedAt)}</td>
-                    <td>
-                      <span className={`visit-status ${status === "Online" ? "online" : "offline"}`}>
-                        {status}
-                      </span>
-                    </td>
-                    <td>{visit.site}</td>
-                    <td>{visit.ip ?? "-"}</td>
-                    <td>{visit.countryCity ?? "-"}</td>
-                    <td>{visit.device ?? "-"}</td>
-                    <td>{visit.browserOs ?? "-"}</td>
-                    <td>{formatDuration(visit.durationSeconds)}</td>
-                    <td>{visit.path}</td>
-                    <td>{visit.referrer ?? "-"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-          </div>
-          */}
-        </div>
       </section>
 
       <section className="panel" id="gameweeks" style={{ marginBottom: 16 }}>
@@ -935,61 +738,66 @@ export default async function AdminPage({
         <p className="muted">Гравці згруповані за групами і збірними. Фото: JPG, PNG або WebP до 200 КБ.</p>
         <div className="admin-player-groups">
           {[...playersByGroup.entries()].map(([groupName, groupTeams]) => (
-            <section className="admin-player-group" key={groupName}>
-              <h3>{groupName}</h3>
-              {groupTeams.map((team) => {
-                const teamPlayers = players.filter((player) => player.nationalTeamId === team.id);
-                return (
-                  <details className="admin-team-players" key={team.id}>
-                    <summary>
-                      {teamLabel(team)}
-                      <span className="badge">{teamPlayers.length}</span>
-                    </summary>
-                    <div className="admin-team-actions">
-                      <DeleteNationalTeamPlayersButton nationalTeamId={team.id} teamName={team.nameUk} playerCount={teamPlayers.length} />
-                    </div>
-                    <table className="table compact-table">
-                      <thead>
-                        <tr>
-                          <th>Гравець</th>
-                          <th>Поз.</th>
-                          <th>Клуб</th>
-                          <th>Ціна</th>
-                          <th>Статус</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {teamPlayers.map((player) => (
-                          <tr key={player.id}>
-                            <td>{player.name}</td>
-                            <td>{player.position}</td>
-                            <td>{player.club ?? "-"}</td>
-                            <td>{Number(player.price).toFixed(1)}</td>
-                            <td>{player.status}</td>
-                            <td>
-                              <AdminPlayerActions
-                                player={{
-                                  id: player.id,
-                                  name: player.name,
-                                  nameOriginal: player.nameOriginal,
-                                  position: player.position,
-                                  price: Number(player.price),
-                                  club: player.club,
-                                  clubOriginal: player.clubOriginal,
-                                  status: player.status,
-                                  unavailableReason: player.unavailableReason,
-                                }}
-                              />
-                            </td>
+            <details className="admin-player-group" key={groupName}>
+              <summary>
+                <strong>{groupName}</strong>
+                <span className="badge">{groupTeams.length} збірні</span>
+              </summary>
+              <div className="admin-player-group-content">
+                {groupTeams.map((team) => {
+                  const teamPlayers = players.filter((player) => player.nationalTeamId === team.id);
+                  return (
+                    <details className="admin-team-players" key={team.id}>
+                      <summary>
+                        {teamLabel(team)}
+                        <span className="badge">{teamPlayers.length}</span>
+                      </summary>
+                      <div className="admin-team-actions">
+                        <DeleteNationalTeamPlayersButton nationalTeamId={team.id} teamName={team.nameUk} playerCount={teamPlayers.length} />
+                      </div>
+                      <table className="table compact-table">
+                        <thead>
+                          <tr>
+                            <th>Гравець</th>
+                            <th>Поз.</th>
+                            <th>Клуб</th>
+                            <th>Ціна</th>
+                            <th>Статус</th>
+                            <th></th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </details>
-                );
-              })}
-            </section>
+                        </thead>
+                        <tbody>
+                          {teamPlayers.map((player) => (
+                            <tr key={player.id}>
+                              <td>{player.name}</td>
+                              <td>{player.position}</td>
+                              <td>{player.club ?? "-"}</td>
+                              <td>{Number(player.price).toFixed(1)}</td>
+                              <td>{player.status}</td>
+                              <td>
+                                <AdminPlayerActions
+                                  player={{
+                                    id: player.id,
+                                    name: player.name,
+                                    nameOriginal: player.nameOriginal,
+                                    position: player.position,
+                                    price: Number(player.price),
+                                    club: player.club,
+                                    clubOriginal: player.clubOriginal,
+                                    status: player.status,
+                                    unavailableReason: player.unavailableReason,
+                                  }}
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </details>
+                  );
+                })}
+              </div>
+            </details>
           ))}
         </div>
       </section>
@@ -1023,7 +831,7 @@ export default async function AdminPage({
                 {groupFixtures.map((fixture) => (
                   <a
                     className={`admin-match-link ${fixture.id === activeFixture?.id ? "active" : ""}`}
-                    href={`/admin?fixtureId=${fixture.id}${selectedGameweek ? `&gw=${selectedGameweek}` : ""}#points`}
+                    href={`/admin?fixtureId=${fixture.id}${selectedGameweek ? `&gw=${selectedGameweek}` : ""}#fixture-points-modal`}
                     key={fixture.id}
                   >
                     <span className="match-meta">#{fixture.matchNo ?? "-"} · GW{fixture.gameweek}</span>
@@ -1040,72 +848,90 @@ export default async function AdminPage({
         </div>
 
         {activeFixture ? (
-          <div className="active-fixture-panel">
-            <div className="active-fixture-title">
-              <div>
-                <p className="eyebrow">#{activeFixture.matchNo ?? "-"} · GW{activeFixture.gameweek} · {activeFixture.groupName ?? "Без групи"}</p>
-                <h3>{teamLabel(activeFixture.homeTeam)} <span>{scoreLabel(activeFixture)}</span> {teamLabel(activeFixture.awayTeam)}</h3>
+          <section className="admin-modal fixture-points-modal" id="fixture-points-modal" aria-label="Ручні очки матчу">
+            <a
+              className="admin-modal-backdrop"
+              href={`/admin${selectedGameweek ? `?gw=${selectedGameweek}` : ""}#points`}
+              aria-label="Закрити матч"
+            />
+            <div className="admin-modal-content fixture-points-content">
+              <div className="admin-modal-heading">
+                <div>
+                  <p className="eyebrow">#{activeFixture.matchNo ?? "-"} · GW{activeFixture.gameweek} · {activeFixture.groupName ?? "Без групи"}</p>
+                  <h2>{teamLabel(activeFixture.homeTeam)} <span className="fixture-score-label">{scoreLabel(activeFixture)}</span> {teamLabel(activeFixture.awayTeam)}</h2>
+                </div>
+                <a className="button" href={`/admin${selectedGameweek ? `?gw=${selectedGameweek}` : ""}#points`}>Закрити</a>
               </div>
-            </div>
 
-            <div className="score-actions">
-              <form action={saveFixtureScore} className="score-form">
-                <input type="hidden" name="fixtureId" value={activeFixture.id} />
-                <label>
-                  Голи господарів
-                  <input className="input points-input" name="homeScore" type="number" min={0} step={1} defaultValue={activeFixture.homeScore ?? ""} required />
-                </label>
-                <label>
-                  Голи гостей
-                  <input className="input points-input" name="awayScore" type="number" min={0} step={1} defaultValue={activeFixture.awayScore ?? ""} required />
-                </label>
-                <button className="button primary" type="submit">Зберегти рахунок</button>
-              </form>
+              <div className="fixture-modal-score">
+                <form action={saveFixtureScore} className="score-form">
+                  <input type="hidden" name="fixtureId" value={activeFixture.id} />
+                  <label>
+                    {activeFixture.homeTeam.nameUk}
+                    <input className="input points-input" name="homeScore" type="number" min={0} step={1} defaultValue={activeFixture.homeScore ?? ""} required />
+                  </label>
+                  <span>:</span>
+                  <label>
+                    {activeFixture.awayTeam.nameUk}
+                    <input className="input points-input" name="awayScore" type="number" min={0} step={1} defaultValue={activeFixture.awayScore ?? ""} required />
+                  </label>
+                  <button className="button primary" type="submit">Зберегти рахунок</button>
+                </form>
+                <form action={resetFixtureScore}>
+                  <input type="hidden" name="fixtureId" value={activeFixture.id} />
+                  <button className="button warning" type="submit">
+                    <RotateCcw size={16} />
+                    Скинути
+                  </button>
+                </form>
+              </div>
 
-              <form action={resetFixtureScore}>
-                <input type="hidden" name="fixtureId" value={activeFixture.id} />
-                <button className="button warning" type="submit">
-                  <RotateCcw size={18} />
-                  Скинути рахунок
-                </button>
-              </form>
-            </div>
-
-            {fixturePlayers.length > 0 ? (
-              <form action={saveFixturePoints} style={{ marginTop: 14 }}>
-                <input type="hidden" name="fixtureId" value={activeFixture.id} />
-                <table className="table">
-                  <thead>
-                    <tr><th>Гравець</th><th>Збірна</th><th>Позиція</th><th>Очки</th><th>Не грав</th><th>Червона картка</th></tr>
-                  </thead>
-                  <tbody>
-                    {fixturePlayers.map((player) => (
-                      <tr key={player.id}>
-                        <td>{player.name}</td>
-                        <td>{player.nationalTeamId === activeFixture.homeTeamId ? teamLabel(activeFixture.homeTeam) : teamLabel(activeFixture.awayTeam)}</td>
-                        <td>{player.position}</td>
-                        <AdminPlayerPointInputs
-                          playerId={player.id}
-                          initialPoints={pointMap.get(player.id)?.points ?? 0}
-                          initialDidPlay={pointMap.get(player.id)?.didPlay ?? true}
-                          initialRedCard={pointMap.get(player.id)?.redCard ?? false}
-                        />
-                      </tr>
+              {activeFixture.homeTeam.players.length + activeFixture.awayTeam.players.length > 0 ? (
+                <form action={saveFixturePoints} className="fixture-points-form">
+                  <input type="hidden" name="fixtureId" value={activeFixture.id} />
+                  <div className="fixture-squads-grid">
+                    {[
+                      { team: activeFixture.homeTeam, players: activeFixture.homeTeam.players },
+                      { team: activeFixture.awayTeam, players: activeFixture.awayTeam.players },
+                    ].map(({ team, players: squadPlayers }) => (
+                      <section className="fixture-squad-column" key={team.id}>
+                        <h3>{teamLabel(team)}</h3>
+                        <table className="table fixture-points-table">
+                          <thead>
+                            <tr><th>Гравець</th><th>Поз.</th><th>Очки</th><th>Не грав</th><th>ЧК</th></tr>
+                          </thead>
+                          <tbody>
+                            {squadPlayers.map((player) => (
+                              <tr key={player.id}>
+                                <td title={player.name}>{player.name}</td>
+                                <td>{player.position}</td>
+                                <AdminPlayerPointInputs
+                                  playerId={player.id}
+                                  initialPoints={pointMap.get(player.id)?.points ?? 0}
+                                  initialDidPlay={pointMap.get(player.id)?.didPlay ?? true}
+                                  initialRedCard={pointMap.get(player.id)?.redCard ?? false}
+                                  compact
+                                />
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </section>
                     ))}
-                  </tbody>
-                </table>
-                <button className="button primary" type="submit" style={{ marginTop: 14 }}>
-                  <Calculator size={18} />
-                  Зберегти очки матчу
-                </button>
-              </form>
-            ) : (
-              <p className="muted" style={{ marginTop: 14 }}>Для цих збірних ще немає гравців. Імпортуй склади через CSV вище.</p>
-            )}
-          </div>
-        ) : (
-          <p className="muted">Спочатку створи матч.</p>
-        )}
+                  </div>
+                  <div className="fixture-points-submit">
+                    <button className="button primary" type="submit">
+                      <Calculator size={18} />
+                      Зберегти очки матчу
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <p className="muted">Для цих збірних ще немає гравців. Імпортуй склади через CSV вище.</p>
+              )}
+            </div>
+          </section>
+        ) : null}
       </section>
 
       <section className="panel" style={{ marginTop: 16 }} id="playoff-scores">

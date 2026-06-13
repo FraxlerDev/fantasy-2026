@@ -332,7 +332,7 @@ export async function saveFixturePoints(formData: FormData) {
   revalidatePath("/teams");
   revalidatePath("/leaderboard");
   revalidatePath("/leagues");
-  redirect(`/admin?fixtureId=${fixtureId}&points=saved`);
+  redirect(`/admin?fixtureId=${fixtureId}&points=saved#fixture-points-modal`);
 }
 
 export async function saveFixtureScore(formData: FormData) {
@@ -355,7 +355,7 @@ export async function saveFixtureScore(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/tournament");
   revalidatePath("/matches");
-  redirect(`/admin?fixtureId=${fixtureId}&score=saved`);
+  redirect(`/admin?fixtureId=${fixtureId}&score=saved#fixture-points-modal`);
 }
 
 export async function resetFixtureScore(formData: FormData) {
@@ -371,7 +371,7 @@ export async function resetFixtureScore(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/tournament");
   revalidatePath("/matches");
-  redirect(`/admin?fixtureId=${fixtureId}&score=reset`);
+  redirect(`/admin?fixtureId=${fixtureId}&score=reset#fixture-points-modal`);
 }
 
 export async function savePlayoffScore(formData: FormData) {

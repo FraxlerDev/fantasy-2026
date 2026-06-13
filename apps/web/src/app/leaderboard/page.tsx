@@ -299,7 +299,10 @@ export default async function LeaderboardPage({
                   <td>{team.rank}</td>
                   <td>
                     <span className="leaderboard-team-cell">
-                      <TeamLink id={team.id} name={team.name} image={team.image} />
+                      <span className="leaderboard-team-main">
+                        <TeamLink id={team.id} name={team.name} image={team.image} />
+                        <small className="leaderboard-mobile-manager">{team.manager}</small>
+                      </span>
                       {isOwnTeam ? <span className="badge own-team-badge">Ви</span> : null}
                     </span>
                   </td>
