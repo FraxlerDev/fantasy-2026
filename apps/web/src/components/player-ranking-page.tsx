@@ -73,6 +73,8 @@ export function PlayerRankingPage({
           <PlayerRankingTable
             players={filteredPlayers}
             valueLabel={isPopularity ? "Виборів" : "Очки"}
+            showPosition
+            showPrice={!isPopularity}
             emptyText="За вибраними фільтрами гравців не знайдено."
           />
         </section>

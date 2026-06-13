@@ -7,6 +7,7 @@ export type RankedPlayer = {
   id: string;
   name: string;
   position: PlayerPosition;
+  price: number;
   photoUrl: string | null;
   value: number;
   nationalTeam: {
@@ -52,6 +53,7 @@ export async function getPlayerRanking(mode: PlayerRankingMode) {
       id: player.id,
       name: player.name,
       position: player.position,
+      price: Number(player.price),
       photoUrl: player.photoUrl,
       value: values.get(player.id) ?? 0,
       nationalTeam: {

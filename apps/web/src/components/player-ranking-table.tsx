@@ -1,23 +1,44 @@
 import { UserRound } from "lucide-react";
+import type { PlayerPosition } from "@prisma/client";
 import type { RankedPlayer } from "../lib/player-rankings";
+
+const positionLabels: Record<PlayerPosition, { full: string; short: string }> = {
+  GK: { full: "Воротар", short: "ВРТ" },
+  DEF: { full: "Захисник", short: "ЗАХ" },
+  MID: { full: "Півзахисник", short: "ПІВ" },
+  FWD: { full: "Нападник", short: "НАП" },
+};
 
 export function PlayerRankingTable({
   players,
   valueLabel,
   emptyText,
+  showPosition = false,
+  showPrice = false,
 }: {
   players: RankedPlayer[];
   valueLabel: string;
   emptyText: string;
+  showPosition?: boolean;
+  showPrice?: boolean;
 }) {
+  const columnCount = 4 + Number(showPosition) + Number(showPrice);
+  const tableClasses = [
+    "table compact-table player-ranking-table",
+    showPosition ? "has-position" : "",
+    showPrice ? "has-price" : "",
+  ].filter(Boolean).join(" ");
+
   return (
     <div className="table-scroll">
-      <table className="table compact-table player-ranking-table">
+      <table className={tableClasses}>
         <thead>
           <tr>
             <th>#</th>
             <th>Гравець</th>
+            {showPosition ? <th>Позиція</th> : null}
             <th>Збірна</th>
+            {showPrice ? <th>Ціна</th> : null}
             <th>{valueLabel}</th>
           </tr>
         </thead>
@@ -43,16 +64,23 @@ export function PlayerRankingTable({
                   </span>
                 </span>
               </td>
+              {showPosition ? (
+                <td className="player-ranking-position">
+                  <span className="position-full">{positionLabels[player.position].full}</span>
+                  <span className="position-short">{positionLabels[player.position].short}</span>
+                </td>
+              ) : null}
               <td>
                 <span className="team-with-flag">
                   {player.nationalTeam.flagPath ? <img alt="" className="flag" src={player.nationalTeam.flagPath} /> : null}
                   {player.nationalTeam.nameUk}
                 </span>
               </td>
+              {showPrice ? <td className="player-ranking-price">{player.price.toFixed(1)}</td> : null}
               <td><strong>{player.value}</strong></td>
             </tr>
           ))}
-          {players.length === 0 ? <tr><td colSpan={4}>{emptyText}</td></tr> : null}
+          {players.length === 0 ? <tr><td colSpan={columnCount}>{emptyText}</td></tr> : null}
         </tbody>
       </table>
     </div>

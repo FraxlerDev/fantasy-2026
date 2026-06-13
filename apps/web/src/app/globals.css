@@ -1403,6 +1403,15 @@ h3 {
   display: none;
 }
 
+.position-short {
+  display: none;
+}
+
+.player-ranking-position,
+.player-ranking-price {
+  white-space: nowrap;
+}
+
 .section-heading-row {
   display: flex;
   align-items: center;
@@ -6780,15 +6789,37 @@ h3 {
     text-align: center;
   }
 
-  .player-ranking-table th:nth-child(3),
-  .player-ranking-table td:nth-child(3) {
+  .player-ranking-table:not(.has-position) th:nth-child(3),
+  .player-ranking-table:not(.has-position) td:nth-child(3),
+  .player-ranking-table.has-position th:nth-child(4),
+  .player-ranking-table.has-position td:nth-child(4) {
     display: none;
+  }
+
+  .player-ranking-table.has-position th:nth-child(3),
+  .player-ranking-table.has-position td:nth-child(3) {
+    width: 42px;
+    text-align: center;
+  }
+
+  .player-ranking-table.has-price th:nth-child(5),
+  .player-ranking-table.has-price td:nth-child(5) {
+    width: 42px;
+    text-align: right;
   }
 
   .player-ranking-table th:last-child,
   .player-ranking-table td:last-child {
-    width: 56px;
+    width: 48px;
     text-align: right;
+  }
+
+  .player-ranking-position .position-full {
+    display: none;
+  }
+
+  .player-ranking-position .position-short {
+    display: inline;
   }
 
   .player-ranking-table .catalog-player {
