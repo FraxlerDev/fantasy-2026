@@ -289,7 +289,7 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
             {rows.length} команд
           </span>
         </div>
-        <table className="table">
+        <table className="table league-ranking-table">
           <thead>
             <tr>
               <th>#</th>
@@ -313,6 +313,7 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
                     <span>{row.fantasyTeam.name}</span>
                     {isOwnTeam ? <span className="own-team-badge">Ви</span> : null}
                   </Link>
+                  <small className="league-mobile-manager">{row.fantasyTeam.user.username?.trim() || "Користувач"}</small>
                 </td>
                 <td>{row.fantasyTeam.user.username?.trim() || "Користувач"}</td>
                 <td><strong>{row.totalPoints}</strong></td>

@@ -188,13 +188,16 @@ export default async function LeaguesPage({
                     </div>
                     <Link className="button" href="/leagues?tab=create">Редагувати</Link>
                   </div>
-                  <table className="table compact-table">
+                  <table className="table compact-table league-ranking-table">
                     <thead><tr><th>Місце</th><th>Команда</th><th>Менеджер</th><th>Очки</th><th /></tr></thead>
                     <tbody>
                       {rankedMembers(ownedLeague.members).slice(0, 10).map((row) => (
                         <tr key={row.id}>
                           <td>{row.rank}</td>
-                          <td><Link href={`/teams/${row.id}`}>{row.name}</Link></td>
+                          <td>
+                            <Link href={`/teams/${row.id}`}>{row.name}</Link>
+                            <small className="league-mobile-manager">{row.user.username?.trim() || "Користувач"}</small>
+                          </td>
                           <td>{row.user.username?.trim() || "Користувач"}</td>
                           <td><strong>{row.totalPoints}</strong></td>
                           <td>
@@ -228,13 +231,16 @@ export default async function LeaguesPage({
                       <button className="button" type="submit">Вийти</button>
                     </form>
                   </div>
-                  <table className="table compact-table">
+                  <table className="table compact-table league-ranking-table">
                     <thead><tr><th>Місце</th><th>Команда</th><th>Менеджер</th><th>Очки</th></tr></thead>
                     <tbody>
                       {rankedMembers(membership.league.members).slice(0, 10).map((row) => (
                         <tr key={row.id}>
                           <td>{row.rank}</td>
-                          <td><Link href={`/teams/${row.id}`}>{row.name}</Link></td>
+                          <td>
+                            <Link href={`/teams/${row.id}`}>{row.name}</Link>
+                            <small className="league-mobile-manager">{row.user.username?.trim() || "Користувач"}</small>
+                          </td>
                           <td>{row.user.username?.trim() || "Користувач"}</td>
                           <td><strong>{row.totalPoints}</strong></td>
                         </tr>

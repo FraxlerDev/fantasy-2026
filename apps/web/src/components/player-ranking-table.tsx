@@ -37,7 +37,10 @@ export function PlayerRankingTable({
                       <img alt="" className="player-photo-flag" src={player.nationalTeam.flagPath} />
                     ) : null}
                   </span>
-                  <strong>{player.name}</strong>
+                  <span className="player-ranking-name">
+                    <strong>{player.name}</strong>
+                    <small>{player.nationalTeam.nameUk}</small>
+                  </span>
                 </span>
               </td>
               <td>
