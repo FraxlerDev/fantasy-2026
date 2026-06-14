@@ -1125,6 +1125,12 @@ h3 {
   color: #10251b;
 }
 
+.button.danger {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
+}
+
 .grid {
   display: grid;
   gap: 16px;
@@ -3075,7 +3081,9 @@ h3 {
 
 .fixture-points-submit {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .visit-stat-grid {

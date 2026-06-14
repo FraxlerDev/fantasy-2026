@@ -17,6 +17,7 @@ import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
 import { AdminPlayerPointInputs } from "../../components/admin-player-point-inputs";
 import { DeleteNationalTeamPlayersButton } from "../../components/delete-national-team-players-button";
+import { ResetFixturePointsButton } from "../../components/reset-fixture-points-button";
 import { AppShell } from "../../components/shell";
 import { SnapshotSubmitButton } from "../../components/snapshot-submit-button";
 import { TransferWindowButton } from "../../components/transfer-window-button";
@@ -387,7 +388,8 @@ export default async function AdminPage({
       {params?.error ? <div className="form-error">Помилка: {errorMessages[params.error] ?? params.error}</div> : null}
       {params?.points || params?.rankings || params?.score || params?.players || params?.teamPlayers ? (
         <div className="form-success">
-          Зміни збережено.{params?.players ? ` Імпортовано рядків: ${params.count ?? "0"}.` : ""}
+          {params?.points === "reset" ? "Очки матчу скинуто." : "Зміни збережено."}
+          {params?.players ? ` Імпортовано рядків: ${params.count ?? "0"}.` : ""}
         </div>
       ) : null}
       {params?.snapshots || params?.openedGw || params?.closedGw ? (
@@ -887,45 +889,48 @@ export default async function AdminPage({
               </div>
 
               {activeFixture.homeTeam.players.length + activeFixture.awayTeam.players.length > 0 ? (
-                <form action={saveFixturePoints} className="fixture-points-form">
-                  <input type="hidden" name="fixtureId" value={activeFixture.id} />
-                  <div className="fixture-squads-grid">
-                    {[
-                      { team: activeFixture.homeTeam, players: activeFixture.homeTeam.players },
-                      { team: activeFixture.awayTeam, players: activeFixture.awayTeam.players },
-                    ].map(({ team, players: squadPlayers }) => (
-                      <section className="fixture-squad-column" key={team.id}>
-                        <h3>{teamLabel(team)}</h3>
-                        <table className="table fixture-points-table">
-                          <thead>
-                            <tr><th>Гравець</th><th>Поз.</th><th>Очки</th><th>Не грав</th><th>ЧК</th></tr>
-                          </thead>
-                          <tbody>
-                            {squadPlayers.map((player) => (
-                              <tr key={player.id}>
-                                <td title={player.name}>{player.name}</td>
-                                <td>{player.position}</td>
-                                <AdminPlayerPointInputs
-                                  playerId={player.id}
-                                  initialPoints={pointMap.get(player.id)?.points ?? 0}
-                                  initialDidPlay={pointMap.get(player.id)?.didPlay ?? true}
-                                  initialRedCard={pointMap.get(player.id)?.redCard ?? false}
-                                  compact
-                                />
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </section>
-                    ))}
-                  </div>
+                <>
+                  <form action={saveFixturePoints} className="fixture-points-form" id="fixture-points-form">
+                    <input type="hidden" name="fixtureId" value={activeFixture.id} />
+                    <div className="fixture-squads-grid">
+                      {[
+                        { team: activeFixture.homeTeam, players: activeFixture.homeTeam.players },
+                        { team: activeFixture.awayTeam, players: activeFixture.awayTeam.players },
+                      ].map(({ team, players: squadPlayers }) => (
+                        <section className="fixture-squad-column" key={team.id}>
+                          <h3>{teamLabel(team)}</h3>
+                          <table className="table fixture-points-table">
+                            <thead>
+                              <tr><th>Гравець</th><th>Поз.</th><th>Очки</th><th>Не грав</th><th>ЧК</th></tr>
+                            </thead>
+                            <tbody>
+                              {squadPlayers.map((player) => (
+                                <tr key={player.id}>
+                                  <td title={player.name}>{player.name}</td>
+                                  <td>{player.position}</td>
+                                  <AdminPlayerPointInputs
+                                    playerId={player.id}
+                                    initialPoints={pointMap.get(player.id)?.points ?? 0}
+                                    initialDidPlay={pointMap.get(player.id)?.didPlay ?? true}
+                                    initialRedCard={pointMap.get(player.id)?.redCard ?? false}
+                                    compact
+                                  />
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </section>
+                      ))}
+                    </div>
+                  </form>
                   <div className="fixture-points-submit">
-                    <button className="button primary" type="submit">
+                    <ResetFixturePointsButton fixtureId={activeFixture.id} />
+                    <button className="button primary" type="submit" form="fixture-points-form">
                       <Calculator size={18} />
                       Зберегти очки матчу
                     </button>
                   </div>
-                </form>
+                </>
               ) : (
                 <p className="muted">Для цих збірних ще немає гравців. Імпортуй склади через CSV вище.</p>
               )}

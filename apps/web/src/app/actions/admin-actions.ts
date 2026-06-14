@@ -335,6 +335,59 @@ export async function saveFixturePoints(formData: FormData) {
   redirect(`/admin?fixtureId=${fixtureId}&points=saved#fixture-points-modal`);
 }
 
+export async function resetFixturePoints(formData: FormData) {
+  await requireAdmin();
+  const fixtureId = String(formData.get("fixtureId") ?? "");
+  const fixture = await prisma.fixture.findUnique({
+    where: { id: fixtureId },
+    select: {
+      gameweek: true,
+      playerPoints: {
+        where: { redCard: true },
+        select: { playerId: true },
+      },
+    },
+  });
+  if (!fixture) redirect("/admin?error=fixture");
+
+  const redCardPlayerIds = [...new Set(fixture.playerPoints.map((point) => point.playerId))];
+  await prisma.$transaction(async (tx) => {
+    await tx.matchPlayerPoint.deleteMany({ where: { fixtureId } });
+    await tx.fixture.update({
+      where: { id: fixtureId },
+      data: { status: "SCHEDULED" },
+    });
+
+    for (const playerId of redCardPlayerIds) {
+      const otherRedCards = await tx.matchPlayerPoint.count({
+        where: {
+          playerId,
+          redCard: true,
+          fixture: { gameweek: fixture.gameweek },
+        },
+      });
+      if (otherRedCards === 0) {
+        await tx.player.updateMany({
+          where: {
+            id: playerId,
+            suspendedUntilGameweek: fixture.gameweek + 1,
+          },
+          data: {
+            status: "AVAILABLE",
+            unavailableReason: null,
+            suspendedUntilGameweek: null,
+          },
+        });
+      }
+    }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/squad");
+  revalidatePath("/teams");
+  redirect(`/admin?fixtureId=${fixtureId}&points=reset#fixture-points-modal`);
+}
+
 export async function saveFixtureScore(formData: FormData) {
   await requireAdmin();
   const fixtureId = String(formData.get("fixtureId") ?? "");
