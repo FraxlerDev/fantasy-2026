@@ -4710,11 +4710,6 @@ h3 {
   align-self: stretch;
 }
 
-.fixed-pitch-row.slots-5 > .fantasy-shirt {
-  transform: scale(0.78);
-  transform-origin: center;
-}
-
 .fixed-pitch-row.slots-5 > .fantasy-shirt:nth-child(1) {
   grid-column: 1 / 3;
 }
