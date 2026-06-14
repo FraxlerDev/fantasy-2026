@@ -122,6 +122,13 @@ function playerSurname(name: string) {
   return name.trim().split(/\s+/).at(-1) || name.trim();
 }
 
+function transferCountLabel(count: number) {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  const noun = mod10 === 1 && mod100 !== 11 ? "трансфер" : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "трансфери" : "трансферів";
+  return `Залишилося ${count} ${noun}`;
+}
+
 function byPositionOrder(a: SquadPlayer, b: SquadPlayer) {
   const order: Record<PlayerPosition, number> = { GK: 0, DEF: 1, MID: 2, FWD: 3 };
   return order[a.position] - order[b.position] || a.price - b.price || a.name.localeCompare(b.name, "uk");
@@ -826,7 +833,15 @@ export function SquadBuilder({
             <dt>Лавка</dt><dd>{bench.length}/4</dd>
             <dt>Вартість</dt><dd>{budgetUsed.toFixed(1)}</dd>
             <dt>Баланс</dt><dd>{balance.toFixed(1)}</dd>
-            <dt>Трансфери</dt><dd>{hasUnlimitedTransfers ? "Безліміт" : hasLimitedTransfers ? `${Math.max(0, (transferLimit ?? 0) - currentUsedTransfers)} з ${transferLimit}` : "-"}</dd>
+            <dt>Трансфери</dt>
+            <dd>
+              {hasUnlimitedTransfers ? "Безліміт" : hasLimitedTransfers ? `Зроблено ${currentUsedTransfers} з ${transferLimit}` : "-"}
+              {hasLimitedTransfers ? (
+                <small className="transfer-remaining-note">
+                  {transferCountLabel(Math.max(0, (transferLimit ?? 0) - currentUsedTransfers))}
+                </small>
+              ) : null}
+            </dd>
             <dt>Схема</dt><dd>{formation}</dd>
           </dl>
 

@@ -29,6 +29,13 @@ function formatDate(date: Date) {
   });
 }
 
+function transferCountLabel(count: number) {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  const noun = mod10 === 1 && mod100 !== 11 ? "трансфер" : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "трансфери" : "трансферів";
+  return `Залишилося ${count} ${noun}`;
+}
+
 export default async function SquadPage({
   searchParams,
 }: {
@@ -155,7 +162,11 @@ export default async function SquadPage({
     ? "Закриті"
     : editableGameweek.transferLimit === null || previousIds.size === 0
       ? "Безліміт"
-      : `${Math.max(0, editableGameweek.transferLimit - usedTransfers)} з ${editableGameweek.transferLimit}`;
+      : `Зроблено ${usedTransfers} з ${editableGameweek.transferLimit}`;
+  const remainingTransfers =
+    editableGameweek?.transferLimit !== null && editableGameweek && previousIds.size > 0
+      ? Math.max(0, editableGameweek.transferLimit - usedTransfers)
+      : null;
 
   const activity = [
     ...notifications.map((item) => ({
@@ -220,6 +231,7 @@ export default async function SquadPage({
                 <div className="panel dashboard-stat">
                   <span>Трансфери</span>
                   <strong>{transferText}</strong>
+                  {remainingTransfers !== null ? <small className="transfer-remaining-note">{transferCountLabel(remainingTransfers)}</small> : null}
                 </div>
                 <div className={`panel dashboard-stat ${isValid ? "valid" : "invalid"}`}>
                   {isValid ? <CheckCircle2 size={20} /> : <CircleAlert size={20} />}

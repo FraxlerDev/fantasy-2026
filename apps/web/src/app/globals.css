@@ -578,6 +578,15 @@
   font-size: 28px;
 }
 
+.transfer-remaining-note {
+  display: block;
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
 .dashboard-stat.valid {
   border-left: 4px solid #23885a;
 }
