@@ -4950,14 +4950,16 @@ h3 {
 .fixed-pitch-row.slots-1 .lineup-player-label,
 .fixed-pitch-row.slots-2 .lineup-player-label,
 .fixed-pitch-row.slots-3 .lineup-player-label,
-.fixed-pitch-row.slots-4 .lineup-player-label {
+.fixed-pitch-row.slots-4 .lineup-player-label,
+.fixed-pitch-row.slots-5 .lineup-player-label {
   max-width: min(122px, 24vw);
 }
 
 .fixed-pitch-row.slots-1 .lineup-player-label strong,
 .fixed-pitch-row.slots-2 .lineup-player-label strong,
 .fixed-pitch-row.slots-3 .lineup-player-label strong,
-.fixed-pitch-row.slots-4 .lineup-player-label strong {
+.fixed-pitch-row.slots-4 .lineup-player-label strong,
+.fixed-pitch-row.slots-5 .lineup-player-label strong {
   overflow: visible;
   text-overflow: clip;
 }
