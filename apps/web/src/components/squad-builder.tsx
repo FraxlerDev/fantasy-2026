@@ -118,6 +118,10 @@ function starterLimits(formation: string) {
   return { GK: 1, DEF: shape.DEF, MID: shape.MID, FWD: shape.FWD };
 }
 
+function playerSurname(name: string) {
+  return name.trim().split(/\s+/).at(-1) || name.trim();
+}
+
 function byPositionOrder(a: SquadPlayer, b: SquadPlayer) {
   const order: Record<PlayerPosition, number> = { GK: 0, DEF: 1, MID: 2, FWD: 3 };
   return order[a.position] - order[b.position] || a.price - b.price || a.name.localeCompare(b.name, "uk");
@@ -575,6 +579,7 @@ export function SquadBuilder({
       player.id === captainId
         ? `GW${pointsGameweek ?? ""}: очки подвоєні за капітанство — ${basePoints} × 2 = ${displayedPoints}`
         : `GW${pointsGameweek ?? ""}: ${displayedPoints} очок`;
+    const surname = playerSurname(player.name);
     return (
       <div
         className={`fantasy-shirt filled ${player.status !== "AVAILABLE" ? "unavailable" : ""} ${isSwapSelected ? "swap-selected" : ""}`}
@@ -595,26 +600,22 @@ export function SquadBuilder({
         >
           <RotateCcw size={12} />
         </button>
-        <span
-          className="player-photo-wrap"
-        >
+        <span className="player-photo-wrap">
           {player.photoUrl ? <img alt="" className="player-photo" src={player.photoUrl} /> : <span className="player-photo placeholder"><UserRound size={24} /></span>}
-          {gameweekStat ? (
-            <span className={`player-photo-points ${player.id === captainId ? "captain-points" : ""}`} title={pointsTitle}>
-              {displayedPoints}
-            </span>
-          ) : null}
-          {player.nationFlagPath ? <img alt="" className="player-photo-flag" src={player.nationFlagPath} /> : null}
         </span>
-        {player.id === captainId ? <span className="captain-mark">К</span> : null}
-        {player.id === captainId && gameweekStat ? (
-          <span className="captain-points-mark" title={`Очки подвоєні за капітанство: ${basePoints} × 2`}>
-            🔥
+        {gameweekStat ? (
+          <span className={`player-photo-points ${player.id === captainId ? "captain-points" : ""}`} title={pointsTitle}>
+            {displayedPoints}
+          </span>
+        ) : null}
+        {player.id === captainId ? (
+          <span className="captain-points-mark" title="Капітан. Очки подвоюються">
+            <img alt="" src="/fire.png" />
           </span>
         ) : null}
         {gameweekStat && !gameweekStat.didPlay ? (
           <span className="match-status-mark did-not-play" title="Не грав у цьому GW — 0 очок">
-            ⛔
+            <img alt="" src="/not-play.png" />
           </span>
         ) : null}
         {gameweekStat?.redCard ? (
@@ -622,12 +623,17 @@ export function SquadBuilder({
             className="match-status-mark red-card"
             title="Червона картка — гравець не гратиме в наступному турі, його доцільно замінити"
           >
-            🟥
+            <img alt="" src="/red-card.png" />
           </span>
         ) : null}
-        <strong>{player.name}</strong>
-        <em>{label ?? shortPositionLabels[player.position]}</em>
-        <span className="player-price-badge">{player.price.toFixed(1)}</span>
+        <span className="lineup-player-label" title={player.name}>
+          <strong>{surname}</strong>
+          <span className="player-price-badge">${player.price.toFixed(1)}</span>
+        </span>
+        <em className="lineup-player-meta">
+          {player.nationFlagPath ? <img alt="" className="flag" src={player.nationFlagPath} /> : null}
+          <span>{label ?? shortPositionLabels[player.position]}</span>
+        </em>
         {player.status !== "AVAILABLE" ? <span className="unavailable-mark"><AlertTriangle size={12} />{player.unavailableReason?.toLowerCase().includes("черв") ? "ЧК" : "ТР"}</span> : null}
       </div>
     );
@@ -644,7 +650,7 @@ export function SquadBuilder({
 
   function visualSquad() {
     return (
-      <>
+      <div className="football-lineup-board">
         <section className="fixed-pitch" onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, "STARTER")}>
           {pitchRows(formation).map((row) => {
             const rowPlayers = starterPlayers.filter((player) => player.position === row.position);
@@ -665,7 +671,7 @@ export function SquadBuilder({
             return player ? playerChip(player, positionLabels[player.position]) : emptySlot(`bench-${index}`, "Лавка", "BENCH");
           })}
         </div>
-      </>
+      </div>
     );
   }
 

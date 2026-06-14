@@ -4434,7 +4434,7 @@ h3 {
 .public-fixed-pitch,
 .public-fixed-bench {
   width: 100%;
-  max-width: 680px;
+  max-width: none;
 }
 
 .public-team-shirt {
@@ -4643,57 +4643,75 @@ h3 {
   padding: 4px 8px;
 }
 
-.fixed-pitch {
-  width: min(100%, 390px);
-  height: 460px;
+.football-lineup-board {
+  width: min(100%, 430px);
+  aspect-ratio: 960 / 1573;
   margin: 0 auto;
   display: grid;
-  grid-template-rows: repeat(4, 1fr);
-  gap: 5px;
-  padding: 10px;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    repeating-linear-gradient(0deg, #127142 0 42px, #0f653b 42px 84px);
-  background-size: 34px 34px, 34px 34px, auto;
+  grid-template-rows: 80.4% 19.6%;
+  overflow: hidden;
+  background: url("/football-field.png") center / 100% 100% no-repeat;
   border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
+.fixed-pitch {
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  padding: 5% 2.5% 1%;
+  background: transparent;
+  border: 0;
+}
+
 .fixed-pitch-row {
+  width: 100%;
   display: grid;
   align-items: center;
-  justify-items: center;
-  gap: 5px;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fixed-pitch-row > .fantasy-shirt,
+.fixed-bench > .fantasy-shirt {
+  justify-self: center;
+}
+
+.fixed-pitch-row:last-child {
+  transform: translateY(clamp(1px, calc(5vw - 15px), 11px));
 }
 
 .fixed-pitch-row.slots-1 {
-  grid-template-columns: minmax(76px, 1fr);
+  grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 
 .fixed-pitch-row.slots-2 {
-  grid-template-columns: repeat(2, minmax(66px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .fixed-pitch-row.slots-3 {
-  grid-template-columns: repeat(3, minmax(64px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .fixed-pitch-row.slots-4 {
-  grid-template-columns: repeat(4, minmax(54px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .fixed-pitch-row.slots-5 {
-  grid-template-columns: repeat(5, minmax(46px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .fantasy-shirt {
   position: relative;
-  width: 66px;
-  min-height: 70px;
+  width: min(78px, 100%);
+  min-width: 0;
+  min-height: 96px;
   display: grid;
   justify-items: center;
   align-content: start;
-  gap: 3px;
+  gap: 2px;
   padding: 2px;
   border: 0;
   background: transparent;
@@ -4726,7 +4744,7 @@ h3 {
   opacity: 0;
   cursor: pointer;
   transition: opacity 0.15s ease;
-  z-index: 3;
+  z-index: 12;
 }
 
 .swap-player-button {
@@ -4748,7 +4766,7 @@ h3 {
   opacity: 0;
   cursor: pointer;
   transition: opacity 0.15s ease, transform 0.15s ease;
-  z-index: 3;
+  z-index: 12;
 }
 
 .remove-player-button svg {
@@ -4835,17 +4853,169 @@ h3 {
 }
 
 .fantasy-shirt strong {
-  width: 100%;
-  color: #fff;
-  font-size: 10px;
-  line-height: 1.1;
-  overflow-wrap: anywhere;
+  min-width: 0;
+  overflow: hidden;
+  color: #111;
+  font-size: 11px;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fantasy-shirt em {
   color: rgba(255, 255, 255, 0.86);
-  font-size: 9px;
+  font-size: 10px;
   font-style: normal;
+}
+
+.football-lineup-board .player-photo-wrap {
+  z-index: 1;
+  width: 58px;
+  height: 58px;
+  margin: 0 0 -8px;
+}
+
+.football-lineup-board .player-photo {
+  border: 0;
+  border-radius: 50%;
+  box-shadow: none;
+}
+
+.lineup-player-label {
+  position: relative;
+  z-index: 2;
+  width: max-content;
+  max-width: 88px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 7px;
+  background: #fff;
+  color: #111;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+  white-space: nowrap;
+}
+
+.lineup-player-label .player-price-badge {
+  flex: 0 0 auto;
+  min-width: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #178346;
+  font-size: 11px;
+  box-shadow: none;
+}
+
+.lineup-player-label strong {
+  flex: 1 1 auto;
+}
+
+.fixed-pitch-row.slots-1 .lineup-player-label,
+.fixed-pitch-row.slots-2 .lineup-player-label,
+.fixed-pitch-row.slots-3 .lineup-player-label,
+.fixed-pitch-row.slots-4 .lineup-player-label {
+  max-width: min(122px, 24vw);
+}
+
+.fixed-pitch-row.slots-1 .lineup-player-label strong,
+.fixed-pitch-row.slots-2 .lineup-player-label strong,
+.fixed-pitch-row.slots-3 .lineup-player-label strong,
+.fixed-pitch-row.slots-4 .lineup-player-label strong {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.lineup-player-meta {
+  max-width: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: hidden;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.lineup-player-meta .flag {
+  width: 17px;
+  height: 12px;
+  flex: 0 0 auto;
+}
+
+.lineup-player-meta span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.football-lineup-board .player-photo-points {
+  top: 4px;
+  left: -2px;
+  bottom: auto;
+  z-index: 4;
+  min-width: 27px;
+  height: 27px;
+  padding: 0 5px;
+  border: 1px solid #d8ddd8;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  font-size: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
+.football-lineup-board .player-photo-points.captain-points {
+  background: var(--yellow);
+  color: #111;
+}
+
+.football-lineup-board .captain-points-mark,
+.football-lineup-board .match-status-mark {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.football-lineup-board .captain-points-mark {
+  top: 31px;
+  right: -3px;
+}
+
+.football-lineup-board .match-status-mark {
+  top: 31px;
+  left: -3px;
+}
+
+.football-lineup-board .match-status-mark.red-card {
+  top: 55px;
+  left: auto;
+  right: -3px;
+}
+
+.football-lineup-board .captain-points-mark img,
+.football-lineup-board .match-status-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.football-lineup-board .unavailable-mark {
+  position: absolute;
+  right: -4px;
+  bottom: -13px;
+  z-index: 5;
+  padding: 1px 3px;
+  font-size: 8px;
+}
+
+.football-lineup-board .fantasy-shirt.empty strong {
+  color: #fff;
 }
 
 .shirt-icon {
@@ -4865,18 +5035,23 @@ h3 {
 }
 
 .fixed-bench {
-  width: min(100%, 390px);
-  min-height: 100px;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, minmax(56px, 1fr));
-  gap: 5px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
   align-items: center;
   justify-items: center;
-  padding: 10px;
-  background: repeating-linear-gradient(0deg, #a9aca9 0 28px, #969b97 28px 56px);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-top: 0;
+  padding: 0 2.5%;
+  background: transparent;
+  border: 0;
+}
+
+.fixed-bench .fantasy-shirt {
+  transform: scale(0.9);
+  transform-origin: center;
 }
 
 .catalog-table-panel {
@@ -6377,16 +6552,16 @@ h3 {
   }
 
   .fixed-pitch {
-    height: 460px;
-    padding: 10px 8px;
+    height: 100%;
+    padding: 5% 2.5% 1%;
   }
 
   .fixed-pitch-row {
-    gap: 4px;
+    gap: 2px;
   }
 
   .fantasy-shirt {
-    width: 64px;
+    width: min(78px, 100%);
   }
 
   .promo-hero {
@@ -6633,6 +6808,66 @@ h3 {
 }
 
 @media (max-width: 620px) {
+  .football-lineup-board {
+    width: 100%;
+  }
+
+  .football-lineup-board .fantasy-shirt {
+    min-height: 82px;
+  }
+
+  .football-lineup-board .player-photo-wrap {
+    width: clamp(42px, 13vw, 54px);
+    height: clamp(42px, 13vw, 54px);
+  }
+
+  .lineup-player-label {
+    max-width: clamp(58px, 19vw, 78px);
+    min-height: 21px;
+    gap: 2px;
+    padding: 3px 4px;
+  }
+
+  .lineup-player-label strong,
+  .lineup-player-label .player-price-badge {
+    font-size: clamp(8px, 2.4vw, 10px);
+  }
+
+  .lineup-player-meta {
+    max-width: clamp(60px, 20vw, 82px);
+    font-size: clamp(7px, 2.2vw, 9px);
+  }
+
+  .lineup-player-meta .flag {
+    width: 14px;
+    height: 10px;
+  }
+
+  .football-lineup-board .player-photo-points {
+    min-width: 23px;
+    height: 23px;
+    font-size: 10px;
+  }
+
+  .football-lineup-board .captain-points-mark,
+  .football-lineup-board .match-status-mark {
+    width: 20px;
+    height: 20px;
+  }
+
+  .football-lineup-board .captain-points-mark,
+  .football-lineup-board .match-status-mark {
+    top: 27px;
+  }
+
+  .football-lineup-board .match-status-mark.red-card {
+    top: 47px;
+  }
+
+  .fixed-bench .fantasy-shirt {
+    transform: scale(0.86);
+  }
+
   .player-ranking-page {
     min-width: 0;
     overflow-x: hidden;

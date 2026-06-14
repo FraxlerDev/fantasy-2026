@@ -85,10 +85,10 @@ const formationShapes: Record<string, { DEF: number; MID: number; FWD: number }>
 };
 
 const positionLabels: Record<PlayerPosition, string> = {
-  GK: "ВРТ",
-  DEF: "ЗАХ",
-  MID: "ПЗХ",
-  FWD: "НАП",
+  GK: "Воротар",
+  DEF: "Захисник",
+  MID: "Півзахисник",
+  FWD: "Нападник",
 };
 
 function pitchRows(formation: string): Array<{ position: PlayerPosition; slots: number }> {
@@ -110,6 +110,10 @@ function teamName(team: { nameUk: string; flagPath: string | null }) {
   );
 }
 
+function playerSurname(name: string) {
+  return name.trim().split(/\s+/).at(-1) || name.trim();
+}
+
 function playerCard(
   entry: LineupEntry,
   points: Map<string, number>,
@@ -119,26 +123,45 @@ function playerCard(
   const basePoints = points.get(entry.playerId) ?? 0;
   const playerPoints = entry.isCaptain ? basePoints * 2 : basePoints;
   const matchStatus = statuses.get(entry.playerId);
+  const hasResult = statuses.has(entry.playerId);
+  const surname = playerSurname(entry.player.name);
 
   return (
     <div className={`fantasy-shirt filled public-team-shirt ${entry.player.status !== "AVAILABLE" ? "unavailable" : ""}`} key={entry.id}>
       <span className="player-photo-wrap">
         {entry.player.photoUrl ? <img alt="" className="player-photo" src={entry.player.photoUrl} /> : <span className="player-photo placeholder" />}
+      </span>
+      {hasResult ? (
         <span
           className={`player-photo-points ${entry.isCaptain ? "captain-points" : ""}`}
           title={entry.isCaptain ? `Очки подвоєні за капітанство: ${basePoints} × 2 = ${playerPoints}` : `${playerPoints} очок`}
         >
           {playerPoints}
         </span>
-        {entry.player.nationalTeam.flagPath ? <img alt="" className="player-photo-flag" src={entry.player.nationalTeam.flagPath} /> : null}
+      ) : null}
+      {entry.isCaptain ? (
+        <span className="captain-points-mark" title={`Капітан. Очки подвоєні: ${basePoints} × 2`}>
+          <img alt="" src="/fire.png" />
+        </span>
+      ) : null}
+      {matchStatus && !matchStatus.didPlay ? (
+        <span className="match-status-mark did-not-play" title="Не грав у цьому GW — 0 очок">
+          <img alt="" src="/not-play.png" />
+        </span>
+      ) : null}
+      {matchStatus?.redCard ? (
+        <span className="match-status-mark red-card" title="Червона картка — гравець пропустить наступний тур, його доцільно замінити">
+          <img alt="" src="/red-card.png" />
+        </span>
+      ) : null}
+      <span className="lineup-player-label" title={entry.player.name}>
+        <strong>{surname}</strong>
+        <span className="player-price-badge">${Number(entry.player.price).toFixed(1)}</span>
       </span>
-      {entry.isCaptain ? <span className="captain-mark">К</span> : null}
-      {entry.isCaptain ? <span className="captain-points-mark" title={`Очки подвоєні за капітанство: ${basePoints} × 2`}>🔥</span> : null}
-      {matchStatus && !matchStatus.didPlay ? <span className="match-status-mark did-not-play" title="Не грав у цьому GW — 0 очок">⛔</span> : null}
-      {matchStatus?.redCard ? <span className="match-status-mark red-card" title="Червона картка — гравець пропустить наступний тур, його доцільно замінити">🟥</span> : null}
-      <strong>{entry.player.name}</strong>
-      <em>{label} | {entry.player.club ?? "-"}</em>
-      <span className="player-price-badge">{Number(entry.player.price).toFixed(1)}</span>
+      <em className="lineup-player-meta">
+        {entry.player.nationalTeam.flagPath ? <img alt="" className="flag" src={entry.player.nationalTeam.flagPath} /> : null}
+        <span>{label}</span>
+      </em>
       {entry.player.status !== "AVAILABLE" ? <span className="unavailable-mark">НД</span> : null}
     </div>
   );
@@ -320,6 +343,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
             <h2>Склад GW{requestedGameweek}</h2>
             {selectedSnapshot || isPreview ? (
               <>
+                <div className="football-lineup-board public-football-lineup-board">
                 <div className="fixed-pitch public-fixed-pitch">
                   {starters.length > 0 ? (
                     pitchRows(currentFormation).map((row) => {
@@ -346,6 +370,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
                   ) : (
                     <div className="drop-empty small">Лавка порожня</div>
                   )}
+                </div>
                 </div>
               </>
             ) : (
