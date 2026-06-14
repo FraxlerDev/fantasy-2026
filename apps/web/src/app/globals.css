@@ -578,9 +578,97 @@
   font-size: 28px;
 }
 
+.squad-overview-stats {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.squad-overview-stats .dashboard-stat {
+  min-width: 0;
+  min-height: 102px;
+  align-content: center;
+  justify-items: center;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  padding: 12px 10px;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(21 48 37 / 7%);
+}
+
+.squad-overview-stats .dashboard-stat > svg {
+  width: 22px;
+  height: 22px;
+  color: var(--ink);
+}
+
+.squad-overview-stats .dashboard-stat > strong {
+  grid-column: 1;
+  overflow-wrap: anywhere;
+  font-size: clamp(20px, 1.75vw, 29px);
+  line-height: 1.05;
+}
+
+.squad-overview-stats .dashboard-stat > span {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.squad-overview-stats .dashboard-stat:nth-child(3) > strong,
+.squad-overview-stats .dashboard-stat:nth-child(4) > strong,
+.squad-deadline-stat > strong {
+  font-size: clamp(17px, 1.35vw, 22px);
+}
+
+.squad-overview-stats .squad-deadline-stat > strong {
+  display: block;
+  width: calc(100% - 8px);
+  max-width: calc(100% - 8px);
+  margin-inline: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: clip;
+  font-size: clamp(10px, 0.8vw, 13px);
+  line-height: 1.2;
+  text-align: center;
+  letter-spacing: 0;
+}
+
+.squad-deadline-stat {
+  container-type: inline-size;
+}
+
+.squad-deadline-stat .hero-deadline-timer {
+  grid-column: 1;
+  justify-content: center;
+  gap: 4px;
+}
+
+.squad-deadline-stat .hero-deadline-timer > span {
+  min-width: 27px;
+}
+
+.squad-deadline-stat .hero-deadline-timer strong {
+  color: var(--green);
+  font-size: 15px;
+}
+
+.squad-deadline-stat .hero-deadline-timer small {
+  color: var(--muted);
+  font-size: 7px;
+}
+
+.squad-deadline-stat .hero-deadline-timer i {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .transfer-remaining-note {
   display: block;
-  grid-column: 1 / -1;
+  grid-column: 1;
   color: var(--muted);
   font-size: 12px;
   font-weight: 600;
@@ -589,6 +677,10 @@
 
 .dashboard-stat.valid {
   border-left: 4px solid #23885a;
+}
+
+.squad-overview-stats .dashboard-stat.valid {
+  border-left: 1px solid var(--line);
 }
 
 .dashboard-stat.invalid {
@@ -722,7 +814,7 @@
 }
 
 .squad-dashboard {
-  margin-bottom: 28px;
+  margin-bottom: 0;
 }
 
 .squad-page {
@@ -2000,6 +2092,14 @@ h3 {
   padding: 0;
   display: grid;
   place-items: center;
+}
+
+.share-squad-button:not(.icon-only) {
+  width: auto;
+  min-width: 0;
+  height: 40px;
+  display: inline-flex;
+  padding: 0 14px;
 }
 
 .share-squad-tooltip {
@@ -4478,6 +4578,14 @@ h3 {
 .squad-profile {
   margin-bottom: 0;
   overflow: hidden;
+  min-height: 126px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.95fr);
+  align-items: center;
+  gap: 28px;
+  padding: 14px 22px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(21 48 37 / 7%);
 }
 
 .squad-profile-header {
@@ -4485,6 +4593,25 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+}
+
+.squad-public-link {
+  min-height: 60px;
+  margin-top: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.squad-public-link:hover {
+  border-color: var(--green);
+  color: var(--green);
 }
 
 .squad-profile-header > div {
@@ -4498,18 +4625,19 @@ h3 {
 
 .squad-profile-row {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
-  align-items: start;
-  gap: 14px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
 }
 
 .squad-avatar {
-  width: 54px;
-  height: 54px;
+  width: 72px;
+  height: 72px;
   display: grid;
   place-items: center;
   background: var(--surface-strong);
   border: 1px solid var(--line);
+  border-radius: 8px;
   color: var(--green-2);
   font-weight: 900;
   overflow: hidden;
@@ -4519,6 +4647,36 @@ h3 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.squad-profile .eyebrow {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.squad-profile .team-title-row {
+  gap: 10px;
+}
+
+.squad-profile .team-title-row h1 {
+  font-size: clamp(27px, 2.35vw, 38px);
+  line-height: 1;
+}
+
+.squad-profile .team-title-row .icon-button {
+  width: 34px;
+  height: 34px;
+  border-radius: 5px;
+}
+
+.squad-profile .muted {
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+.squad-profile .team-edit-panel,
+.squad-profile .team-edit-message {
+  grid-column: 1 / -1;
 }
 
 .squad-builder-layout {
@@ -4533,7 +4691,7 @@ h3 {
   grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
   gap: 14px;
   align-items: start;
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 .squad-workspace-main {
@@ -4629,6 +4787,12 @@ h3 {
   margin-bottom: 10px;
   padding: 6px;
   background: #e7ebe4;
+}
+
+.squad-tabs > strong {
+  padding: 0 8px;
+  color: var(--green);
+  font-size: 15px;
 }
 
 .squad-tabs button {
@@ -5191,7 +5355,25 @@ h3 {
 }
 
 .squad-summary {
-  min-height: 300px;
+  min-height: 0;
+}
+
+.squad-summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.squad-summary-heading h2 {
+  margin: 0;
+}
+
+.squad-info-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
 }
 
 .squad-meta {
@@ -5202,6 +5384,52 @@ h3 {
   font-size: 14px;
 }
 
+.squad-captain-control {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+}
+
+.squad-captain-control label {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.squad-captain-control .input {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 12px 34px;
+  text-align: center;
+  text-align-last: center;
+}
+
+.squad-save-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.squad-save-actions > .button,
+.squad-save-actions .share-squad-control,
+.squad-save-actions .share-squad-button {
+  width: 100%;
+}
+
+.squad-field-panel > .unsaved-indicator,
+.squad-field-panel > .form-error,
+.squad-field-panel > .form-success {
+  margin-top: 10px;
+}
+
 .squad-meta dt {
   color: var(--muted);
 }
@@ -5209,6 +5437,10 @@ h3 {
 .squad-meta dd {
   margin: 0;
   font-weight: 800;
+}
+
+.squad-summary .validation-list {
+  margin-top: 4px;
 }
 
 @media (max-width: 1200px) {
@@ -7517,5 +7749,239 @@ h3 {
   .match-modal-card {
     max-height: calc(100vh - 16px);
     padding: 12px;
+  }
+}
+
+@media (max-width: 980px) {
+  .squad-profile {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 22px;
+  }
+
+  .squad-public-link {
+    min-height: 58px;
+  }
+
+  .squad-overview-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(4),
+  .squad-overview-stats .dashboard-stat:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(4),
+  .squad-deadline-stat {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(4) > strong,
+  .squad-deadline-stat > strong {
+    grid-column: 2;
+  }
+
+  .squad-deadline-stat .hero-deadline-timer {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .squad-page {
+    gap: 12px;
+  }
+
+  .squad-page .squad-dashboard {
+    margin-bottom: 4px;
+  }
+
+  .squad-profile {
+    padding: 16px;
+  }
+
+  .squad-profile-header {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .squad-profile-row {
+    grid-template-columns: 66px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .squad-avatar {
+    width: 66px;
+    height: 66px;
+    border-radius: 8px;
+  }
+
+  .team-title-row h1 {
+    font-size: clamp(23px, 8vw, 34px);
+    line-height: 1.05;
+  }
+
+  .team-title-row .icon-button {
+    flex: 0 0 auto;
+  }
+
+  .squad-public-link {
+    margin-top: 14px;
+  }
+
+  .squad-overview-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .squad-overview-stats .dashboard-stat {
+    min-height: 112px;
+    gap: 5px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(3) {
+    order: 4;
+    grid-column: 1 / -1;
+    min-height: 82px;
+    padding: 14px;
+    text-align: left;
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(4) {
+    order: 3;
+    grid-column: auto;
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(5) {
+    order: 5;
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .squad-overview-stats .dashboard-stat > svg {
+    justify-self: center;
+  }
+
+  .squad-overview-stats .dashboard-stat > span {
+    font-size: 11px;
+  }
+
+  .squad-overview-stats .dashboard-stat > strong {
+    font-size: clamp(17px, 5.5vw, 23px);
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(3),
+  .squad-overview-stats .dashboard-stat:nth-child(5) {
+    min-height: 82px;
+    padding: 14px;
+    text-align: left;
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(3) > svg,
+  .squad-overview-stats .dashboard-stat:nth-child(5) > svg {
+    justify-self: start;
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(3) > strong,
+  .squad-overview-stats .dashboard-stat:nth-child(5) > strong {
+    font-size: 21px;
+  }
+
+  .squad-overview-stats .dashboard-stat:nth-child(4) > strong {
+    grid-column: 1;
+  }
+
+  .squad-deadline-stat {
+    min-height: 118px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2px;
+    padding: 8px 12px !important;
+  }
+
+  .squad-deadline-stat > svg {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .squad-overview-stats .squad-deadline-stat > strong {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    font-size: clamp(17px, 5.4vw, 21px);
+    text-align: center;
+  }
+
+  .squad-deadline-stat .hero-deadline-timer {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 2px;
+    padding-top: 4px;
+    border-top: 1px solid var(--line);
+  }
+
+  .squad-deadline-stat .hero-deadline-timer > span {
+    min-width: 34px;
+  }
+
+  .squad-tabs {
+    min-height: 50px;
+    margin-bottom: 8px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+
+  .squad-tabs > strong {
+    flex: 0 1 auto;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .formation-control {
+    width: auto;
+    margin-left: auto;
+    flex: 0 0 auto;
+    gap: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .formation-control .input {
+    width: 88px;
+  }
+
+  .squad-workspace {
+    margin-top: 0;
+  }
+
+  .squad-captain-control label {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .squad-save-actions,
+  .squad-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .squad-summary {
+    min-height: 0;
+  }
+
+  .squad-meta {
+    margin-bottom: 0;
+  }
+
+  .team-edit-grid {
+    grid-template-columns: 1fr;
   }
 }

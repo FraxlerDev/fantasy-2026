@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { Bell, CheckCircle2, CircleAlert, Clock3, MessageCircle, Shield, Trophy } from "lucide-react";
+import { CheckCircle2, CircleAlert, Clock3, Star, Trophy } from "lucide-react";
 import { cookies } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
-import { ChatMessagesHeading } from "../../components/chat-messages-heading";
 import { HeroDeadlineCountdown } from "../../components/hero-deadline-countdown";
-import { OpenFanSectorButton } from "../../components/open-fan-sector-button";
 import { AppShell } from "../../components/shell";
 import { SquadBuilder, type SavedRosterEntry, type SquadPlayer } from "../../components/squad-builder";
 import { getEditableGameweek, validateRosterForSnapshot } from "../../lib/gameweeks";
@@ -49,7 +46,7 @@ export default async function SquadPage({
   if (!session?.user?.id) redirect("/login");
   if (!session.user.username) redirect("/onboarding");
 
-  const [players, fantasyTeam, editableGameweek, nextGameweek, notifications, chatMessages, currentUser] = await Promise.all([
+  const [players, fantasyTeam, editableGameweek, nextGameweek, currentUser] = await Promise.all([
     prisma.player.findMany({
       include: { nationalTeam: true },
       orderBy: [{ position: "asc" }, { price: "asc" }],
@@ -72,17 +69,6 @@ export default async function SquadPage({
     prisma.gameweek.findFirst({
       where: { deadlineAt: { gt: new Date() } },
       orderBy: { deadlineAt: "asc" },
-    }),
-    prisma.notification.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
-    prisma.chatMessage.findMany({
-      where: { isDeleted: false },
-      include: { author: { select: { username: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 5,
     }),
     prisma.user.findUnique({
       where: { id: session.user.id },
@@ -168,25 +154,6 @@ export default async function SquadPage({
       ? Math.max(0, editableGameweek.transferLimit - usedTransfers)
       : null;
 
-  const activity = [
-    ...notifications.map((item) => ({
-      id: `notification-${item.id}`,
-      message: item.message,
-      href: item.href ?? "/forum",
-      createdAt: item.createdAt,
-      type: "notification" as const,
-    })),
-    ...chatMessages.map((item) => ({
-      id: `chat-${item.id}`,
-      message: `${item.author.username?.trim() || "Користувач"}: ${item.body}`,
-      href: "/",
-      createdAt: item.createdAt,
-      type: "chat" as const,
-    })),
-  ]
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(0, 5);
-
   const mappedPlayers: SquadPlayer[] = players.map((player) => ({
     id: player.id,
     name: player.name,
@@ -216,89 +183,50 @@ export default async function SquadPage({
     <AppShell active="/squad">
       <div className="squad-page">
         <div className="dashboard-page squad-dashboard">
-          {fantasyTeam ? (
-            <>
-              <section className="dashboard-stats">
-                <div className="panel dashboard-stat">
-                  <Trophy size={20} />
-                  <span>Місце</span>
-                  <strong>{rank?.rank ?? "-"}</strong>
-                </div>
-                <div className="panel dashboard-stat">
-                  <span>Очки</span>
-                  <strong>{fantasyTeam.totalPoints}</strong>
-                </div>
-                <div className="panel dashboard-stat">
-                  <span>Трансфери</span>
-                  <strong>{transferText}</strong>
-                  {remainingTransfers !== null ? <small className="transfer-remaining-note">{transferCountLabel(remainingTransfers)}</small> : null}
-                </div>
-                <div className={`panel dashboard-stat ${isValid ? "valid" : "invalid"}`}>
-                  {isValid ? <CheckCircle2 size={20} /> : <CircleAlert size={20} />}
-                  <span>Статус складу</span>
-                  <strong>{isValid ? "Валідний" : "Потрібні зміни"}</strong>
-                </div>
-              </section>
-            </>
-          ) : (
-            <>
-              <div className="topbar">
-                <div>
-                  <p className="eyebrow">Мій склад</p>
-                  <h1>Вітаємо, {session.user.username}</h1>
-                  <p className="muted">Створи першу команду, щоб відкрити статистику, трансфери й місце в рейтингу.</p>
-                </div>
-              </div>
-            </>
-          )}
-
-          <section className="dashboard-grid">
-            <div className="panel dashboard-deadline-panel">
-              {nextGameweek ? (
-                <div className="promo-deadline squad-deadline">
-                  <div className="promo-deadline-heading">
-                    <span className="promo-deadline-icon"><Clock3 size={19} /></span>
-                    <span>
-                      <small>Найближчий дедлайн</small>
-                      <strong>GW{nextGameweek.number} · {formatDate(nextGameweek.deadlineAt)}</strong>
-                    </span>
-                  </div>
-                  <HeroDeadlineCountdown deadlineAt={nextGameweek.deadlineAt.toISOString()} />
-                </div>
-              ) : (
-                <p className="muted">Усі дедлайни турніру завершено.</p>
-              )}
-              <div className={`dashboard-team-state ${fantasyTeam ? "created" : "missing"}`}>
-                {fantasyTeam ? <CheckCircle2 size={20} /> : <Shield size={20} />}
-                <strong>{fantasyTeam ? "Команда створена" : "Команду ще не створено"}</strong>
-                {!fantasyTeam ? (
-                  <span>Нижче можна обрати 15 футболістів, стартовий склад і капітана.</span>
-                ) : null}
-              </div>
-              {fantasyTeam && !isValid ? (
-                <div className="form-error dashboard-validity">
-                  {snapshotFailure?.reason ?? validationReason}
-                </div>
-              ) : null}
+          <section className="dashboard-stats squad-overview-stats">
+            <div className="panel dashboard-stat">
+              <Trophy size={20} />
+              <span>Місце</span>
+              <strong>{rank?.rank ?? "-"}</strong>
             </div>
-
-            <div className="panel dashboard-messages-panel">
-              <ChatMessagesHeading />
-              <div className="dashboard-activity">
-                {activity.map((item) => (
-                  <Link href={item.href} key={item.id}>
-                    {item.type === "chat" ? <MessageCircle size={16} /> : <Bell size={16} />}
-                    <span>{item.message}</span>
-                    <time>{formatDate(item.createdAt)}</time>
-                  </Link>
-                ))}
-                {activity.length === 0 ? <p className="muted">Нових повідомлень поки немає.</p> : null}
-              </div>
-              <div className="dashboard-chat-action">
-                <OpenFanSectorButton />
-              </div>
+            <div className="panel dashboard-stat">
+              <Star size={28} />
+              <span>Очки</span>
+              <strong>{fantasyTeam?.totalPoints ?? 0}</strong>
+            </div>
+            <div className="panel dashboard-stat">
+              <span>Трансфери</span>
+              <strong>{transferText}</strong>
+              {remainingTransfers !== null ? <small className="transfer-remaining-note">{transferCountLabel(remainingTransfers)}</small> : null}
+            </div>
+            <div className={`panel dashboard-stat ${isValid ? "valid" : "invalid"}`}>
+              {isValid ? <CheckCircle2 size={20} /> : <CircleAlert size={20} />}
+              <span>Статус складу</span>
+              <strong>{isValid ? "Валідний" : "Потрібні зміни"}</strong>
+            </div>
+            <div className="panel dashboard-stat squad-deadline-stat">
+              {nextGameweek ? (
+                <>
+                  <Clock3 size={20} />
+                  <span>Найближчий дедлайн</span>
+                  <strong>GW{nextGameweek.number} · {formatDate(nextGameweek.deadlineAt)}</strong>
+                  <HeroDeadlineCountdown deadlineAt={nextGameweek.deadlineAt.toISOString()} />
+                </>
+              ) : (
+                <>
+                  <Clock3 size={20} />
+                  <span>Найближчий дедлайн</span>
+                  <strong>Завершено</strong>
+                </>
+              )}
             </div>
           </section>
+
+          {fantasyTeam && !isValid ? (
+            <div className="form-error dashboard-validity">
+              {snapshotFailure?.reason ?? validationReason}
+            </div>
+          ) : null}
         </div>
 
         {!editableGameweek ? (

@@ -3,7 +3,15 @@
 import { Share2 } from "lucide-react";
 import { useState } from "react";
 
-export function ShareSquadButton({ teamId, version }: { teamId: string; version?: string | number }) {
+export function ShareSquadButton({
+  teamId,
+  version,
+  label,
+}: {
+  teamId: string;
+  version?: string | number;
+  label?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   async function copyTeamLink() {
@@ -18,12 +26,13 @@ export function ShareSquadButton({ teamId, version }: { teamId: string; version?
   return (
     <span className="share-squad-control">
       <button
-        className="button icon-only share-squad-button"
+        className={`button share-squad-button ${label ? "" : "icon-only"}`}
         type="button"
         onClick={copyTeamLink}
         aria-label="Поділитися своїм складом із друзями"
       >
         <Share2 size={19} />
+        {label ? <span>{copied ? "Посилання скопійовано" : label}</span> : null}
       </button>
       <span className="share-squad-tooltip" role="status">
         {copied ? "Посилання скопійовано" : "Поділися своїм складом із друзями"}

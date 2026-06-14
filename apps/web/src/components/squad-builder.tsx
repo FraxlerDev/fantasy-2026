@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import type { PlayerPosition } from "@fantasy/shared";
-import { AlertTriangle, Pencil, RotateCcw, Save, Search, UserRound, X } from "lucide-react";
+import { AlertTriangle, ChevronRight, Globe2, Pencil, RotateCcw, Save, Search, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import type { DragEvent, FormEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -220,7 +220,6 @@ export function SquadBuilder({
   const [minPrice, setMinPrice] = useState("");
   const [availability, setAvailability] = useState("");
   const [catalogPage, setCatalogPage] = useState(1);
-  const [view, setView] = useState<"field" | "table">("field");
   const [clientError, setClientError] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
   const [swapSourceId, setSwapSourceId] = useState("");
@@ -724,8 +723,14 @@ export function SquadBuilder({
               </div>
             </div>
           </div>
-          {publicTeamUrl ? <Link className="button" href={publicTeamUrl}>Публічна сторінка</Link> : null}
         </div>
+        {publicTeamUrl ? (
+          <Link className="squad-public-link" href={publicTeamUrl}>
+            <Globe2 size={20} />
+            <span>Публічна сторінка</span>
+            <ChevronRight size={19} />
+          </Link>
+        ) : null}
         {isEditingTeam ? (
           <div className="team-edit-panel">
             <div className="team-edit-grid">
@@ -758,37 +763,11 @@ export function SquadBuilder({
 
       </div>
 
-      <div className="topbar">
-        <div>
-          <h1>Склад команди</h1>
-          <p className="muted">Додавай гравців кнопкою або перетягуй їх на поле чи лавку.</p>
-        </div>
-        <div className="toolbar">
-          {hasUnsavedChanges ? <span className="unsaved-indicator"><AlertTriangle size={16} />Є незбережені зміни</span> : null}
-          {initialTeamId ? <ShareSquadButton teamId={initialTeamId} version={initialTeamVersion} /> : null}
-            <button
-              className="button primary"
-              type="submit"
-              disabled={!isSignedIn || !hasProfile || !currentGameweek || Boolean(initialTeamId && !hasUnsavedChanges)}
-            >
-            <Save size={18} />
-            {initialTeamId && !hasUnsavedChanges ? "Збережено" : "Зберегти зміни"}
-          </button>
-        </div>
-      </div>
-
-      {!isSignedIn ? <div className="form-error">Увійди через Google, щоб зберегти команду.</div> : null}
-      {isSignedIn && !hasProfile ? <div className="form-error">Заверши onboarding, щоб зберегти команду.</div> : null}
-      {error && !profileErrorCodes.has(error) ? <div className="form-error">Помилка збереження: {errorMessages[error] ?? error}</div> : null}
-      {clientError ? <div className="form-error">{clientError}</div> : null}
-      {saved ? <div className="form-success">Команду збережено.</div> : null}
-
       <div className="squad-workspace">
         <div className="squad-workspace-main">
           <section className="panel squad-field-panel">
           <nav className="squad-tabs" aria-label="Вигляд складу">
-            <button className={view === "field" ? "active" : ""} type="button" onClick={() => setView("field")}>Поле</button>
-            <button className={view === "table" ? "active" : ""} type="button" onClick={() => setView("table")}>Таблиця</button>
+            <strong>Склад команди</strong>
             <label className="formation-control">
               <span>Схема:</span>
               <select className="input" value={formation} onChange={(event) => applyFormation(event.target.value)} aria-label="Схема гри">
@@ -799,53 +778,9 @@ export function SquadBuilder({
             </label>
           </nav>
 
-          {view === "field" ? (
-            visualSquad()
-          ) : (
-            <table className="table compact-table">
-              <thead><tr><th>Гравець</th><th>Позиція</th><th>Збірна</th><th>Клуб</th><th>Ціна</th><th>Слот</th></tr></thead>
-              <tbody>
-                {[...starterPlayers, ...benchPlayers].map((player) => (
-                  <tr key={player.id}>
-                    <td>{player.name}</td>
-                    <td>{positionLabels[player.position]}</td>
-                    <td>{player.nationName}</td>
-                    <td>{player.club ?? player.clubOriginal ?? "-"}</td>
-                    <td>{player.price.toFixed(1)}</td>
-                    <td>{starters.includes(player.id) ? "Старт" : "Лавка"}</td>
-                  </tr>
-                ))}
-                {selectedPlayers.length === 0 ? <tr><td colSpan={6}>Гравців ще не вибрано.</td></tr> : null}
-              </tbody>
-            </table>
-          )}
+          {visualSquad()}
 
-          </section>
-
-        <section className="squad-summary panel" style={{ marginTop: 16 }}>
-          <h2>Інформація</h2>
-          <dl className="squad-meta">
-            <dt>Поточний тур</dt><dd>{currentGameweek ? `GW${currentGameweek}` : "-"}</dd>
-            <dt>Старт GW</dt><dd>{currentStart ? formatKickoff(currentStart) : "-"}</dd>
-            <dt>Дедлайн</dt><dd>{currentDeadline ? formatKickoff(currentDeadline) : "-"}</dd>
-            <dt>Обрано</dt><dd>{selectedIds.size}/15</dd>
-            <dt>Старт</dt><dd>{starters.length}/11</dd>
-            <dt>Лавка</dt><dd>{bench.length}/4</dd>
-            <dt>Вартість</dt><dd>{budgetUsed.toFixed(1)}</dd>
-            <dt>Баланс</dt><dd>{balance.toFixed(1)}</dd>
-            <dt>Трансфери</dt>
-            <dd>
-              {hasUnlimitedTransfers ? "Безліміт" : hasLimitedTransfers ? `Зроблено ${currentUsedTransfers} з ${transferLimit}` : "-"}
-              {hasLimitedTransfers ? (
-                <small className="transfer-remaining-note">
-                  {transferCountLabel(Math.max(0, (transferLimit ?? 0) - currentUsedTransfers))}
-                </small>
-              ) : null}
-            </dd>
-            <dt>Схема</dt><dd>{formation}</dd>
-          </dl>
-
-          <div className="captain-grid">
+          <div className="captain-grid squad-captain-control">
             <label>
               Капітан
               <select className="input" value={captainId} onChange={(event) => setCaptainId(event.target.value)}>
@@ -855,14 +790,62 @@ export function SquadBuilder({
             </label>
           </div>
 
-          <ul className="validation-list">
-            {validationItems.map((item) => (
-              <li className={item.ok ? "ok" : "bad"} key={item.label}>
-                <span>{item.ok ? "✓" : "!"}</span>
-                {item.label}
-              </li>
-            ))}
-          </ul>
+          <div className="squad-save-actions">
+            <button
+              className="button primary"
+              type="submit"
+              disabled={!isSignedIn || !hasProfile || !currentGameweek || Boolean(initialTeamId && !hasUnsavedChanges)}
+            >
+              <Save size={18} />
+              {initialTeamId && !hasUnsavedChanges ? "Збережено" : "Зберегти зміни"}
+            </button>
+            {initialTeamId ? <ShareSquadButton teamId={initialTeamId} version={initialTeamVersion} label="Поділитися складом" /> : null}
+          </div>
+
+          {hasUnsavedChanges ? <div className="unsaved-indicator"><AlertTriangle size={16} />Є незбережені зміни</div> : null}
+          {!isSignedIn ? <div className="form-error">Увійди через Google, щоб зберегти команду.</div> : null}
+          {isSignedIn && !hasProfile ? <div className="form-error">Заверши onboarding, щоб зберегти команду.</div> : null}
+          {error && !profileErrorCodes.has(error) ? <div className="form-error">Помилка збереження: {errorMessages[error] ?? error}</div> : null}
+          {clientError ? <div className="form-error">{clientError}</div> : null}
+          {saved ? <div className="form-success">Команду збережено.</div> : null}
+          </section>
+
+        <section className="squad-summary panel" style={{ marginTop: 16 }}>
+          <div className="squad-summary-heading">
+            <h2>Інформація</h2>
+            {currentGameweek ? <span className="badge">GW{currentGameweek}</span> : null}
+          </div>
+          <div className="squad-info-grid">
+            <dl className="squad-meta">
+              <dt>Поточний тур</dt><dd>{currentGameweek ? `GW${currentGameweek}` : "-"}</dd>
+              <dt>Старт GW</dt><dd>{currentStart ? formatKickoff(currentStart) : "-"}</dd>
+              <dt>Дедлайн</dt><dd>{currentDeadline ? formatKickoff(currentDeadline) : "-"}</dd>
+              <dt>Обрано</dt><dd>{selectedIds.size}/15</dd>
+              <dt>Старт</dt><dd>{starters.length}/11</dd>
+              <dt>Лавка</dt><dd>{bench.length}/4</dd>
+              <dt>Вартість</dt><dd>{budgetUsed.toFixed(1)}</dd>
+              <dt>Баланс</dt><dd>{balance.toFixed(1)}</dd>
+              <dt>Трансфери</dt>
+              <dd>
+                {hasUnlimitedTransfers ? "Безліміт" : hasLimitedTransfers ? `Зроблено ${currentUsedTransfers} з ${transferLimit}` : "-"}
+                {hasLimitedTransfers ? (
+                  <small className="transfer-remaining-note">
+                    {transferCountLabel(Math.max(0, (transferLimit ?? 0) - currentUsedTransfers))}
+                  </small>
+                ) : null}
+              </dd>
+              <dt>Схема</dt><dd>{formation}</dd>
+            </dl>
+
+            <ul className="validation-list">
+              {validationItems.map((item) => (
+                <li className={item.ok ? "ok" : "bad"} key={item.label}>
+                  <span>{item.ok ? "✓" : "!"}</span>
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
 
       <section className="panel" style={{ marginTop: 16 }}>
