@@ -154,7 +154,7 @@ function playerCard(
           <img alt="" src="/red-card.png" />
         </span>
       ) : null}
-      <span className="lineup-player-label" title={entry.player.name}>
+      <span className={`lineup-player-label ${surname.length > 12 ? "long-name" : ""}`} title={entry.player.name}>
         <strong>{surname}</strong>
         <span className="player-price-badge">${Number(entry.player.price).toFixed(1)}</span>
       </span>

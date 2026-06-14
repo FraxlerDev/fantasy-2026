@@ -4916,8 +4916,8 @@ h3 {
 .lineup-player-label {
   position: relative;
   z-index: 2;
-  width: max-content;
-  max-width: 88px;
+  width: min(106px, 23vw);
+  max-width: min(106px, 23vw);
   min-height: 24px;
   display: flex;
   align-items: center;
@@ -4947,12 +4947,17 @@ h3 {
   flex: 1 1 auto;
 }
 
+.lineup-player-label.long-name strong {
+  font-size: 9px;
+}
+
 .fixed-pitch-row.slots-1 .lineup-player-label,
 .fixed-pitch-row.slots-2 .lineup-player-label,
 .fixed-pitch-row.slots-3 .lineup-player-label,
 .fixed-pitch-row.slots-4 .lineup-player-label,
 .fixed-pitch-row.slots-5 .lineup-player-label {
-  max-width: min(122px, 24vw);
+  width: min(106px, 23vw);
+  max-width: min(106px, 23vw);
 }
 
 .fixed-pitch-row.slots-1 .lineup-player-label strong,

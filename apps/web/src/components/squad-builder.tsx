@@ -626,7 +626,7 @@ export function SquadBuilder({
             <img alt="" src="/red-card.png" />
           </span>
         ) : null}
-        <span className="lineup-player-label" title={player.name}>
+        <span className={`lineup-player-label ${surname.length > 12 ? "long-name" : ""}`} title={player.name}>
           <strong>{surname}</strong>
           <span className="player-price-badge">${player.price.toFixed(1)}</span>
         </span>
