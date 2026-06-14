@@ -4705,6 +4705,14 @@ h3 {
   min-width: 0;
 }
 
+.squad-field-panel,
+.squad-summary,
+.squad-workspace-main > section.panel,
+.squad-page .player-catalog-panel {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
 .squad-page .player-catalog-panel {
   padding: 16px;
 }
@@ -7790,14 +7798,19 @@ h3 {
 
 @media (max-width: 620px) {
   .squad-page {
-    gap: 12px;
+    gap: 4px;
   }
 
   .squad-page .squad-dashboard {
-    margin-bottom: 4px;
+    margin-bottom: 0;
+  }
+
+  .squad-page .squad-top-row {
+    margin-bottom: 0;
   }
 
   .squad-profile {
+    gap: 8px;
     padding: 16px;
   }
 
@@ -7812,6 +7825,13 @@ h3 {
     gap: 12px;
   }
 
+  .squad-profile-row > div:last-child {
+    min-height: 66px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
   .squad-avatar {
     width: 66px;
     height: 66px;
@@ -7819,8 +7839,13 @@ h3 {
   }
 
   .team-title-row h1 {
+    margin: 0;
     font-size: clamp(23px, 8vw, 34px);
     line-height: 1.05;
+  }
+
+  .squad-profile .muted {
+    margin: 7px 0 0;
   }
 
   .team-title-row .icon-button {
@@ -7828,7 +7853,8 @@ h3 {
   }
 
   .squad-public-link {
-    margin-top: 14px;
+    min-height: 54px;
+    margin-top: 0;
   }
 
   .squad-overview-stats {
@@ -7922,15 +7948,16 @@ h3 {
   }
 
   .squad-deadline-stat .hero-deadline-timer {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    justify-content: center;
+    gap: 5px;
     margin-top: 2px;
     padding-top: 4px;
     border-top: 1px solid var(--line);
   }
 
   .squad-deadline-stat .hero-deadline-timer > span {
-    min-width: 34px;
+    min-width: 27px;
   }
 
   .squad-tabs {
