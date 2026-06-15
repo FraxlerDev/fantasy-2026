@@ -97,7 +97,7 @@ export default async function HomePage() {
       <section className="promo-hero poster-hero">
         <div className="promo-copy">
           <p className="eyebrow">Fantasy World Cup 2026</p>
-          <h1>Фентезі-турнір до ЧС-2026 для твоєї футбольної компанії</h1>
+          <h1>Фентезі-турнір до ЧС-2026</h1>
           <p>
             Збери команду з 15 гравців, обери стартові 11, постав капітана і
             змагайся у глобальному рейтингу або в лігах з друзями.

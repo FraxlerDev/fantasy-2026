@@ -25,7 +25,7 @@ export function SystemStateShell({ children }: { children: React.ReactNode }) {
               <img src="/main-photo.png" alt="" />
             </div>
             <div className="brand-text">
-              <div>Fantasy 2026 UA</div>
+              <div>Fantasy 2026</div>
             </div>
           </Link>
           <label className="mobile-menu-button" htmlFor="system-mobile-nav-toggle" aria-label="Відкрити меню">

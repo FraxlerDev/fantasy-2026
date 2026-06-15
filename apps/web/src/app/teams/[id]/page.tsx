@@ -15,6 +15,52 @@ type PublicTeamPageProps = {
   searchParams?: Promise<{ gw?: string }>;
 };
 
+type LineupEntry = {
+  id: string;
+  playerId: string;
+  slot: RosterSlot;
+  benchOrder: number | null;
+  isCaptain: boolean;
+  player: {
+    name: string;
+    position: PlayerPosition;
+    club: string | null;
+    photoUrl: string | null;
+    price: { toString(): string };
+    status: string;
+    unavailableReason: string | null;
+    nationalTeam: { nameUk: string; flagPath: string | null };
+  };
+};
+
+type ScoringEntry = {
+  playerId: string;
+  slot: RosterSlot;
+  isCaptain: boolean;
+};
+
+type PlayerGameweekStatus = {
+  didPlay: boolean;
+  redCard: boolean;
+};
+
+const formationShapes: Record<string, { DEF: number; MID: number; FWD: number }> = {
+  "4-3-3": { DEF: 4, MID: 3, FWD: 3 },
+  "3-4-3": { DEF: 3, MID: 4, FWD: 3 },
+  "3-5-2": { DEF: 3, MID: 5, FWD: 2 },
+  "4-4-2": { DEF: 4, MID: 4, FWD: 2 },
+  "4-5-1": { DEF: 4, MID: 5, FWD: 1 },
+  "5-3-2": { DEF: 5, MID: 3, FWD: 2 },
+  "5-4-1": { DEF: 5, MID: 4, FWD: 1 },
+};
+
+const positionLabels: Record<PlayerPosition, string> = {
+  GK: "Воротар",
+  DEF: "Захисник",
+  MID: "Півзахисник",
+  FWD: "Нападник",
+};
+
 export async function generateMetadata({ params }: PublicTeamPageProps): Promise<Metadata> {
   const { id } = await params;
   const team = await prisma.fantasyTeam.findUnique({
@@ -51,46 +97,6 @@ export async function generateMetadata({ params }: PublicTeamPageProps): Promise
   });
 }
 
-type LineupEntry = {
-  id: string;
-  playerId: string;
-  slot: RosterSlot;
-  benchOrder: number | null;
-  isCaptain: boolean;
-  player: {
-    name: string;
-    position: PlayerPosition;
-    club: string | null;
-    photoUrl: string | null;
-    price: { toString(): string };
-    status: string;
-    unavailableReason: string | null;
-    nationalTeam: { nameUk: string; flagPath: string | null };
-  };
-};
-
-type PlayerGameweekStatus = {
-  didPlay: boolean;
-  redCard: boolean;
-};
-
-const formationShapes: Record<string, { DEF: number; MID: number; FWD: number }> = {
-  "4-3-3": { DEF: 4, MID: 3, FWD: 3 },
-  "3-4-3": { DEF: 3, MID: 4, FWD: 3 },
-  "3-5-2": { DEF: 3, MID: 5, FWD: 2 },
-  "4-4-2": { DEF: 4, MID: 4, FWD: 2 },
-  "4-5-1": { DEF: 4, MID: 5, FWD: 1 },
-  "5-3-2": { DEF: 5, MID: 3, FWD: 2 },
-  "5-4-1": { DEF: 5, MID: 4, FWD: 1 },
-};
-
-const positionLabels: Record<PlayerPosition, string> = {
-  GK: "Воротар",
-  DEF: "Захисник",
-  MID: "Півзахисник",
-  FWD: "Нападник",
-};
-
 function pitchRows(formation: string): Array<{ position: PlayerPosition; slots: number }> {
   const shape = formationShapes[formation] ?? formationShapes["4-3-3"];
   return [
@@ -101,17 +107,36 @@ function pitchRows(formation: string): Array<{ position: PlayerPosition; slots: 
   ];
 }
 
-function teamName(team: { nameUk: string; flagPath: string | null }) {
-  return (
-    <span className="fixture-line">
-      {team.flagPath ? <img alt="" className="flag" src={team.flagPath} /> : null}
-      {team.nameUk}
-    </span>
-  );
-}
-
 function playerSurname(name: string) {
   return name.trim().split(/\s+/).at(-1) || name.trim();
+}
+
+function scoreEntries(entries: ScoringEntry[], points: Map<string, number>) {
+  const starters = entries.filter((entry) => entry.slot === "STARTER");
+  let total = starters.reduce((sum, entry) => sum + (points.get(entry.playerId) ?? 0), 0);
+  const captain = starters.find((entry) => entry.isCaptain);
+  if (captain) total += points.get(captain.playerId) ?? 0;
+  return total;
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("uk-UA", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Kyiv",
+  }).format(date);
+}
+
+function matchupTeam(team: { nameUk: string; flagPath: string | null }, side: "home" | "away") {
+  return (
+    <span className={`public-matchup-team ${side}`}>
+      {side === "away" && team.flagPath ? <img alt="" className="flag" src={team.flagPath} /> : null}
+      <span>{team.nameUk}</span>
+      {side === "home" && team.flagPath ? <img alt="" className="flag" src={team.flagPath} /> : null}
+    </span>
+  );
 }
 
 function playerCard(
@@ -119,24 +144,27 @@ function playerCard(
   points: Map<string, number>,
   statuses: Map<string, PlayerGameweekStatus>,
   label = positionLabels[entry.player.position],
+  isBench = false,
 ) {
   const basePoints = points.get(entry.playerId) ?? 0;
-  const playerPoints = entry.isCaptain ? basePoints * 2 : basePoints;
+  const displayedPoints = entry.isCaptain ? basePoints * 2 : basePoints;
   const matchStatus = statuses.get(entry.playerId);
   const hasResult = statuses.has(entry.playerId);
-  const surname = playerSurname(entry.player.name);
 
   return (
-    <div className={`fantasy-shirt filled public-team-shirt ${entry.player.status !== "AVAILABLE" ? "unavailable" : ""}`} key={entry.id}>
+    <div
+      className={`fantasy-shirt filled public-team-shirt ${isBench ? "public-bench-player" : ""} ${entry.player.status !== "AVAILABLE" ? "unavailable" : ""}`}
+      key={entry.id}
+    >
       <span className="player-photo-wrap">
         {entry.player.photoUrl ? <img alt="" className="player-photo" src={entry.player.photoUrl} /> : <span className="player-photo placeholder" />}
       </span>
       {hasResult ? (
         <span
           className={`player-photo-points ${entry.isCaptain ? "captain-points" : ""}`}
-          title={entry.isCaptain ? `Очки подвоєні за капітанство: ${basePoints} × 2 = ${playerPoints}` : `${playerPoints} очок`}
+          title={entry.isCaptain ? `Очки подвоєні за капітанство: ${basePoints} × 2 = ${displayedPoints}` : `${displayedPoints} очок`}
         >
-          {playerPoints}
+          {displayedPoints}
         </span>
       ) : null}
       {entry.isCaptain ? (
@@ -155,7 +183,7 @@ function playerCard(
         </span>
       ) : null}
       <span className="lineup-player-label" title={entry.player.name}>
-        <strong>{surname}</strong>
+        <strong>{playerSurname(entry.player.name)}</strong>
         <span className="player-price-badge">${Number(entry.player.price).toFixed(1)}</span>
       </span>
       <em className="lineup-player-meta">
@@ -167,21 +195,11 @@ function playerCard(
   );
 }
 
-function gameweekPoints(entries: LineupEntry[], points: Map<string, number>) {
-  const starters = entries.filter((entry) => entry.slot === "STARTER");
-  let total = starters.reduce((sum, entry) => sum + (points.get(entry.playerId) ?? 0), 0);
-  const captain = starters.find((entry) => entry.isCaptain);
-
-  if (captain) {
-    total += points.get(captain.playerId) ?? 0;
-  }
-
-  return total;
-}
-
 export default async function PublicTeamPage({ params, searchParams }: PublicTeamPageProps) {
   const { id } = await params;
   const query = await searchParams;
+  const now = new Date();
+
   const team = await prisma.fantasyTeam.findUnique({
     where: { id },
     include: {
@@ -204,205 +222,309 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
 
   if (!team) notFound();
 
-  const [rank, fixtures, gameweeks] = await Promise.all([
-    prisma.leaderboardRow.findFirst({ where: { scope: "GLOBAL", fantasyTeamId: team.id } }),
+  const [fixtures, gameweeks, rankedTeams] = await Promise.all([
     prisma.fixture.findMany({
       include: { homeTeam: true, awayTeam: true, playerPoints: true },
       orderBy: [{ gameweek: "asc" }, { kickoffAt: "asc" }, { matchNo: "asc" }],
     }),
     prisma.gameweek.findMany({ orderBy: { number: "asc" } }),
+    prisma.fantasyTeam.findMany({
+      where: { rosterEntries: { some: {} } },
+      select: {
+        id: true,
+        name: true,
+        lineupSnapshots: {
+          select: {
+            gameweek: true,
+            entries: { select: { playerId: true, slot: true, isCaptain: true } },
+          },
+        },
+      },
+    }),
   ]);
 
-  const latestSnapshot = team.lineupSnapshots.at(-1);
-  const parsedGameweek = Number(query?.gw ?? latestSnapshot?.gameweek ?? 1);
-  const requestedGameweek = Number.isFinite(parsedGameweek) ? Math.min(7, Math.max(1, parsedGameweek)) : 1;
-  const selectedSnapshot = team.lineupSnapshots.find((snapshot) => snapshot.gameweek === requestedGameweek);
+  const currentGameweek =
+    [...gameweeks].reverse().find((gameweek) => gameweek.startAt <= now) ??
+    gameweeks[0];
+  const requestedMode = query?.gw === "overall" ? "overall" : "gameweek";
+  const parsedGameweek = Number(query?.gw);
+  const requestedGameweek =
+    requestedMode === "overall"
+      ? currentGameweek?.number ?? 1
+      : Number.isInteger(parsedGameweek) && parsedGameweek >= 1 && parsedGameweek <= 7
+        ? parsedGameweek
+        : currentGameweek?.number ?? 1;
   const selectedGameweek = gameweeks.find((gameweek) => gameweek.number === requestedGameweek);
-  const now = new Date();
+  const selectedSnapshot = team.lineupSnapshots.find((snapshot) => snapshot.gameweek === requestedGameweek);
   const deadlinePassed = selectedGameweek ? selectedGameweek.deadlineAt <= now : false;
-  const isPreview = !selectedSnapshot && !deadlinePassed && team.rosterEntries.length > 0;
-  const isSnapshotProcessing =
-    !selectedSnapshot &&
-    deadlinePassed &&
-    !selectedGameweek?.snapshotsFinalizedAt;
-  const didNotParticipate =
-    !selectedSnapshot &&
-    deadlinePassed &&
-    Boolean(selectedGameweek?.snapshotsFinalizedAt);
-  const currentFormation = selectedSnapshot?.formation ?? (isPreview ? team.formation : "-");
+  const isOverall = requestedMode === "overall";
+  const isPreview = !isOverall && !selectedSnapshot && !deadlinePassed;
+  const didNotParticipate = !isOverall && !selectedSnapshot && deadlinePassed;
+  const currentFormation = isOverall
+    ? team.formation
+    : selectedSnapshot?.formation ?? (isPreview ? team.formation : "-");
   const currentEntries = (
-    selectedSnapshot?.entries ??
-    (isPreview ? team.rosterEntries : [])
+    isOverall
+      ? team.rosterEntries
+      : selectedSnapshot?.entries ?? (isPreview ? team.rosterEntries : [])
   ) as LineupEntry[];
   const starters = currentEntries.filter((entry) => entry.slot === "STARTER");
-  const bench = currentEntries.filter((entry) => entry.slot === "BENCH").sort((a, b) => (a.benchOrder ?? 99) - (b.benchOrder ?? 99));
-  const playerPointTotals = new Map<string, number>();
-  const playerGameweekStatuses = new Map<string, PlayerGameweekStatus>();
+  const bench = currentEntries
+    .filter((entry) => entry.slot === "BENCH")
+    .sort((a, b) => (a.benchOrder ?? 99) - (b.benchOrder ?? 99));
 
-  for (const fixture of fixtures.filter((item) => item.gameweek === requestedGameweek)) {
+  const pointsByGameweek = new Map<number, Map<string, number>>();
+  const statusesByGameweek = new Map<number, Map<string, PlayerGameweekStatus>>();
+  const scoredFixturesByGameweek = new Map<number, number>();
+
+  for (const fixture of fixtures) {
+    const pointMap = pointsByGameweek.get(fixture.gameweek) ?? new Map<string, number>();
+    const statusMap = statusesByGameweek.get(fixture.gameweek) ?? new Map<string, PlayerGameweekStatus>();
+    if (fixture.playerPoints.length > 0) {
+      scoredFixturesByGameweek.set(fixture.gameweek, (scoredFixturesByGameweek.get(fixture.gameweek) ?? 0) + 1);
+    }
     for (const point of fixture.playerPoints) {
-      playerPointTotals.set(point.playerId, (playerPointTotals.get(point.playerId) ?? 0) + point.points);
-      const currentStatus = playerGameweekStatuses.get(point.playerId);
-      playerGameweekStatuses.set(point.playerId, {
+      pointMap.set(point.playerId, (pointMap.get(point.playerId) ?? 0) + point.points);
+      const currentStatus = statusMap.get(point.playerId);
+      statusMap.set(point.playerId, {
         didPlay: Boolean(currentStatus?.didPlay || point.didPlay),
         redCard: Boolean(currentStatus?.redCard || point.redCard),
       });
     }
+    pointsByGameweek.set(fixture.gameweek, pointMap);
+    statusesByGameweek.set(fixture.gameweek, statusMap);
   }
+
+  const teamPointsByGameweek = new Map<number, number>();
+  for (const snapshot of team.lineupSnapshots) {
+    teamPointsByGameweek.set(
+      snapshot.gameweek,
+      scoreEntries(snapshot.entries as ScoringEntry[], pointsByGameweek.get(snapshot.gameweek) ?? new Map()),
+    );
+  }
+
+  const rankDataByGameweek = new Map<number, { gameweekRank: number | null; cumulativeRank: number | null }>();
+  for (const gameweek of gameweeks) {
+    const participants = rankedTeams
+      .map((rankedTeam) => {
+        const snapshot = rankedTeam.lineupSnapshots.find((item) => item.gameweek === gameweek.number);
+        if (!snapshot) return null;
+        const gameweekPoints = scoreEntries(
+          snapshot.entries as ScoringEntry[],
+          pointsByGameweek.get(gameweek.number) ?? new Map(),
+        );
+        const cumulativePoints = rankedTeam.lineupSnapshots
+          .filter((item) => item.gameweek <= gameweek.number)
+          .reduce(
+            (sum, item) =>
+              sum + scoreEntries(item.entries as ScoringEntry[], pointsByGameweek.get(item.gameweek) ?? new Map()),
+            0,
+          );
+        return { id: rankedTeam.id, name: rankedTeam.name, gameweekPoints, cumulativePoints };
+      })
+      .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+    const gameweekOrder = [...participants].sort(
+      (a, b) => b.gameweekPoints - a.gameweekPoints || a.name.localeCompare(b.name, "uk"),
+    );
+    const cumulativeOrder = [...participants].sort(
+      (a, b) => b.cumulativePoints - a.cumulativePoints || a.name.localeCompare(b.name, "uk"),
+    );
+    rankDataByGameweek.set(gameweek.number, {
+      gameweekRank: gameweekOrder.findIndex((item) => item.id === team.id) + 1 || null,
+      cumulativeRank: cumulativeOrder.findIndex((item) => item.id === team.id) + 1 || null,
+    });
+  }
+
+  const selectedPoints = pointsByGameweek.get(requestedGameweek) ?? new Map<string, number>();
+  const selectedStatuses = statusesByGameweek.get(requestedGameweek) ?? new Map<string, PlayerGameweekStatus>();
+  const selectedGwPoints = selectedSnapshot ? teamPointsByGameweek.get(requestedGameweek) ?? 0 : null;
+  const cumulativePoints = [...teamPointsByGameweek.entries()]
+    .filter(([gameweek]) => gameweek <= requestedGameweek)
+    .reduce((sum, [, points]) => sum + points, 0);
+  const selectedRanks = rankDataByGameweek.get(requestedGameweek);
+  const selectedFixtures = fixtures.filter((fixture) => fixture.gameweek === requestedGameweek);
+  const allFixturesScored =
+    selectedFixtures.length > 0 &&
+    (scoredFixturesByGameweek.get(requestedGameweek) ?? 0) === selectedFixtures.length;
+  const selectedStatus = isOverall
+    ? "Поточний склад"
+    : didNotParticipate
+      ? "Не брала участі"
+      : isPreview
+        ? "Попередній склад"
+        : allFixturesScored
+          ? "Очки підраховано"
+          : "Склад зафіксовано";
 
   const gameweekRows = gameweeks.map((gameweek) => {
     const snapshot = team.lineupSnapshots.find((item) => item.gameweek === gameweek.number);
-    const snapshotEntries = (snapshot?.entries as LineupEntry[] | undefined) ?? [];
-    const gwFixtures = fixtures.filter((fixture) => fixture.gameweek === gameweek.number);
-    const points = new Map<string, number>();
-    for (const fixture of gwFixtures) {
-      for (const point of fixture.playerPoints) {
-        points.set(point.playerId, (points.get(point.playerId) ?? 0) + point.points);
-      }
-    }
-    const status = snapshot
-      ? "Зараховано"
-      : gameweek.deadlineAt > now
-        ? "Очікується"
-        : gameweek.snapshotsFinalizedAt
-          ? "Не брала участі"
-          : "Snapshot обробляється";
-
+    const hasEnteredPoints = (scoredFixturesByGameweek.get(gameweek.number) ?? 0) > 0;
     return {
       gameweek: gameweek.number,
-      fixtures: gwFixtures.length,
-      points: snapshot ? gameweekPoints(snapshotEntries, points) : 0,
-      status,
+      points: snapshot && hasEnteredPoints ? teamPointsByGameweek.get(gameweek.number) ?? 0 : null,
+      status: snapshot
+        ? hasEnteredPoints
+          ? "Очки нараховуються"
+          : "Склад зафіксовано"
+        : gameweek.deadlineAt > now
+          ? "Очікується"
+          : "Не брала участі",
     };
   });
 
   const selectedTeamCodes = new Set(currentEntries.map((entry) => entry.player.nationalTeam.nameUk));
-  const currentFixtures = fixtures
-    .filter((fixture) => fixture.gameweek === requestedGameweek)
+  const currentFixtures = selectedFixtures
     .filter((fixture) => selectedTeamCodes.has(fixture.homeTeam.nameUk) || selectedTeamCodes.has(fixture.awayTeam.nameUk))
     .slice(0, 18);
-  const selectedGameweekPoints = gameweekRows.find((row) => row.gameweek === requestedGameweek)?.points ?? 0;
+  const overallOrder = rankedTeams
+    .map((rankedTeam) => ({
+      id: rankedTeam.id,
+      name: rankedTeam.name,
+      points: rankedTeam.lineupSnapshots.reduce(
+        (sum, item) =>
+          sum + scoreEntries(item.entries as ScoringEntry[], pointsByGameweek.get(item.gameweek) ?? new Map()),
+        0,
+      ),
+    }))
+    .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, "uk"));
+  const overallRankIndex = overallOrder.findIndex((item) => item.id === team.id);
+  const overallRank = overallRankIndex >= 0 ? overallRankIndex + 1 : null;
 
   return (
     <AppShell active="/leaderboard">
       <>
-        <section className="team-header panel">
-          <div className="topbar">
+        <section className="public-team-main">
+          <div className="panel public-team-lineup-panel">
+            <div className="public-team-section-heading">
+              <h2>{isOverall ? "Поточний склад" : `Склад GW${requestedGameweek}`}</h2>
+              <span>Схема: <strong>{currentFormation}</strong></span>
+            </div>
+            {currentEntries.length > 0 ? (
+              <div className="football-lineup-board public-football-lineup-board">
+                <div className="fixed-pitch public-fixed-pitch">
+                  {pitchRows(currentFormation).map((row) => {
+                    const rowPlayers = starters.filter((entry) => entry.player.position === row.position);
+                    return (
+                      <div className={`fixed-pitch-row slots-${row.slots}`} key={row.position}>
+                        {Array.from({ length: row.slots }, (_, index) => {
+                          const entry = rowPlayers[index];
+                          return entry
+                            ? playerCard(entry, selectedPoints, selectedStatuses)
+                            : <div className="fantasy-shirt empty public-empty-slot" key={`${row.position}-${index}`} />;
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="fixed-bench public-fixed-bench">
+                  {Array.from({ length: 4 }, (_, index) => {
+                    const entry = bench[index];
+                    return entry
+                      ? playerCard(entry, selectedPoints, selectedStatuses, positionLabels[entry.player.position], true)
+                      : <div className="fantasy-shirt empty public-empty-slot" key={`bench-${index}`} />;
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="snapshot-no-participation">
+                {didNotParticipate
+                  ? `Команда не брала участі в GW${requestedGameweek}.`
+                  : "Склад команди ще не збережено."}
+              </div>
+            )}
+          </div>
+
+          <section className="team-header panel public-team-header">
             <div>
               <p className="eyebrow">Фентезі команда</p>
               <h1>{team.name}</h1>
               <p className="muted">Менеджер: {team.user.username?.trim() || "Користувач"}</p>
             </div>
             <ShareSquadButton teamId={team.id} version={team.updatedAt.getTime()} />
-          </div>
-          <div className="grid cols-3" style={{ marginTop: 14 }}>
-            <div className="card stat"><span className="badge">Очки GW{requestedGameweek}</span><strong>{selectedGameweekPoints}</strong></div>
-            <div className="card stat"><span className="badge">Місце</span><strong>{rank?.rank ?? "-"}</strong></div>
-            <div className="card stat"><span className="badge">Схема</span><strong>{currentFormation}</strong></div>
-          </div>
-        </section>
+          </section>
 
-        <nav className="gameweek-switcher" aria-label="Історія складу за турами">
-          {Array.from({ length: 7 }, (_, index) => {
-            const gameweek = index + 1;
-            const points = gameweekRows.find((row) => row.gameweek === gameweek)?.points ?? 0;
-            return (
+          <nav className="gameweek-switcher public-gameweek-switcher" aria-label="Історія складу за турами">
+            <Link className={isOverall ? "active" : ""} href={`/teams/${team.id}?gw=overall`} scroll={false}>
+              Загалом
+            </Link>
+            {gameweeks.map((gameweek) => (
               <Link
-                className={requestedGameweek === gameweek ? "active" : ""}
-                href={`/teams/${team.id}?gw=${gameweek}`}
-                key={gameweek}
+                className={!isOverall && requestedGameweek === gameweek.number ? "active" : ""}
+                href={`/teams/${team.id}?gw=${gameweek.number}`}
+                key={gameweek.id}
+                scroll={false}
               >
-                GW{gameweek} · {points}
+                GW{gameweek.number}
               </Link>
-            );
-          })}
-        </nav>
-        {isPreview ? (
-          <div className="form-success snapshot-fallback-note">
-            Попередній склад. Остаточний склад буде зафіксовано після дедлайну під час snapshot GW{requestedGameweek}.
-          </div>
-        ) : null}
-        {isSnapshotProcessing ? (
-          <div className="form-success snapshot-fallback-note">
-            Snapshot GW{requestedGameweek} ще обробляється.
-          </div>
-        ) : null}
-        {didNotParticipate ? (
-          <div className="form-error snapshot-fallback-note">
-            Команда не брала участі в GW{requestedGameweek}.
-          </div>
-        ) : null}
-        {!selectedSnapshot && !isPreview && !deadlinePassed ? (
-          <div className="form-error snapshot-fallback-note">
-            Склад команди ще не збережено.
-          </div>
-        ) : null}
+            ))}
+          </nav>
 
-        <section className="grid cols-2" style={{ marginTop: 16 }}>
-          <div className="panel">
-            <h2>Склад GW{requestedGameweek}</h2>
-            {selectedSnapshot || isPreview ? (
-              <>
-                <div className="football-lineup-board public-football-lineup-board">
-                <div className="fixed-pitch public-fixed-pitch">
-                  {starters.length > 0 ? (
-                    pitchRows(currentFormation).map((row) => {
-                      const rowPlayers = starters.filter((entry) => entry.player.position === row.position);
-                      return (
-                        <div className={`fixed-pitch-row slots-${row.slots}`} key={row.position}>
-                          {Array.from({ length: row.slots }, (_, index) => {
-                            const entry = rowPlayers[index];
-                            return entry ? playerCard(entry, playerPointTotals, playerGameweekStatuses) : <div className="fantasy-shirt empty public-empty-slot" key={`${row.position}-${index}`} />;
-                          })}
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="drop-empty">Команда ще без гравців</div>
-                  )}
-                </div>
-                <div className="fixed-bench public-fixed-bench">
-                  {bench.length > 0 ? (
-                    Array.from({ length: 4 }, (_, index) => {
-                      const entry = bench[index];
-                      return entry ? playerCard(entry, playerPointTotals, playerGameweekStatuses) : <div className="fantasy-shirt empty public-empty-slot" key={`bench-${index}`} />;
-                    })
-                  ) : (
-                    <div className="drop-empty small">Лавка порожня</div>
-                  )}
-                </div>
-                </div>
-              </>
+          <div className={`public-team-status status-${selectedStatus === "Не брала участі" ? "error" : "ok"}`}>
+            <strong>{selectedStatus}</strong>
+            {!isOverall && selectedGameweek ? (
+              <span>
+                {deadlinePassed ? `Дедлайн: ${formatDate(selectedGameweek.deadlineAt)}` : `До дедлайну ${formatDate(selectedGameweek.deadlineAt)}`}
+              </span>
             ) : (
-              <div className="snapshot-no-participation">
-                {isSnapshotProcessing
-                  ? `Snapshot GW${requestedGameweek} ще обробляється.`
-                  : didNotParticipate
-                    ? `Команда не брала участі в GW${requestedGameweek}.`
-                    : "Склад команди ще не збережено."}
-              </div>
+              <span>Відображено останній збережений склад команди</span>
             )}
           </div>
 
-          <div className="panel">
-            <h2>Очки по турах</h2>
-            <table className="table compact-table">
-              <thead><tr><th>GW</th><th>Матчів</th><th>Очки</th><th>Статус</th></tr></thead>
-              <tbody>
-                {gameweekRows.map((row) => (
-                  <tr key={row.gameweek}>
-                    <td>GW{row.gameweek}</td>
-                    <td>{row.fixtures}</td>
-                    <td><strong>{row.points}</strong></td>
-                    <td>{row.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <aside className="panel public-team-points-panel">
+            <p className="eyebrow">{isOverall ? "Загальний результат" : `Результат GW${requestedGameweek}`}</p>
+            <h2>{isOverall ? "Очки команди" : "Очки та місця"}</h2>
+            <div className="public-team-point-grid">
+              {isOverall ? (
+                <>
+                  <div><span>Всього очок</span><strong>{team.totalPoints}</strong></div>
+                  <div><span>Поточне місце</span><strong>{overallRank ?? "—"}</strong></div>
+                  <div><span>Поточний тур</span><strong>GW{currentGameweek?.number ?? 1}</strong></div>
+                  <div><span>Схема</span><strong>{team.formation}</strong></div>
+                </>
+              ) : (
+                <>
+                  <div><span>Очки за GW{requestedGameweek}</span><strong>{selectedGwPoints ?? "—"}</strong></div>
+                  <div><span>Очки загалом</span><strong>{selectedSnapshot ? cumulativePoints : "—"}</strong></div>
+                  <div><span>Місце після GW{requestedGameweek}</span><strong>{selectedSnapshot ? selectedRanks?.cumulativeRank ?? "—" : "—"}</strong></div>
+                  <div><span>Поточне місце</span><strong>{overallRank ?? "—"}</strong></div>
+                </>
+              )}
+            </div>
+          </aside>
+
+          <section className="panel public-team-history">
+            <div className="public-team-section-heading">
+              <h2>Очки за турами</h2>
+              <span>Лавка не входить у підсумок GW</span>
+            </div>
+            <div className="public-team-history-grid">
+              <Link
+                className={isOverall ? "active" : ""}
+                href={`/teams/${team.id}?gw=overall`}
+                scroll={false}
+              >
+                <span>Загалом</span>
+                <strong>{team.totalPoints}</strong>
+                <small>Поточне місце: {overallRank ?? "—"}</small>
+              </Link>
+              {gameweekRows.map((row) => (
+                <Link
+                  className={!isOverall && requestedGameweek === row.gameweek ? "active" : ""}
+                  href={`/teams/${team.id}?gw=${row.gameweek}`}
+                  key={row.gameweek}
+                  scroll={false}
+                >
+                  <span>GW{row.gameweek}</span>
+                  <strong>{row.points ?? "—"}</strong>
+                  <small>{row.status}</small>
+                </Link>
+              ))}
+            </div>
+          </section>
         </section>
 
-        <section className="panel" style={{ marginTop: 16 }}>
+        <section className="panel public-team-fixtures">
           <h2>Матчі гравців</h2>
           <table className="table compact-table">
             <thead><tr><th>GW</th><th>Матч</th><th>Статус</th></tr></thead>
@@ -410,7 +532,13 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
               {currentFixtures.map((fixture) => (
                 <tr key={fixture.id}>
                   <td>GW{fixture.gameweek}</td>
-                  <td>{teamName(fixture.homeTeam)} - {teamName(fixture.awayTeam)}</td>
+                  <td>
+                    <div className="public-matchup">
+                      {matchupTeam(fixture.homeTeam, "home")}
+                      <span className="public-matchup-separator">–</span>
+                      {matchupTeam(fixture.awayTeam, "away")}
+                    </div>
+                  </td>
                   <td>{fixture.homeScore === null ? "Очікується" : `${fixture.homeScore}:${fixture.awayScore}`}</td>
                 </tr>
               ))}
