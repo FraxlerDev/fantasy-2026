@@ -102,26 +102,65 @@ export default async function SquadPage({
         orderBy: [{ kickoffAt: "asc" }, { matchNo: "asc" }],
       })
     : [];
-  const latestPointsFixture = await prisma.fixture.findFirst({
-    where: { playerPoints: { some: {} } },
-    select: { gameweek: true },
-    orderBy: [{ gameweek: "desc" }, { kickoffAt: "desc" }],
-  });
-  const latestPointFixtures = latestPointsFixture
+  const pointFixtures = editableGameweek
     ? await prisma.fixture.findMany({
-        where: { gameweek: latestPointsFixture.gameweek },
+        where: { gameweek: { lte: editableGameweek.number }, playerPoints: { some: {} } },
         include: { playerPoints: true },
+        orderBy: [{ gameweek: "desc" }, { kickoffAt: "desc" }],
       })
     : [];
-  const latestPlayerPointMap = new Map<string, { points: number; didPlay: boolean; redCard: boolean }>();
-  for (const fixture of latestPointFixtures) {
+  const latestPointUpdateByGameweek = new Map<number, Date>();
+  for (const fixture of pointFixtures) {
     for (const point of fixture.playerPoints) {
-      const current = latestPlayerPointMap.get(point.playerId);
-      latestPlayerPointMap.set(point.playerId, {
-        points: (current?.points ?? 0) + point.points,
-        didPlay: Boolean(current?.didPlay || point.didPlay),
-        redCard: Boolean(current?.redCard || point.redCard),
-      });
+      const latest = latestPointUpdateByGameweek.get(fixture.gameweek);
+      if (!latest || point.updatedAt > latest) latestPointUpdateByGameweek.set(fixture.gameweek, point.updatedAt);
+    }
+  }
+  const latestRankingRefresh = latestPointUpdateByGameweek.size > 0
+    ? await prisma.leaderboardRow.findFirst({
+        select: { refreshedAt: true },
+        orderBy: { refreshedAt: "desc" },
+      })
+    : null;
+  const officialPointGameweeks = [...latestPointUpdateByGameweek.entries()]
+    .filter(([, updatedAt]) => latestRankingRefresh?.refreshedAt && latestRankingRefresh.refreshedAt >= updatedAt)
+    .map(([gameweek]) => gameweek)
+    .sort((a, b) => b - a);
+  const pointsDisplayGameweek = editableGameweek
+    ? officialPointGameweeks.includes(editableGameweek.number)
+      ? editableGameweek.number
+      : editableGameweek.deadlineAt > new Date()
+        ? officialPointGameweeks.find((gameweek) => gameweek < editableGameweek.number)
+        : undefined
+    : undefined;
+  const pointsSnapshot =
+    fantasyTeam && editableGameweek && pointsDisplayGameweek && pointsDisplayGameweek < editableGameweek.number
+      ? await prisma.lineupSnapshot.findUnique({
+          where: {
+            fantasyTeamId_gameweek: {
+              fantasyTeamId: fantasyTeam.id,
+              gameweek: pointsDisplayGameweek,
+            },
+          },
+          select: { entries: { select: { playerId: true } } },
+        })
+      : null;
+  const pointsSnapshotPlayerIds =
+    fantasyTeam && editableGameweek && pointsDisplayGameweek && pointsDisplayGameweek < editableGameweek.number
+      ? new Set(pointsSnapshot?.entries.map((entry) => entry.playerId) ?? [])
+      : null;
+  const latestPlayerPointMap = new Map<string, { points: number; didPlay: boolean; redCard: boolean }>();
+  if (pointsDisplayGameweek) {
+    for (const fixture of pointFixtures.filter((item) => item.gameweek === pointsDisplayGameweek)) {
+      for (const point of fixture.playerPoints) {
+        if (pointsSnapshotPlayerIds && !pointsSnapshotPlayerIds.has(point.playerId)) continue;
+        const current = latestPlayerPointMap.get(point.playerId);
+        latestPlayerPointMap.set(point.playerId, {
+          points: (current?.points ?? 0) + point.points,
+          didPlay: Boolean(current?.didPlay || point.didPlay),
+          redCard: Boolean(current?.redCard || point.redCard),
+        });
+      }
     }
   }
   const transferBaseSnapshot =
@@ -258,7 +297,7 @@ export default async function SquadPage({
           currentStart={editableGameweek?.startAt.toISOString()}
           transferLimit={editableGameweek?.transferLimit}
           transferBasePlayerIds={[...previousIds]}
-          pointsGameweek={latestPointsFixture?.gameweek}
+          pointsGameweek={pointsDisplayGameweek}
           playerGameweekStats={[...latestPlayerPointMap.entries()].map(([playerId, stats]) => ({ playerId, ...stats }))}
           userProfile={{
             username: currentUser?.username ?? session.user.username,
