@@ -240,7 +240,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
 
   if (!team) notFound();
 
-  const [fixtures, gameweeks, rankedTeams, autoSubstitutions] = await Promise.all([
+  const [fixtures, gameweeks, rankedTeams, autoSubstitutions, autoSubstitutionSettings] = await Promise.all([
     prisma.fixture.findMany({
       include: { homeTeam: true, awayTeam: true, playerPoints: true },
       orderBy: [{ gameweek: "asc" }, { kickoffAt: "asc" }, { matchNo: "asc" }],
@@ -264,6 +264,9 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
         outPlayer: { select: { name: true } },
         inPlayer: { select: { name: true } },
       },
+    }),
+    prisma.systemSetting.findMany({
+      where: { key: { startsWith: "autoSubstitutionsCalculated:" } },
     }),
   ]);
 
@@ -330,6 +333,15 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
   const selectedAutoSubPoints = selectedAutoSubstitutions.reduce((sum, item) => sum + item.points, 0);
   const selectedAutoSubOutIds = new Set(selectedAutoSubstitutions.map((item) => item.outPlayerId));
   const selectedAutoSubInByPlayer = new Map(selectedAutoSubstitutions.map((item) => [item.inPlayerId, item]));
+  const autoSubstitutionCalculatedGameweeks = new Set(
+    autoSubstitutionSettings
+      .map((setting) => Number(setting.key.replace("autoSubstitutionsCalculated:GW", "")))
+      .filter((gameweek) => Number.isFinite(gameweek)),
+  );
+  for (const autoSubstitution of autoSubstitutions) {
+    autoSubstitutionCalculatedGameweeks.add(autoSubstitution.gameweek);
+  }
+  const selectedAutoSubstitutionsCalculated = autoSubstitutionCalculatedGameweeks.has(requestedGameweek);
 
   const teamPointsByGameweek = new Map<number, number>();
   for (const snapshot of team.lineupSnapshots) {
@@ -562,8 +574,8 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
                         </li>
                       ))}
                     </ul>
-                  ) : allFixturesScored ? (
-                    <p>Автозамін не було</p>
+                  ) : selectedAutoSubstitutionsCalculated ? (
+                    <p>Автозамін в GW{requestedGameweek} не було</p>
                   ) : (
                     <p>Очки з автозамін будуть додані по завершенню GW{requestedGameweek}</p>
                   )}

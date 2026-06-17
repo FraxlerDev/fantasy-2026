@@ -68,7 +68,7 @@ export async function calculateAutoSubstitutionRows(gameweek: number) {
           if (usedBench.has(entry.playerId)) return false;
           if (entry.player.position !== starter.player.position) return false;
           const points = pointsByPlayer.get(entry.playerId);
-          return Boolean(points?.didPlay && points.points !== 0);
+          return Boolean(points?.didPlay);
         })
         .sort((a, b) => {
           const pointsDiff = (pointsByPlayer.get(b.playerId)?.points ?? 0) - (pointsByPlayer.get(a.playerId)?.points ?? 0);
@@ -100,6 +100,11 @@ export async function applyAutoSubstitutions(gameweek: number) {
     if (rows.length > 0) {
       await tx.autoSubstitution.createMany({ data: rows });
     }
+    await tx.systemSetting.upsert({
+      where: { key: `autoSubstitutionsCalculated:GW${gameweek}` },
+      create: { key: `autoSubstitutionsCalculated:GW${gameweek}`, value: new Date().toISOString() },
+      update: { value: new Date().toISOString() },
+    });
   });
 
   await refreshLeaderboards();
@@ -107,7 +112,11 @@ export async function applyAutoSubstitutions(gameweek: number) {
 }
 
 export async function resetAutoSubstitutions(gameweek: number) {
-  const result = await prisma.autoSubstitution.deleteMany({ where: { gameweek } });
+  const result = await prisma.$transaction(async (tx) => {
+    const deleted = await tx.autoSubstitution.deleteMany({ where: { gameweek } });
+    await tx.systemSetting.deleteMany({ where: { key: `autoSubstitutionsCalculated:GW${gameweek}` } });
+    return deleted;
+  });
   await refreshLeaderboards();
   return { deleted: result.count };
 }
