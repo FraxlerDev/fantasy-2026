@@ -12,6 +12,7 @@ import {
   Upload,
   UserRoundCog,
   Users,
+  Wrench,
 } from "lucide-react";
 import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
@@ -27,13 +28,16 @@ import { prisma } from "../../lib/prisma";
 import { createMetadata } from "../../lib/seo";
 import { buildAllGroupStandings, ensurePlayoffMatches, resolvePlayoffMatches } from "../../lib/tournament";
 import {
+  calculateAutoSubstitutionsAction,
   createFixture,
   refreshRankingsAction,
+  resetAutoSubstitutionsAction,
   resetPlayoffScore,
   resetFixtureScore,
   savePlayoffScore,
   saveFixturePoints,
   saveFixtureScore,
+  setMaintenanceModeAction,
   updateTournamentTiebreaks,
   updatePlayerPrice,
 } from "../actions/admin-actions";
@@ -202,7 +206,7 @@ export default async function AdminPage({
 
   const params = await searchParams;
   const selectedGameweek = params?.gw ? Number(params.gw) : undefined;
-  const [teams, players, allFixtures, gameweeks, fantasyTeams] = await Promise.all([
+  const [teams, players, allFixtures, gameweeks, fantasyTeams, maintenanceSetting] = await Promise.all([
     prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }] }),
     prisma.player.findMany({
       include: { nationalTeam: true },
@@ -231,7 +235,9 @@ export default async function AdminPage({
       },
       orderBy: [{ createdAt: "asc" }],
     }),
+    prisma.systemSetting.findUnique({ where: { key: "maintenanceMode" } }),
   ]);
+  const maintenanceEnabled = maintenanceSetting?.value === "on";
   const playoffScores = await prisma.playoffMatch.findMany({ orderBy: { matchNo: "asc" } });
   const tournamentTeams = teams.map((team) => ({
     id: team.id,
@@ -579,6 +585,60 @@ export default async function AdminPage({
               ) : null}
             </details>
           ))}
+        </div>
+      </section>
+
+      <section className="panel" id="autosubs" style={{ marginBottom: 16 }}>
+        <h2>Автозаміни</h2>
+        <p className="muted">
+          Підрахунок автозамін перезаписує автозаміни вибраного GW, додає їх до очок команд і одразу оновлює рейтинг.
+          Скидання прибирає автозаміни цього GW і також перераховує рейтинг без них.
+        </p>
+        <div className="admin-action-grid">
+          {gameweeks.map((gameweek) => (
+            <div className="card stat" key={`autosub-${gameweek.id}`}>
+              <span className="badge">GW{gameweek.number}</span>
+              <strong>{gameweek.stage ?? gameweek.name}</strong>
+              <div className="toolbar" style={{ marginTop: 12 }}>
+                <form action={calculateAutoSubstitutionsAction}>
+                  <input type="hidden" name="gameweek" value={gameweek.number} />
+                  <button className="button primary" type="submit">
+                    <Calculator size={16} />
+                    Підрахунок автозамін GW{gameweek.number}
+                  </button>
+                </form>
+                <form action={resetAutoSubstitutionsAction}>
+                  <input type="hidden" name="gameweek" value={gameweek.number} />
+                  <button className="button" type="submit">
+                    <RotateCcw size={16} />
+                    Скинути GW{gameweek.number}
+                  </button>
+                </form>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="panel" id="maintenance" style={{ marginBottom: 16 }}>
+        <h2>Технічні роботи</h2>
+        <p className="muted">
+          Поточний статус: <strong>{maintenanceEnabled ? "увімкнено" : "вимкнено"}</strong>. Для адміна адмінка і логін залишаються доступними.
+        </p>
+        <div className="toolbar">
+          <form action={setMaintenanceModeAction}>
+            <input type="hidden" name="enabled" value="1" />
+            <button className="button" type="submit">
+              <Wrench size={16} />
+              Технічні роботи
+            </button>
+          </form>
+          <form action={setMaintenanceModeAction}>
+            <input type="hidden" name="enabled" value="0" />
+            <button className="button primary" type="submit">
+              Завершити технічні роботи
+            </button>
+          </form>
         </div>
       </section>
 

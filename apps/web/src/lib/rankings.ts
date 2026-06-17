@@ -40,6 +40,13 @@ export async function refreshLeaderboards() {
 
   const gameweeks = [...new Set(fixtures.map((fixture) => fixture.gameweek))];
   const pointsByGameweek = new Map<number, Map<string, number>>();
+  const autoSubstitutions = await prisma.autoSubstitution.findMany();
+  const autoSubPointsByTeamGameweek = new Map<string, number>();
+
+  for (const autoSubstitution of autoSubstitutions) {
+    const key = `${autoSubstitution.fantasyTeamId}:${autoSubstitution.gameweek}`;
+    autoSubPointsByTeamGameweek.set(key, (autoSubPointsByTeamGameweek.get(key) ?? 0) + autoSubstitution.points);
+  }
 
   for (const fixture of fixtures) {
     const pointMap = pointsByGameweek.get(fixture.gameweek) ?? new Map<string, number>();
@@ -71,6 +78,8 @@ export async function refreshLeaderboards() {
       if (captain) {
         total += pointByPlayer.get(captain.playerId) ?? 0;
       }
+
+      total += autoSubPointsByTeamGameweek.get(`${team.id}:${gameweek}`) ?? 0;
     }
 
     totals.set(team.id, total);

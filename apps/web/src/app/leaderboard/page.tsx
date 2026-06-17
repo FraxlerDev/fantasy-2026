@@ -60,11 +60,11 @@ function assignRanks<T extends { id: string; points: number }>(rows: T[]) {
   return rows.map((row, index) => ({ ...row, rank: index + 1 }));
 }
 
-function scoreEntries(entries: ScoringEntry[], points: Map<string, number>) {
+function scoreEntries(entries: ScoringEntry[], points: Map<string, number>, autoSubPoints = 0) {
   const starters = entries.filter((entry) => entry.slot === "STARTER");
   const basePoints = starters.reduce((sum, entry) => sum + (points.get(entry.playerId) ?? 0), 0);
   const captain = starters.find((entry) => entry.isCaptain);
-  return basePoints + (captain ? points.get(captain.playerId) ?? 0 : 0);
+  return basePoints + (captain ? points.get(captain.playerId) ?? 0 : 0) + autoSubPoints;
 }
 
 function leaderboardUrl({
@@ -131,7 +131,7 @@ export default async function LeaderboardPage({
   const page = Math.max(1, Number(params?.page ?? 1) || 1);
   const query = String(params?.q ?? "").trim();
 
-  const [teams, fixtures] = await Promise.all([
+  const [teams, fixtures, autoSubstitutions] = await Promise.all([
     prisma.fantasyTeam.findMany({
       where: { rosterEntries: { some: {} } },
       select: {
@@ -158,6 +158,12 @@ export default async function LeaderboardPage({
           },
         })
       : Promise.resolve([]),
+    activeTab === "gw"
+      ? prisma.autoSubstitution.findMany({
+          where: { gameweek: { in: selectedGameweek > 1 ? [selectedGameweek - 1, selectedGameweek] : [1] } },
+          select: { fantasyTeamId: true, gameweek: true, points: true },
+        })
+      : Promise.resolve([]),
   ]);
 
   const pointsByGameweek = new Map<number, Map<string, number>>();
@@ -169,13 +175,23 @@ export default async function LeaderboardPage({
     pointsByGameweek.set(fixture.gameweek, gameweekPoints);
   }
 
+  const autoSubPointsByTeamGameweek = new Map<string, number>();
+  for (const autoSubstitution of autoSubstitutions) {
+    const key = `${autoSubstitution.fantasyTeamId}:${autoSubstitution.gameweek}`;
+    autoSubPointsByTeamGameweek.set(key, (autoSubPointsByTeamGameweek.get(key) ?? 0) + autoSubstitution.points);
+  }
+
   const rawRows = teams.map((team) => {
     const snapshot = team.lineupSnapshots.find((item) => item.gameweek === selectedGameweek);
     const points =
       activeTab === "overall"
         ? team.totalPoints
         : snapshot
-          ? scoreEntries(snapshot.entries as ScoringEntry[], pointsByGameweek.get(selectedGameweek) ?? new Map())
+          ? scoreEntries(
+              snapshot.entries as ScoringEntry[],
+              pointsByGameweek.get(selectedGameweek) ?? new Map(),
+              autoSubPointsByTeamGameweek.get(`${team.id}:${selectedGameweek}`) ?? 0,
+            )
           : 0;
 
     return {
@@ -201,7 +217,11 @@ export default async function LeaderboardPage({
         id: team.id,
         name: team.name,
         points: snapshot
-          ? scoreEntries(snapshot.entries as ScoringEntry[], pointsByGameweek.get(selectedGameweek - 1) ?? new Map())
+          ? scoreEntries(
+              snapshot.entries as ScoringEntry[],
+              pointsByGameweek.get(selectedGameweek - 1) ?? new Map(),
+              autoSubPointsByTeamGameweek.get(`${team.id}:${selectedGameweek - 1}`) ?? 0,
+            )
           : 0,
       };
     });

@@ -2,6 +2,7 @@ import type { PlayerPosition, RosterSlot } from "@prisma/client";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AutosubRulesPopover } from "../../../components/autosub-rules-popover";
 import { ShareSquadButton } from "../../../components/share-squad-button";
 import { AppShell } from "../../../components/shell";
 import { prisma } from "../../../lib/prisma";
@@ -42,6 +43,16 @@ type ScoringEntry = {
 type PlayerGameweekStatus = {
   didPlay: boolean;
   redCard: boolean;
+};
+
+type AutoSubstitutionDisplay = {
+  fantasyTeamId: string;
+  gameweek: number;
+  outPlayerId: string;
+  inPlayerId: string;
+  points: number;
+  outPlayer: { name: string };
+  inPlayer: { name: string };
 };
 
 const formationShapes: Record<string, { DEF: number; MID: number; FWD: number }> = {
@@ -111,12 +122,12 @@ function playerSurname(name: string) {
   return name.trim().split(/\s+/).at(-1) || name.trim();
 }
 
-function scoreEntries(entries: ScoringEntry[], points: Map<string, number>) {
+function scoreEntries(entries: ScoringEntry[], points: Map<string, number>, autoSubPoints = 0) {
   const starters = entries.filter((entry) => entry.slot === "STARTER");
   let total = starters.reduce((sum, entry) => sum + (points.get(entry.playerId) ?? 0), 0);
   const captain = starters.find((entry) => entry.isCaptain);
   if (captain) total += points.get(captain.playerId) ?? 0;
-  return total;
+  return total + autoSubPoints;
 }
 
 function formatDate(date: Date) {
@@ -143,6 +154,8 @@ function playerCard(
   entry: LineupEntry,
   points: Map<string, number>,
   statuses: Map<string, PlayerGameweekStatus>,
+  autoSubOutIds: Set<string>,
+  autoSubInByPlayer: Map<string, AutoSubstitutionDisplay>,
   label = positionLabels[entry.player.position],
   isBench = false,
 ) {
@@ -150,10 +163,11 @@ function playerCard(
   const displayedPoints = entry.isCaptain ? basePoints * 2 : basePoints;
   const matchStatus = statuses.get(entry.playerId);
   const hasResult = statuses.has(entry.playerId);
+  const autoSubIn = autoSubInByPlayer.get(entry.playerId);
 
   return (
     <div
-      className={`fantasy-shirt filled public-team-shirt ${isBench ? "public-bench-player" : ""} ${entry.player.status !== "AVAILABLE" ? "unavailable" : ""}`}
+      className={`fantasy-shirt filled public-team-shirt ${isBench ? "public-bench-player" : ""} ${entry.player.status !== "AVAILABLE" ? "unavailable" : ""} ${autoSubOutIds.has(entry.playerId) ? "autosub-out" : ""} ${autoSubIn ? "autosub-in" : ""}`}
       key={entry.id}
     >
       <span className="player-photo-wrap">
@@ -182,6 +196,9 @@ function playerCard(
           <img alt="" src="/red-card.png" />
         </span>
       ) : null}
+      {autoSubIn ? (
+        <span className="autosub-mark" title={`Автозаміна: +${autoSubIn.points} очок`}>↔</span>
+      ) : null}
       <span className="lineup-player-label" title={entry.player.name}>
         <strong>{playerSurname(entry.player.name)}</strong>
         <span className="player-price-badge">${Number(entry.player.price).toFixed(1)}</span>
@@ -190,6 +207,7 @@ function playerCard(
         {entry.player.nationalTeam.flagPath ? <img alt="" className="flag" src={entry.player.nationalTeam.flagPath} /> : null}
         <span>{label}</span>
       </em>
+      {autoSubIn ? <small className="autosub-credit">+{autoSubIn.points} оч.</small> : null}
       {entry.player.status !== "AVAILABLE" ? <span className="unavailable-mark">НД</span> : null}
     </div>
   );
@@ -222,7 +240,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
 
   if (!team) notFound();
 
-  const [fixtures, gameweeks, rankedTeams] = await Promise.all([
+  const [fixtures, gameweeks, rankedTeams, autoSubstitutions] = await Promise.all([
     prisma.fixture.findMany({
       include: { homeTeam: true, awayTeam: true, playerPoints: true },
       orderBy: [{ gameweek: "asc" }, { kickoffAt: "asc" }, { matchNo: "asc" }],
@@ -239,6 +257,12 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
             entries: { select: { playerId: true, slot: true, isCaptain: true } },
           },
         },
+      },
+    }),
+    prisma.autoSubstitution.findMany({
+      include: {
+        outPlayer: { select: { name: true } },
+        inPlayer: { select: { name: true } },
       },
     }),
   ]);
@@ -295,11 +319,27 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
     statusesByGameweek.set(fixture.gameweek, statusMap);
   }
 
+  const autoSubPointsByTeamGameweek = new Map<string, number>();
+  for (const autoSubstitution of autoSubstitutions) {
+    const key = `${autoSubstitution.fantasyTeamId}:${autoSubstitution.gameweek}`;
+    autoSubPointsByTeamGameweek.set(key, (autoSubPointsByTeamGameweek.get(key) ?? 0) + autoSubstitution.points);
+  }
+  const selectedAutoSubstitutions = autoSubstitutions.filter(
+    (item) => item.fantasyTeamId === team.id && item.gameweek === requestedGameweek,
+  ) as AutoSubstitutionDisplay[];
+  const selectedAutoSubPoints = selectedAutoSubstitutions.reduce((sum, item) => sum + item.points, 0);
+  const selectedAutoSubOutIds = new Set(selectedAutoSubstitutions.map((item) => item.outPlayerId));
+  const selectedAutoSubInByPlayer = new Map(selectedAutoSubstitutions.map((item) => [item.inPlayerId, item]));
+
   const teamPointsByGameweek = new Map<number, number>();
   for (const snapshot of team.lineupSnapshots) {
     teamPointsByGameweek.set(
       snapshot.gameweek,
-      scoreEntries(snapshot.entries as ScoringEntry[], pointsByGameweek.get(snapshot.gameweek) ?? new Map()),
+      scoreEntries(
+        snapshot.entries as ScoringEntry[],
+        pointsByGameweek.get(snapshot.gameweek) ?? new Map(),
+        autoSubPointsByTeamGameweek.get(`${team.id}:${snapshot.gameweek}`) ?? 0,
+      ),
     );
   }
 
@@ -312,12 +352,17 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
         const gameweekPoints = scoreEntries(
           snapshot.entries as ScoringEntry[],
           pointsByGameweek.get(gameweek.number) ?? new Map(),
+          autoSubPointsByTeamGameweek.get(`${rankedTeam.id}:${gameweek.number}`) ?? 0,
         );
         const cumulativePoints = rankedTeam.lineupSnapshots
           .filter((item) => item.gameweek <= gameweek.number)
           .reduce(
             (sum, item) =>
-              sum + scoreEntries(item.entries as ScoringEntry[], pointsByGameweek.get(item.gameweek) ?? new Map()),
+              sum + scoreEntries(
+                item.entries as ScoringEntry[],
+                pointsByGameweek.get(item.gameweek) ?? new Map(),
+                autoSubPointsByTeamGameweek.get(`${rankedTeam.id}:${item.gameweek}`) ?? 0,
+              ),
             0,
           );
         return { id: rankedTeam.id, name: rankedTeam.name, gameweekPoints, cumulativePoints };
@@ -339,6 +384,9 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
   const selectedPoints = pointsByGameweek.get(requestedGameweek) ?? new Map<string, number>();
   const selectedStatuses = statusesByGameweek.get(requestedGameweek) ?? new Map<string, PlayerGameweekStatus>();
   const selectedGwPoints = selectedSnapshot ? teamPointsByGameweek.get(requestedGameweek) ?? 0 : null;
+  const selectedStarterPoints = selectedSnapshot
+    ? scoreEntries(selectedSnapshot.entries as ScoringEntry[], selectedPoints, 0)
+    : null;
   const cumulativePoints = [...teamPointsByGameweek.entries()]
     .filter(([gameweek]) => gameweek <= requestedGameweek)
     .reduce((sum, [, points]) => sum + points, 0);
@@ -383,7 +431,11 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
       name: rankedTeam.name,
       points: rankedTeam.lineupSnapshots.reduce(
         (sum, item) =>
-          sum + scoreEntries(item.entries as ScoringEntry[], pointsByGameweek.get(item.gameweek) ?? new Map()),
+          sum + scoreEntries(
+            item.entries as ScoringEntry[],
+            pointsByGameweek.get(item.gameweek) ?? new Map(),
+            autoSubPointsByTeamGameweek.get(`${rankedTeam.id}:${item.gameweek}`) ?? 0,
+          ),
         0,
       ),
     }))
@@ -410,7 +462,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
                         {Array.from({ length: row.slots }, (_, index) => {
                           const entry = rowPlayers[index];
                           return entry
-                            ? playerCard(entry, selectedPoints, selectedStatuses)
+                            ? playerCard(entry, selectedPoints, selectedStatuses, selectedAutoSubOutIds, selectedAutoSubInByPlayer)
                             : <div className="fantasy-shirt empty public-empty-slot" key={`${row.position}-${index}`} />;
                         })}
                       </div>
@@ -421,7 +473,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
                   {Array.from({ length: 4 }, (_, index) => {
                     const entry = bench[index];
                     return entry
-                      ? playerCard(entry, selectedPoints, selectedStatuses, positionLabels[entry.player.position], true)
+                      ? playerCard(entry, selectedPoints, selectedStatuses, selectedAutoSubOutIds, selectedAutoSubInByPlayer, positionLabels[entry.player.position], true)
                       : <div className="fantasy-shirt empty public-empty-slot" key={`bench-${index}`} />;
                   })}
                 </div>
@@ -491,6 +543,33 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
                 </>
               )}
             </div>
+            {!isOverall && selectedSnapshot ? (
+              <div className="autosub-result-row">
+                <div className="autosub-result-values">
+                  <span>Старт: <strong>{selectedStarterPoints}</strong></span>
+                  <span>Автозаміни: <strong>+{selectedAutoSubPoints}</strong></span>
+                  <span>Разом: <strong>{selectedGwPoints}</strong></span>
+                </div>
+                <div className="autosub-result-info">
+                  <AutosubRulesPopover />
+                  {selectedAutoSubstitutions.length > 0 ? (
+                    <ul className="autosub-result-list">
+                      {selectedAutoSubstitutions.map((item) => (
+                        <li key={`${item.outPlayerId}-${item.inPlayerId}`}>
+                          <span>{item.outPlayer.name} («Не грав»)</span>
+                          <strong>→</strong>
+                          <span>{item.inPlayer.name} (+{item.points} оч.)</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : allFixturesScored ? (
+                    <p>Автозамін не було</p>
+                  ) : (
+                    <p>Очки з автозамін будуть додані по завершенню GW{requestedGameweek}</p>
+                  )}
+                </div>
+              </div>
+            ) : null}
           </aside>
 
           <section className="panel public-team-history">

@@ -205,6 +205,8 @@ model Player {
   rosterEntries RosterEntry[]
   lineupSnapshotEntries LineupSnapshotEntry[]
   matchPoints   MatchPlayerPoint[]
+  autoSubOut     AutoSubstitution[] @relation("AutoSubOutPlayer")
+  autoSubIn      AutoSubstitution[] @relation("AutoSubInPlayer")
 
   @@index([position])
   @@index([nationalTeamId])
@@ -228,6 +230,7 @@ model FantasyTeam {
   leagueMembers LeagueMember[]
   matchPoints    MatchPlayerPoint[]
   leaderboardRows LeaderboardRow[]
+  autoSubstitutions AutoSubstitution[]
 }
 
 model RosterEntry {
@@ -290,6 +293,31 @@ model LineupSnapshotEntry {
 
   @@unique([snapshotId, playerId])
   @@index([playerId])
+}
+
+model AutoSubstitution {
+  id            String   @id @default(cuid())
+  fantasyTeamId String
+  gameweek      Int
+  outPlayerId   String
+  inPlayerId    String
+  points        Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+  outPlayer   Player      @relation("AutoSubOutPlayer", fields: [outPlayerId], references: [id], onDelete: Cascade)
+  inPlayer    Player      @relation("AutoSubInPlayer", fields: [inPlayerId], references: [id], onDelete: Cascade)
+
+  @@unique([fantasyTeamId, gameweek, outPlayerId])
+  @@index([gameweek])
+  @@index([inPlayerId])
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model TeamNameHistory {

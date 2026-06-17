@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { playoffMatches } from "../../data/match-center";
 import { requireAdmin } from "../../lib/admin";
+import { applyAutoSubstitutions, resetAutoSubstitutions } from "../../lib/auto-substitutions";
 import { closeGameweekTransfers, createGameweekSnapshots, openGameweekTransfers } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
 import { refreshLeaderboards } from "../../lib/rankings";
@@ -585,4 +586,47 @@ export async function closeGameweekTransfersAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/squad");
   redirect(`/admin?closedGw=${gameweek}#gameweeks`);
+}
+
+export async function calculateAutoSubstitutionsAction(formData: FormData) {
+  await requireAdmin();
+  const gameweek = Number(formData.get("gameweek") ?? 0);
+  if (!gameweek) redirect("/admin?error=gameweek#autosubs");
+
+  const result = await applyAutoSubstitutions(gameweek);
+
+  revalidatePath("/admin");
+  revalidatePath("/leaderboard");
+  revalidatePath("/leagues");
+  revalidatePath("/teams/[id]", "page");
+  redirect(`/admin?autosubsGw=${gameweek}&autosubs=${result.created}#autosubs`);
+}
+
+export async function resetAutoSubstitutionsAction(formData: FormData) {
+  await requireAdmin();
+  const gameweek = Number(formData.get("gameweek") ?? 0);
+  if (!gameweek) redirect("/admin?error=gameweek#autosubs");
+
+  const result = await resetAutoSubstitutions(gameweek);
+
+  revalidatePath("/admin");
+  revalidatePath("/leaderboard");
+  revalidatePath("/leagues");
+  revalidatePath("/teams/[id]", "page");
+  redirect(`/admin?autosubsResetGw=${gameweek}&autosubsReset=${result.deleted}#autosubs`);
+}
+
+export async function setMaintenanceModeAction(formData: FormData) {
+  await requireAdmin();
+  const enabled = String(formData.get("enabled") ?? "") === "1";
+
+  await prisma.systemSetting.upsert({
+    where: { key: "maintenanceMode" },
+    create: { key: "maintenanceMode", value: enabled ? "on" : "off" },
+    update: { value: enabled ? "on" : "off" },
+  });
+
+  revalidatePath("/", "layout");
+  revalidatePath("/admin");
+  redirect(`/admin?maintenance=${enabled ? "on" : "off"}#maintenance`);
 }
