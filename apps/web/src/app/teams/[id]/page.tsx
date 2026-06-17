@@ -555,12 +555,12 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
                 </>
               )}
             </div>
-            {!isOverall && selectedSnapshot ? (
+            {!isOverall ? (
               <div className="autosub-result-row">
                 <div className="autosub-result-values">
-                  <span>Старт: <strong>{selectedStarterPoints}</strong></span>
+                  <span>Старт: <strong>{selectedStarterPoints ?? "—"}</strong></span>
                   <span>Автозаміни: <strong>+{selectedAutoSubPoints}</strong></span>
-                  <span>Разом: <strong>{selectedGwPoints}</strong></span>
+                  <span>Разом: <strong>{selectedGwPoints ?? "—"}</strong></span>
                 </div>
                 <div className="autosub-result-info">
                   <AutosubRulesPopover />
