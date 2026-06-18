@@ -55,11 +55,12 @@ function buildFallbackRows(members: Array<{ fantasyTeam: RankingRow["fantasyTeam
 function scoreSnapshot(
   entries: Array<{ playerId: string; slot: "STARTER" | "BENCH"; isCaptain: boolean }>,
   playerPoints: Map<string, number>,
+  autoSubPoints = 0,
 ) {
   const starters = entries.filter((entry) => entry.slot === "STARTER");
   const basePoints = starters.reduce((sum, entry) => sum + (playerPoints.get(entry.playerId) ?? 0), 0);
   const captain = starters.find((entry) => entry.isCaptain);
-  return basePoints + (captain ? playerPoints.get(captain.playerId) ?? 0 : 0);
+  return basePoints + (captain ? playerPoints.get(captain.playerId) ?? 0 : 0) + autoSubPoints;
 }
 
 export async function generateMetadata({ params }: LeaguePageProps): Promise<Metadata> {
@@ -124,7 +125,7 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
     select: { gameweek: true },
   });
   const leaderGameweek = latestScoredFixture?.gameweek ?? 1;
-  const [leaderFixtures, memberSnapshots] = await Promise.all([
+  const [leaderFixtures, memberSnapshots, autoSubstitutions] = await Promise.all([
     prisma.fixture.findMany({
       where: { gameweek: leaderGameweek },
       select: {
@@ -148,6 +149,13 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
         },
       },
     }),
+    prisma.autoSubstitution.findMany({
+      where: {
+        gameweek: leaderGameweek,
+        fantasyTeam: { leagueMembers: { some: { leagueId: league.id } } },
+      },
+      select: { fantasyTeamId: true, points: true },
+    }),
   ]);
 
   const playerPoints = new Map<string, number>();
@@ -156,12 +164,19 @@ export default async function LeaguePage({ params, searchParams }: LeaguePagePro
       playerPoints.set(point.playerId, (playerPoints.get(point.playerId) ?? 0) + point.points);
     }
   }
+  const autoSubPointsByTeam = new Map<string, number>();
+  for (const autoSubstitution of autoSubstitutions) {
+    autoSubPointsByTeam.set(
+      autoSubstitution.fantasyTeamId,
+      (autoSubPointsByTeam.get(autoSubstitution.fantasyTeamId) ?? 0) + autoSubstitution.points,
+    );
+  }
 
   const gameweekLeaders = memberSnapshots
     .map((snapshot) => ({
       id: snapshot.fantasyTeam.id,
       name: snapshot.fantasyTeam.name,
-      points: scoreSnapshot(snapshot.entries, playerPoints),
+      points: scoreSnapshot(snapshot.entries, playerPoints, autoSubPointsByTeam.get(snapshot.fantasyTeam.id) ?? 0),
     }))
     .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, "uk"));
   const bestTeam = gameweekLeaders[0] && gameweekLeaders[0].points > 0 ? gameweekLeaders[0] : null;
