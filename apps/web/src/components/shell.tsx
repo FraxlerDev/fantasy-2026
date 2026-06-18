@@ -1,5 +1,6 @@
 import { Sidebar } from "./sidebar";
 import { FloatingChat } from "./floating-chat";
+import { AdminTeamPresence } from "./admin-team-presence";
 import { auth } from "../auth";
 import { prisma } from "../lib/prisma";
 
@@ -37,6 +38,7 @@ export async function AppShell({
       <Sidebar active={active} />
       <main className="main">{children}</main>
       <FloatingChat />
+      {isAdmin ? <AdminTeamPresence /> : null}
     </div>
   );
 }

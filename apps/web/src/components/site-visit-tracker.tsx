@@ -87,7 +87,7 @@ export function SiteVisitTracker() {
 
     const heartbeat = window.setInterval(() => {
       updateVisit();
-    }, 15000);
+    }, 10000);
 
     const finish = () => {
       updateVisit(true);
