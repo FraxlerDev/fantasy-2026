@@ -1524,6 +1524,16 @@ h3 {
   white-space: nowrap;
 }
 
+.player-ranking-gameweek-column {
+  width: 64px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.player-gameweek-mobile {
+  display: none;
+}
+
 .section-heading-row {
   display: flex;
   align-items: center;
@@ -8614,6 +8624,10 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
     text-align: right;
   }
 
+  .player-ranking-table .player-ranking-gameweek-column {
+    display: none;
+  }
+
   .player-ranking-position .position-full {
     display: none;
   }
@@ -8651,6 +8665,26 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
     color: var(--muted);
     font-size: 9px;
     font-weight: 500;
+  }
+
+  .player-gameweek-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 500;
+    line-height: 1.15;
+  }
+
+  .player-gameweek-mobile span {
+    white-space: nowrap;
+  }
+
+  .player-gameweek-mobile strong {
+    color: var(--ink);
+    font-size: inherit;
   }
 
   .league-ranking-table {

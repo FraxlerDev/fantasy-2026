@@ -15,14 +15,16 @@ export function PlayerRankingTable({
   emptyText,
   showPosition = false,
   showPrice = false,
+  activeGameweeks = [],
 }: {
   players: RankedPlayer[];
   valueLabel: string;
   emptyText: string;
   showPosition?: boolean;
   showPrice?: boolean;
+  activeGameweeks?: number[];
 }) {
-  const columnCount = 4 + Number(showPosition) + Number(showPrice);
+  const columnCount = 4 + Number(showPosition) + Number(showPrice) + activeGameweeks.length;
   const tableClasses = [
     "table compact-table player-ranking-table",
     showPosition ? "has-position" : "",
@@ -39,6 +41,9 @@ export function PlayerRankingTable({
             {showPosition ? <th>Позиція</th> : null}
             <th>Збірна</th>
             {showPrice ? <th>Ціна</th> : null}
+            {activeGameweeks.map((gameweek) => (
+              <th className="player-ranking-gameweek-column" key={gameweek}>GW{gameweek}</th>
+            ))}
             <th>{valueLabel}</th>
           </tr>
         </thead>
@@ -61,6 +66,13 @@ export function PlayerRankingTable({
                   <span className="player-ranking-name">
                     <strong>{player.name}</strong>
                     <small>{player.nationalTeam.nameUk}</small>
+                    {activeGameweeks.length > 0 ? (
+                      <span className="player-gameweek-mobile">
+                        {activeGameweeks.map((gameweek) => (
+                          <span key={gameweek}>GW{gameweek}: <strong>{player.pointsByGameweek[gameweek] ?? 0}</strong></span>
+                        ))}
+                      </span>
+                    ) : null}
                   </span>
                 </span>
               </td>
@@ -77,6 +89,11 @@ export function PlayerRankingTable({
                 </span>
               </td>
               {showPrice ? <td className="player-ranking-price">{player.price.toFixed(1)}</td> : null}
+              {activeGameweeks.map((gameweek) => (
+                <td className="player-ranking-gameweek-column" key={gameweek}>
+                  <strong>{player.pointsByGameweek[gameweek] ?? 0}</strong>
+                </td>
+              ))}
               <td><strong>{player.value}</strong></td>
             </tr>
           ))}

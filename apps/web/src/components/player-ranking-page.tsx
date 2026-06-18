@@ -34,6 +34,11 @@ export function PlayerRankingPage({
     return matchesQuery && matchesPosition && matchesNation;
   });
   const isPopularity = mode === "popularity";
+  const activeGameweeks = isPopularity
+    ? []
+    : [...new Set(players.flatMap((player) => Object.keys(player.pointsByGameweek).map(Number)))]
+        .filter((gameweek) => gameweek >= 1 && gameweek <= 7)
+        .sort((a, b) => a - b);
 
   return (
     <AppShell active="/tournament">
@@ -75,6 +80,7 @@ export function PlayerRankingPage({
             valueLabel={isPopularity ? "Виборів" : "Очки"}
             showPosition
             showPrice={!isPopularity}
+            activeGameweeks={activeGameweeks}
             emptyText="За вибраними фільтрами гравців не знайдено."
           />
         </section>
