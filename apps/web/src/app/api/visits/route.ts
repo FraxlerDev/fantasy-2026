@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "../../../auth";
 import { prisma } from "../../../lib/prisma";
 import { isBotUserAgent } from "../../../lib/visit-analytics";
 
@@ -110,8 +111,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ visitId: null, ignored: true }, { status: 202 });
     }
 
+    const session = await auth();
+    const userId = session?.user?.id ?? null;
+
     const visit = await siteVisit.create({
       data: {
+        userId,
         visitorKey: visitorKey.slice(0, 80),
         site: request.headers.get("host") ?? "fantasy.fraxler.site",
         path: safePath(payload.path),

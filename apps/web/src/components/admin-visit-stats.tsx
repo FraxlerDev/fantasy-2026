@@ -5,6 +5,9 @@ import { FilterX } from "lucide-react";
 
 export type AdminRawVisit = {
   id: string;
+  teamName: string | null;
+  managerName: string | null;
+  email: string | null;
   visitorKey: string;
   site: string;
   ip: string | null;
@@ -35,6 +38,9 @@ type VisitPage = {
 
 export type AdminVisitRow = {
   key: string;
+  teamName: string | null;
+  managerName: string | null;
+  email: string | null;
   visitorKey: string;
   site: string;
   ip: string | null;
@@ -154,6 +160,9 @@ function aggregateVisits(visits: AdminRawVisit[]) {
     if (!existing) {
       groups.set(key, {
         key,
+        teamName: visit.teamName,
+        managerName: visit.managerName,
+        email: visit.email,
         visitorKey: visit.visitorKey,
         site: visit.site,
         ip: visit.ip,
@@ -181,6 +190,9 @@ function aggregateVisits(visits: AdminRawVisit[]) {
       existing.pageTitle = visit.pageTitle;
       existing.referrer = visit.referrer;
       existing.countryCity = visit.countryCity ?? existing.countryCity;
+      existing.teamName = visit.teamName ?? existing.teamName;
+      existing.managerName = visit.managerName ?? existing.managerName;
+      existing.email = visit.email ?? existing.email;
     }
   });
 
@@ -493,6 +505,9 @@ export function AdminVisitStats({ visits, registrations, teamsCreated }: Props) 
                 <th>Час входу</th>
                 <th>Статус</th>
                 <th>IP</th>
+                <th>Команда</th>
+                <th>Менеджер</th>
+                <th>Email</th>
                 <th>Країна / місто</th>
                 <th>Пристрій</th>
                 <th>Браузер / ОС</th>
@@ -518,6 +533,9 @@ export function AdminVisitStats({ visits, registrations, teamsCreated }: Props) 
                       </span>
                     </td>
                     <td>{visit.ip ?? "-"}</td>
+                    <td>{visit.teamName ?? "-"}</td>
+                    <td>{visit.managerName ?? "-"}</td>
+                    <td>{visit.email ?? "-"}</td>
                     <td>{visit.countryCity ?? "-"}</td>
                     <td>{visit.device ?? "-"}</td>
                     <td>{visit.browserOs ?? "-"}</td>
@@ -539,6 +557,12 @@ export function AdminVisitStats({ visits, registrations, teamsCreated }: Props) 
             <>
               <div className="visit-detail-heading">
                 <span className="badge">{selectedVisit.ip ?? "Без IP"}</span>
+                {selectedVisit.teamName ? <h3>{selectedVisit.teamName}</h3> : null}
+                {selectedVisit.managerName || selectedVisit.email ? (
+                  <p className="muted">
+                    {[selectedVisit.managerName, selectedVisit.email].filter(Boolean).join(" · ")}
+                  </p>
+                ) : null}
                 <h3>{selectedVisit.countryCity ?? "Країна / місто не передані"}</h3>
                 <p className="muted">
                   {selectedVisit.visitCount} візитів · {formatDuration(selectedVisit.durationSeconds)}

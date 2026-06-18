@@ -86,6 +86,7 @@ model User {
   forumPollVotes ForumPollVote[]
   leagueChatMessages LeagueChatMessage[]
   leagueChatReads LeagueChatRead[]
+  siteVisits SiteVisit[]
 }
 
 model Account {
@@ -634,6 +635,7 @@ model Notification {
 
 model SiteVisit {
   id              String   @id @default(cuid())
+  userId          String?
   visitorKey      String
   site            String
   path            String
@@ -647,6 +649,9 @@ model SiteVisit {
   startedAt       DateTime @default(now())
   lastSeenAt      DateTime @default(now())
 
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
   @@index([visitorKey])
   @@index([startedAt])
   @@index([lastSeenAt])

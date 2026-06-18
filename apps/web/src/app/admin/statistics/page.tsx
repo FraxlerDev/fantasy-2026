@@ -22,6 +22,11 @@ export const metadata: Metadata = createMetadata({
 
 type SiteVisitRow = {
   id: string;
+  user: {
+    email: string | null;
+    username: string | null;
+    fantasyTeam: { name: string } | null;
+  } | null;
   visitorKey: string;
   site: string;
   path: string;
@@ -76,7 +81,18 @@ export default async function AdminStatisticsPage() {
 
   const siteVisit = (prisma as unknown as { siteVisit?: any }).siteVisit;
   const [visits, users, teams] = await Promise.all([
-    siteVisit?.findMany({ orderBy: { startedAt: "desc" } }).catch(() => []) ?? Promise.resolve([]),
+    siteVisit?.findMany({
+      include: {
+        user: {
+          select: {
+            email: true,
+            username: true,
+            fantasyTeam: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { startedAt: "desc" },
+    }).catch(() => []) ?? Promise.resolve([]),
     prisma.user.findMany({ select: { createdAt: true }, orderBy: { createdAt: "asc" } }),
     prisma.fantasyTeam.findMany({ select: { createdAt: true }, orderBy: { createdAt: "asc" } }),
   ]);
@@ -85,6 +101,9 @@ export default async function AdminStatisticsPage() {
     .filter((visit) => !isBotUserAgent(visit.userAgent))
     .map((visit) => ({
       id: visit.id,
+      teamName: visit.user?.fantasyTeam?.name ?? null,
+      managerName: visit.user?.username ?? null,
+      email: visit.user?.email ?? null,
       visitorKey: visit.visitorKey,
       site: visit.site,
       ip: visit.ip,
