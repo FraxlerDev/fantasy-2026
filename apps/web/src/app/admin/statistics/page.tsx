@@ -25,7 +25,7 @@ type SiteVisitRow = {
   user: {
     email: string | null;
     username: string | null;
-    fantasyTeam: { name: string } | null;
+    fantasyTeam: { id: string; name: string } | null;
   } | null;
   visitorKey: string;
   site: string;
@@ -87,7 +87,7 @@ export default async function AdminStatisticsPage() {
           select: {
             email: true,
             username: true,
-            fantasyTeam: { select: { name: true } },
+            fantasyTeam: { select: { id: true, name: true } },
           },
         },
       },
@@ -101,6 +101,7 @@ export default async function AdminStatisticsPage() {
     .filter((visit) => !isBotUserAgent(visit.userAgent))
     .map((visit) => ({
       id: visit.id,
+      teamId: visit.user?.fantasyTeam?.id ?? null,
       teamName: visit.user?.fantasyTeam?.name ?? null,
       managerName: visit.user?.username ?? null,
       email: visit.user?.email ?? null,

@@ -5,6 +5,7 @@ import { FilterX } from "lucide-react";
 
 export type AdminRawVisit = {
   id: string;
+  teamId: string | null;
   teamName: string | null;
   managerName: string | null;
   email: string | null;
@@ -38,6 +39,7 @@ type VisitPage = {
 
 export type AdminVisitRow = {
   key: string;
+  teamId: string | null;
   teamName: string | null;
   managerName: string | null;
   email: string | null;
@@ -160,6 +162,7 @@ function aggregateVisits(visits: AdminRawVisit[]) {
     if (!existing) {
       groups.set(key, {
         key,
+        teamId: visit.teamId,
         teamName: visit.teamName,
         managerName: visit.managerName,
         email: visit.email,
@@ -190,6 +193,7 @@ function aggregateVisits(visits: AdminRawVisit[]) {
       existing.pageTitle = visit.pageTitle;
       existing.referrer = visit.referrer;
       existing.countryCity = visit.countryCity ?? existing.countryCity;
+      existing.teamId = visit.teamId ?? existing.teamId;
       existing.teamName = visit.teamName ?? existing.teamName;
       existing.managerName = visit.managerName ?? existing.managerName;
       existing.email = visit.email ?? existing.email;
@@ -507,7 +511,6 @@ export function AdminVisitStats({ visits, registrations, teamsCreated }: Props) 
                 <th>IP</th>
                 <th>Команда</th>
                 <th>Менеджер</th>
-                <th>Email</th>
                 <th>Країна / місто</th>
                 <th>Пристрій</th>
                 <th>Браузер / ОС</th>
@@ -535,7 +538,6 @@ export function AdminVisitStats({ visits, registrations, teamsCreated }: Props) 
                     <td>{visit.ip ?? "-"}</td>
                     <td>{visit.teamName ?? "-"}</td>
                     <td>{visit.managerName ?? "-"}</td>
-                    <td>{visit.email ?? "-"}</td>
                     <td>{visit.countryCity ?? "-"}</td>
                     <td>{visit.device ?? "-"}</td>
                     <td>{visit.browserOs ?? "-"}</td>
@@ -557,7 +559,15 @@ export function AdminVisitStats({ visits, registrations, teamsCreated }: Props) 
             <>
               <div className="visit-detail-heading">
                 <span className="badge">{selectedVisit.ip ?? "Без IP"}</span>
-                {selectedVisit.teamName ? <h3>{selectedVisit.teamName}</h3> : null}
+                {selectedVisit.teamName ? (
+                  <h3>
+                    {selectedVisit.teamId ? (
+                      <a href={`/teams/${selectedVisit.teamId}`} target="_blank" rel="noreferrer">
+                        {selectedVisit.teamName}
+                      </a>
+                    ) : selectedVisit.teamName}
+                  </h3>
+                ) : null}
                 {selectedVisit.managerName || selectedVisit.email ? (
                   <p className="muted">
                     {[selectedVisit.managerName, selectedVisit.email].filter(Boolean).join(" · ")}
