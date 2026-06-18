@@ -69,7 +69,7 @@ export function PlayerRankingTable({
                     {activeGameweeks.length > 0 ? (
                       <span className="player-gameweek-mobile">
                         {activeGameweeks.map((gameweek) => (
-                          <span key={gameweek}>GW{gameweek}: <strong>{player.pointsByGameweek[gameweek] ?? 0}</strong></span>
+                          <span key={gameweek}>GW{gameweek}: <strong>{player.pointsByGameweek[gameweek] ?? "—"}</strong></span>
                         ))}
                       </span>
                     ) : null}
@@ -91,7 +91,7 @@ export function PlayerRankingTable({
               {showPrice ? <td className="player-ranking-price">{player.price.toFixed(1)}</td> : null}
               {activeGameweeks.map((gameweek) => (
                 <td className="player-ranking-gameweek-column" key={gameweek}>
-                  <strong>{player.pointsByGameweek[gameweek] ?? 0}</strong>
+                  <strong>{player.pointsByGameweek[gameweek] ?? "—"}</strong>
                 </td>
               ))}
               <td><strong>{player.value}</strong></td>
