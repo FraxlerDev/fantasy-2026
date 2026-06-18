@@ -275,7 +275,6 @@ export default async function LeaderboardPage({
         <div>
           <p className="eyebrow">Глобальний рейтинг</p>
           <h1>Таблиця сезону</h1>
-          <p className="muted">У рейтингу показуються команди зі збереженим складом. За однакової кількості очок вище розташовується команда, назва якої йде першою за алфавітом.</p>
         </div>
       </div>
 
@@ -312,7 +311,12 @@ export default async function LeaderboardPage({
           <thead>
             <tr>
               <th className="leaderboard-rank-column">№</th>
-              {isOverall && selectedGameweek > 1 ? <th className="leaderboard-change-column">Зміна</th> : null}
+              {isOverall && selectedGameweek > 1 ? (
+                <th className="leaderboard-change-column">
+                  Зміна
+                  <small>від попер. GW</small>
+                </th>
+              ) : null}
               <th className="leaderboard-team-column">Команда</th>
               <th className="leaderboard-manager-column">Менеджер</th>
               {isOverall ? Array.from({ length: 7 }, (_, index) => index + 1).map((gameweek) => (
