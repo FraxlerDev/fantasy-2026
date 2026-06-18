@@ -9449,6 +9449,13 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .leaderboard-table thead th {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 10px;
+    line-height: 1.05;
+  }
+
   .leaderboard-table .leaderboard-round-column {
     display: none;
   }
