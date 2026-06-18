@@ -37,7 +37,10 @@ type RankedTeam = {
   manager: string;
   image: string | null;
   points: number;
-  rank: number;
+  gameweekPoints: number | null;
+  totalPoints: number;
+  roundPoints: Array<number | null>;
+  rank: number | null;
   previousRank?: number;
 };
 
@@ -127,11 +130,10 @@ export default async function LeaderboardPage({
 }) {
   const [session, params] = await Promise.all([auth(), searchParams]);
   const activeTab = params?.tab === "gw" ? "gw" : "overall";
-  const selectedGameweek = Math.min(7, Math.max(1, Number(params?.gw ?? 1) || 1));
   const page = Math.max(1, Number(params?.page ?? 1) || 1);
   const query = String(params?.q ?? "").trim();
 
-  const [teams, fixtures, autoSubstitutions] = await Promise.all([
+  const [teams, fixtures, autoSubstitutions, rankingGameweekSetting] = await Promise.all([
     prisma.fantasyTeam.findMany({
       where: { rosterEntries: { some: {} } },
       select: {
@@ -149,27 +151,31 @@ export default async function LeaderboardPage({
         },
       },
     }),
-    activeTab === "gw"
-      ? prisma.fixture.findMany({
-          where: { gameweek: { in: selectedGameweek > 1 ? [selectedGameweek - 1, selectedGameweek] : [1] } },
-          select: {
-            gameweek: true,
-            playerPoints: { select: { playerId: true, points: true } },
-          },
-        })
-      : Promise.resolve([]),
-    activeTab === "gw"
-      ? prisma.autoSubstitution.findMany({
-          where: { gameweek: { in: selectedGameweek > 1 ? [selectedGameweek - 1, selectedGameweek] : [1] } },
-          select: { fantasyTeamId: true, gameweek: true, points: true },
-        })
-      : Promise.resolve([]),
+    prisma.fixture.findMany({
+      select: {
+        gameweek: true,
+        playerPoints: { select: { playerId: true, points: true, updatedAt: true } },
+      },
+    }),
+    prisma.autoSubstitution.findMany({
+      select: { fantasyTeamId: true, gameweek: true, points: true, updatedAt: true },
+    }),
+    prisma.systemSetting.findUnique({ where: { key: "rankingsCurrentGameweek" } }),
   ]);
 
+  const rankingGameweek = Math.min(7, Math.max(1, Number(rankingGameweekSetting?.value ?? 1) || 1));
+  const rankingUpdatedAt = rankingGameweekSetting?.updatedAt ?? null;
+  const selectedGameweek = activeTab === "gw"
+    ? Math.min(7, Math.max(1, Number(params?.gw ?? rankingGameweek) || rankingGameweek))
+    : rankingGameweek;
+
   const pointsByGameweek = new Map<number, Map<string, number>>();
+  const scoredGameweeks = new Set<number>();
   for (const fixture of fixtures) {
     const gameweekPoints = pointsByGameweek.get(fixture.gameweek) ?? new Map<string, number>();
     for (const point of fixture.playerPoints) {
+      if (rankingUpdatedAt && point.updatedAt > rankingUpdatedAt) continue;
+      scoredGameweeks.add(fixture.gameweek);
       gameweekPoints.set(point.playerId, (gameweekPoints.get(point.playerId) ?? 0) + point.points);
     }
     pointsByGameweek.set(fixture.gameweek, gameweekPoints);
@@ -177,54 +183,60 @@ export default async function LeaderboardPage({
 
   const autoSubPointsByTeamGameweek = new Map<string, number>();
   for (const autoSubstitution of autoSubstitutions) {
+    if (rankingUpdatedAt && autoSubstitution.updatedAt > rankingUpdatedAt) continue;
+    scoredGameweeks.add(autoSubstitution.gameweek);
     const key = `${autoSubstitution.fantasyTeamId}:${autoSubstitution.gameweek}`;
     autoSubPointsByTeamGameweek.set(key, (autoSubPointsByTeamGameweek.get(key) ?? 0) + autoSubstitution.points);
   }
 
-  const rawRows = teams.map((team) => {
-    const snapshot = team.lineupSnapshots.find((item) => item.gameweek === selectedGameweek);
-    const points =
-      activeTab === "overall"
-        ? team.totalPoints
-        : snapshot
-          ? scoreEntries(
-              snapshot.entries as ScoringEntry[],
-              pointsByGameweek.get(selectedGameweek) ?? new Map(),
-              autoSubPointsByTeamGameweek.get(`${team.id}:${selectedGameweek}`) ?? 0,
-            )
-          : 0;
+  const gameweekPointsForTeam = (team: typeof teams[number], gameweek: number): number | null => {
+    const snapshot = team.lineupSnapshots.find((item) => item.gameweek === gameweek);
+    if (!snapshot || !scoredGameweeks.has(gameweek)) return null;
+    return scoreEntries(
+      snapshot.entries as ScoringEntry[],
+      pointsByGameweek.get(gameweek) ?? new Map(),
+      autoSubPointsByTeamGameweek.get(`${team.id}:${gameweek}`) ?? 0,
+    );
+  };
 
+  const cumulativePointsForTeam = (team: typeof teams[number], throughGameweek: number) =>
+    Array.from({ length: throughGameweek }, (_, index) => index + 1)
+      .reduce((sum, gameweek) => sum + (gameweekPointsForTeam(team, gameweek) ?? 0), 0);
+
+  const rawRows = teams.map((team) => {
+    const roundPoints = Array.from({ length: 7 }, (_, index) => gameweekPointsForTeam(team, index + 1));
+    const gameweekPoints = gameweekPointsForTeam(team, selectedGameweek);
+    const totalPoints = cumulativePointsForTeam(team, selectedGameweek);
     return {
       id: team.id,
       userId: team.userId,
       name: team.name,
       manager: team.user.username?.trim() || "Користувач",
       image: team.user.image,
-      points,
+      points: activeTab === "overall" ? totalPoints : gameweekPoints ?? Number.NEGATIVE_INFINITY,
+      gameweekPoints,
+      totalPoints,
+      roundPoints,
       createdAt: team.createdAt,
     };
   });
 
-  const rankedRows = assignRanks(
-    rawRows.sort(compareRankedTeams),
-  );
+  const sortedRows = rawRows.sort(compareRankedTeams);
+  let rankedPosition = 0;
+  const rankedRows = sortedRows.map((row) => ({
+    ...row,
+    rank: activeTab === "gw" && row.gameweekPoints === null ? null : ++rankedPosition,
+  }));
   let previousRankByTeam = new Map<string, number>();
 
-  if (activeTab === "gw" && selectedGameweek > 1) {
-    const previousRows = teams.map((team) => {
-      const snapshot = team.lineupSnapshots.find((item) => item.gameweek === selectedGameweek - 1);
-      return {
+  if (selectedGameweek > 1) {
+    const previousRows = teams
+      .filter((team) => team.lineupSnapshots.some((snapshot) => snapshot.gameweek <= selectedGameweek - 1))
+      .map((team) => ({
         id: team.id,
         name: team.name,
-        points: snapshot
-          ? scoreEntries(
-              snapshot.entries as ScoringEntry[],
-              pointsByGameweek.get(selectedGameweek - 1) ?? new Map(),
-              autoSubPointsByTeamGameweek.get(`${team.id}:${selectedGameweek - 1}`) ?? 0,
-            )
-          : 0,
-      };
-    });
+        points: cumulativePointsForTeam(team, selectedGameweek - 1),
+      }));
     previousRankByTeam = new Map(
       assignRanks(previousRows.sort(compareRankedTeams))
         .map((row) => [row.id, row.rank]),
@@ -238,6 +250,9 @@ export default async function LeaderboardPage({
     manager: row.manager,
     image: row.image,
     points: row.points,
+    gameweekPoints: row.gameweekPoints,
+    totalPoints: row.totalPoints,
+    roundPoints: row.roundPoints,
     rank: row.rank,
     previousRank: previousRankByTeam.get(row.id),
   }));
@@ -252,6 +267,7 @@ export default async function LeaderboardPage({
   const safePage = Math.min(page, totalPages);
   const visibleRows = filteredRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
   const pageItems = paginationItems(safePage, totalPages);
+  const isOverall = activeTab === "overall";
 
   return (
     <AppShell active="/leaderboard">
@@ -263,28 +279,20 @@ export default async function LeaderboardPage({
         </div>
       </div>
 
-      <nav className="section-tabs" aria-label="Режим рейтингу">
+      <nav className="gameweek-switcher leaderboard-tabs" aria-label="Оберіть рейтинг">
         <Link className={activeTab === "overall" ? "active" : ""} href={leaderboardUrl({ tab: "overall", gw: selectedGameweek, query })}>
           Загалом
         </Link>
-        <Link className={activeTab === "gw" ? "active" : ""} href={leaderboardUrl({ tab: "gw", gw: selectedGameweek, query })}>
-          За тур
-        </Link>
+        {Array.from({ length: 7 }, (_, index) => index + 1).map((gameweek) => (
+          <Link
+            className={activeTab === "gw" && selectedGameweek === gameweek ? "active" : ""}
+            href={leaderboardUrl({ tab: "gw", gw: gameweek, query })}
+            key={gameweek}
+          >
+            GW{gameweek}
+          </Link>
+        ))}
       </nav>
-
-      {activeTab === "gw" ? (
-        <nav className="gameweek-switcher leaderboard-gameweeks" aria-label="Оберіть тур">
-          {Array.from({ length: 7 }, (_, index) => index + 1).map((gameweek) => (
-            <Link
-              className={selectedGameweek === gameweek ? "active" : ""}
-              href={leaderboardUrl({ tab: "gw", gw: gameweek, query })}
-              key={gameweek}
-            >
-              GW{gameweek}
-            </Link>
-          ))}
-        </nav>
-      ) : null}
 
       <section className="panel">
         <form className="form-inline" action="/leaderboard">
@@ -297,27 +305,46 @@ export default async function LeaderboardPage({
       </section>
 
       <section className="panel" style={{ marginTop: 16 }}>
+        {!isOverall && !scoredGameweeks.has(selectedGameweek) ? (
+          <p className="leaderboard-empty-round">Очки GW{selectedGameweek} ще не нараховувалися.</p>
+        ) : null}
         <table className="table leaderboard-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Команда</th>
-              <th>Менеджер</th>
-              {activeTab === "gw" ? <th>Зміна</th> : null}
-              <th>Очки{activeTab === "gw" ? ` GW${selectedGameweek}` : ""}</th>
+              <th className="leaderboard-rank-column">№</th>
+              {isOverall && selectedGameweek > 1 ? <th className="leaderboard-change-column">Зміна</th> : null}
+              <th className="leaderboard-team-column">Команда</th>
+              <th className="leaderboard-manager-column">Менеджер</th>
+              {isOverall ? Array.from({ length: 7 }, (_, index) => index + 1).map((gameweek) => (
+                <th
+                  className={`leaderboard-round-column ${gameweek === selectedGameweek ? "current-round" : ""}`}
+                  key={gameweek}
+                >
+                  GW{gameweek}
+                </th>
+              )) : <th className="leaderboard-gameweek-points-column">Очки GW{selectedGameweek}</th>}
+              {isOverall ? <th className="leaderboard-total-points-column">Очки загалом</th> : null}
             </tr>
           </thead>
           <tbody>
             {visibleRows.map((team) => {
               const isOwnTeam = team.userId === session?.user?.id;
               const rankChange =
-                selectedGameweek > 1 && team.previousRank
+                selectedGameweek > 1 && team.previousRank && team.rank !== null
                   ? team.previousRank - team.rank
                   : null;
               return (
                 <tr className={isOwnTeam ? "leaderboard-own-row" : ""} key={team.id}>
-                  <td>{team.rank}</td>
-                  <td>
+                  <td className="leaderboard-rank-column">{team.rank ?? "—"}</td>
+                  {isOverall && selectedGameweek > 1 ? (
+                    <td className="leaderboard-change-column">
+                      <span className={`rank-movement ${rankChange === null || rankChange === 0 ? "same" : rankChange > 0 ? "up" : "down"}`}>
+                        <i aria-hidden="true" />
+                        {rankChange !== null && rankChange !== 0 ? <strong>{Math.abs(rankChange)}</strong> : null}
+                      </span>
+                    </td>
+                  ) : null}
+                  <td className="leaderboard-team-column">
                     <span className="leaderboard-team-cell">
                       <span className="leaderboard-team-main">
                         <TeamLink id={team.id} name={team.name} image={team.image} />
@@ -326,18 +353,23 @@ export default async function LeaderboardPage({
                       {isOwnTeam ? <span className="badge own-team-badge">Ви</span> : null}
                     </span>
                   </td>
-                  <td>{team.manager}</td>
-                  {activeTab === "gw" ? (
-                    <td>
-                      {rankChange === null || rankChange === 0 ? "—" : rankChange > 0 ? `▲${rankChange}` : `▼${Math.abs(rankChange)}`}
+                  <td className="leaderboard-manager-column">{team.manager}</td>
+                  {isOverall ? team.roundPoints.map((points, index) => (
+                    <td
+                      className={`leaderboard-round-column ${index + 1 === selectedGameweek ? "current-round" : ""}`}
+                      key={index}
+                    >
+                      <strong>{points ?? "—"}</strong>
                     </td>
-                  ) : null}
-                  <td><strong>{team.points}</strong></td>
+                  )) : (
+                    <td className="leaderboard-gameweek-points-column"><strong>{team.gameweekPoints ?? "—"}</strong></td>
+                  )}
+                  {isOverall ? <td className="leaderboard-total-points-column"><strong>{team.totalPoints}</strong></td> : null}
                 </tr>
               );
             })}
             {visibleRows.length === 0 ? (
-              <tr><td colSpan={activeTab === "gw" ? 5 : 4}>Команд у рейтингу ще немає.</td></tr>
+              <tr><td colSpan={isOverall ? (selectedGameweek > 1 ? 12 : 11) : 4}>Команд у рейтингу ще немає.</td></tr>
             ) : null}
           </tbody>
         </table>

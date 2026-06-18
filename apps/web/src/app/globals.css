@@ -4770,6 +4770,24 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
   margin: 0 0 16px;
 }
 
+.leaderboard-tabs {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  margin: 0 0 16px;
+}
+
+.leaderboard-round-column {
+  width: 58px;
+  text-align: center;
+}
+
+.leaderboard-empty-round {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--green);
+  background: var(--surface-strong);
+  color: var(--muted);
+}
+
 .leaderboard-team-cell {
   display: inline-flex;
   align-items: center;
@@ -4788,6 +4806,59 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
 .leaderboard-own-row {
   background: #e9f7ed;
   box-shadow: inset 4px 0 0 var(--green);
+}
+
+.leaderboard-change-column {
+  width: 92px;
+  text-align: center;
+}
+
+.leaderboard-gameweek-points-column,
+.leaderboard-total-points-column {
+  width: 120px;
+  text-align: right;
+}
+
+.rank-movement {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 40px;
+  font-weight: 800;
+}
+
+.rank-movement i {
+  width: 0;
+  height: 0;
+  display: block;
+}
+
+.rank-movement.up {
+  color: #10a94f;
+}
+
+.rank-movement.up i {
+  border-right: 7px solid transparent;
+  border-bottom: 12px solid currentColor;
+  border-left: 7px solid transparent;
+}
+
+.rank-movement.down {
+  color: #f4144f;
+}
+
+.rank-movement.down i {
+  border-top: 12px solid currentColor;
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
+}
+
+.rank-movement.same i {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #92979b;
 }
 
 .own-team-badge {
@@ -8389,27 +8460,50 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
     padding: 8px 4px;
   }
 
-  .leaderboard-table th:first-child,
-  .leaderboard-table td:first-child {
+  .leaderboard-table .leaderboard-rank-column {
     width: 34px;
     text-align: center;
   }
 
-  .leaderboard-table th:nth-child(3),
-  .leaderboard-table td:nth-child(3) {
+  .leaderboard-table .leaderboard-manager-column {
     display: none;
   }
 
-  .leaderboard-table th:last-child,
-  .leaderboard-table td:last-child {
-    width: 54px;
+  .leaderboard-table .leaderboard-gameweek-points-column,
+  .leaderboard-table .leaderboard-total-points-column {
+    width: 48px;
     text-align: right;
   }
 
-  .leaderboard-table th:nth-last-child(2):not(:nth-child(2)),
-  .leaderboard-table td:nth-last-child(2):not(:nth-child(2)) {
-    width: 44px;
+  .leaderboard-table .leaderboard-change-column {
+    width: 40px;
     text-align: center;
+  }
+
+  .leaderboard-table .rank-movement {
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .leaderboard-table .rank-movement strong {
+    font-size: 11px;
+  }
+
+  .leaderboard-table .rank-movement.up i {
+    border-right-width: 5px;
+    border-bottom-width: 9px;
+    border-left-width: 5px;
+  }
+
+  .leaderboard-table .rank-movement.down i {
+    border-top-width: 9px;
+    border-right-width: 5px;
+    border-left-width: 5px;
+  }
+
+  .leaderboard-table .rank-movement.same i {
+    width: 10px;
+    height: 10px;
   }
 
   .leaderboard-team-cell {
@@ -9347,5 +9441,21 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
 
   .promo-team-count svg {
     flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .gameweek-switcher.leaderboard-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .leaderboard-table .leaderboard-round-column {
+    display: none;
+  }
+
+  .leaderboard-table .leaderboard-round-column.current-round {
+    width: 48px;
+    display: table-cell;
+    text-align: right;
   }
 }

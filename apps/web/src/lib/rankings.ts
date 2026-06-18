@@ -38,6 +38,11 @@ export async function refreshLeaderboards() {
     orderBy: [{ gameweek: "asc" }, { kickoffAt: "asc" }],
   });
 
+  const latestScoredGameweek = fixtures.reduce(
+    (latest, fixture) => fixture.playerPoints.length > 0 ? Math.max(latest, fixture.gameweek) : latest,
+    0,
+  );
+
   const gameweeks = [...new Set(fixtures.map((fixture) => fixture.gameweek))];
   const pointsByGameweek = new Map<number, Map<string, number>>();
   const autoSubstitutions = await prisma.autoSubstitution.findMany();
@@ -86,6 +91,14 @@ export async function refreshLeaderboards() {
   }
 
   await prisma.$transaction(async (tx) => {
+    if (latestScoredGameweek > 0) {
+      await tx.systemSetting.upsert({
+        where: { key: "rankingsCurrentGameweek" },
+        create: { key: "rankingsCurrentGameweek", value: String(latestScoredGameweek) },
+        update: { value: String(latestScoredGameweek) },
+      });
+    }
+
     for (const [teamId, totalPoints] of totals.entries()) {
       await tx.fantasyTeam.update({
         where: { id: teamId },
