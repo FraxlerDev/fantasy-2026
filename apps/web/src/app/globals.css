@@ -4785,6 +4785,19 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
   margin: 0 0 16px;
 }
 
+.league-ranking-tabs {
+  margin-top: 16px;
+}
+
+.league-ranking-search {
+  margin-bottom: 16px;
+}
+
+.league-owner-actions-column {
+  width: 92px;
+  text-align: right;
+}
+
 .leaderboard-round-column {
   width: 58px;
   text-align: center;
@@ -9581,5 +9594,37 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
   .leaderboard-page-ellipsis {
     min-width: 12px;
     font-size: 10px;
+  }
+
+  .league-ranking-table.leaderboard-table th.leaderboard-team-column,
+  .league-ranking-table.leaderboard-table td.leaderboard-team-column {
+    display: table-cell;
+    width: auto;
+    text-align: left;
+  }
+
+  .league-ranking-table.leaderboard-table th.leaderboard-manager-column,
+  .league-ranking-table.leaderboard-table td.leaderboard-manager-column {
+    display: none;
+  }
+
+  .league-ranking-table.leaderboard-table .leaderboard-team-link {
+    display: block;
+  }
+
+  .league-ranking-table.leaderboard-table .leaderboard-mobile-manager {
+    display: block;
+    margin-left: 0;
+  }
+
+  .league-ranking-table.leaderboard-table .league-owner-actions-column {
+    width: 62px;
+    text-align: right;
+  }
+
+  .league-ranking-table.leaderboard-table .league-owner-actions-column .button {
+    min-height: 28px;
+    padding-inline: 4px;
+    font-size: 9px;
   }
 }
