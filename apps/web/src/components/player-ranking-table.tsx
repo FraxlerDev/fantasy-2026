@@ -1,5 +1,6 @@
 import { UserRound } from "lucide-react";
 import type { PlayerPosition } from "@prisma/client";
+import Link from "next/link";
 import type { RankedPlayer } from "../lib/player-rankings";
 
 const positionLabels: Record<PlayerPosition, { full: string; short: string }> = {
@@ -16,6 +17,9 @@ export function PlayerRankingTable({
   showPosition = false,
   showPrice = false,
   activeGameweeks = [],
+  gameweekSortLinks = {},
+  sortGameweek = null,
+  sortDirection = null,
 }: {
   players: RankedPlayer[];
   valueLabel: string;
@@ -23,6 +27,9 @@ export function PlayerRankingTable({
   showPosition?: boolean;
   showPrice?: boolean;
   activeGameweeks?: number[];
+  gameweekSortLinks?: Record<number, string>;
+  sortGameweek?: number | null;
+  sortDirection?: "asc" | "desc" | null;
 }) {
   const columnCount = 4 + Number(showPosition) + Number(showPrice) + activeGameweeks.length;
   const tableClasses = [
@@ -42,15 +49,29 @@ export function PlayerRankingTable({
             <th>Збірна</th>
             {showPrice ? <th>Ціна</th> : null}
             {activeGameweeks.map((gameweek) => (
-              <th className="player-ranking-gameweek-column" key={gameweek}>GW{gameweek}</th>
+              <th className="player-ranking-gameweek-column" key={gameweek}>
+                {gameweekSortLinks[gameweek] ? (
+                  <Link
+                    aria-label={`Сортувати за очками GW${gameweek}`}
+                    className={`player-ranking-sort-link ${sortGameweek === gameweek ? "active" : ""}`}
+                    href={gameweekSortLinks[gameweek]}
+                  >
+                    GW{gameweek}
+                    <span className="player-ranking-sort-arrows" aria-hidden="true">
+                      <i className={sortGameweek === gameweek && sortDirection === "asc" ? "selected" : ""} />
+                      <i className={sortGameweek === gameweek && sortDirection === "desc" ? "selected" : ""} />
+                    </span>
+                  </Link>
+                ) : `GW${gameweek}`}
+              </th>
             ))}
             <th>{valueLabel}</th>
           </tr>
         </thead>
         <tbody>
-          {players.map((player, index) => (
+          {players.map((player) => (
             <tr key={player.id}>
-              <td>{index + 1}</td>
+              <td>{player.rank}</td>
               <td>
                 <span className="catalog-player">
                   <span className="player-photo-wrap small">

@@ -5,6 +5,7 @@ export type PlayerRankingMode = "popularity" | "points";
 
 export type RankedPlayer = {
   id: string;
+  rank: number;
   name: string;
   position: PlayerPosition;
   price: number;
@@ -67,5 +68,6 @@ export async function getPlayerRanking(mode: PlayerRankingMode) {
         flagPath: player.nationalTeam.flagPath,
       },
     }))
-    .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name, "uk"));
+    .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name, "uk"))
+    .map((player, index) => ({ ...player, rank: index + 1 }));
 }

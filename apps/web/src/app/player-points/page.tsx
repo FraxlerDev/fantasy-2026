@@ -12,9 +12,12 @@ export const metadata: Metadata = createMetadata({
 export default async function PlayerPointsRankingPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string; position?: string; nation?: string }>;
+  searchParams?: Promise<{ q?: string; position?: string; nation?: string; sort?: string; order?: string }>;
 }) {
   const params = await searchParams;
+  const sortMatch = /^gw([1-7])$/.exec(params?.sort ?? "");
+  const sortGameweek = sortMatch ? Number(sortMatch[1]) : null;
+  const sortDirection = params?.order === "asc" || params?.order === "desc" ? params.order : null;
   return (
     <PlayerRankingPage
       mode="points"
@@ -22,6 +25,8 @@ export default async function PlayerPointsRankingPage({
       query={params?.q ?? ""}
       position={params?.position ?? ""}
       nation={params?.nation ?? ""}
+      sortGameweek={sortGameweek}
+      sortDirection={sortDirection}
     />
   );
 }

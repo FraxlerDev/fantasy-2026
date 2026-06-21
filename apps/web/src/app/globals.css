@@ -1530,6 +1530,49 @@ h3 {
   white-space: nowrap;
 }
 
+.player-ranking-sort-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  color: inherit;
+}
+
+.player-ranking-sort-arrows {
+  display: inline-grid;
+  gap: 2px;
+}
+
+.player-ranking-sort-arrows i {
+  width: 0;
+  height: 0;
+  opacity: 0.35;
+}
+
+.player-ranking-sort-arrows i:first-child {
+  border-right: 4px solid transparent;
+  border-bottom: 6px solid var(--muted);
+  border-left: 4px solid transparent;
+}
+
+.player-ranking-sort-arrows i:last-child {
+  border-top: 6px solid var(--muted);
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+}
+
+.player-ranking-sort-link.active .player-ranking-sort-arrows i.selected {
+  opacity: 1;
+}
+
+.player-ranking-sort-link.active .player-ranking-sort-arrows i:first-child.selected {
+  border-bottom-color: var(--green);
+}
+
+.player-ranking-sort-link.active .player-ranking-sort-arrows i:last-child.selected {
+  border-top-color: var(--green);
+}
+
 .player-gameweek-mobile {
   display: none;
 }
