@@ -39,6 +39,7 @@ type Match = {
   homePenalties: number | null;
   awayPenalties: number | null;
   stadiumId: string | null;
+  city: string | null;
 };
 
 type PlayerStat = {
@@ -140,6 +141,74 @@ function scoreText(match: Match) {
     return `${score} (${match.homePenalties}:${match.awayPenalties} пен.)`;
   }
   return score;
+}
+
+function compactSlot(label: string) {
+  const matchNumber = label.match(/(\d+)\s*$/)?.[1];
+  if (matchNumber && /РџРµСЂРµРјРѕР¶|Перемож/i.test(label)) return `П${matchNumber}`;
+  if (matchNumber && /РџСЂРѕРіСЂР°РІ|Програв/i.test(label)) return `ПР${matchNumber}`;
+  return label.replaceAll("/", "·");
+}
+
+function PlayoffTeam({ team, fallback, score }: { team: Team | null; fallback: string; score: number | null }) {
+  return (
+    <span className="bracket-team">
+      <span className="bracket-team-name">
+        {team?.flagPath ? <img alt="" className="flag" src={team.flagPath} /> : <i className="bracket-placeholder" />}
+        <span>{team?.nameUk ?? compactSlot(fallback)}</span>
+      </span>
+      <strong>{score ?? "–"}</strong>
+    </span>
+  );
+}
+
+function PlayoffCard({ match, className, onOpen }: { match: Match; className: string; onOpen: (id: string) => void }) {
+  const kickoff = compactKickoff(match.kickoffAt);
+  return (
+    <button className={`bracket-match ${className}`} type="button" onClick={() => onOpen(match.id)}>
+      <PlayoffTeam team={match.home} fallback={match.homeLabel} score={match.homeScore} />
+      <PlayoffTeam team={match.away} fallback={match.awayLabel} score={match.awayScore} />
+      <small>{kickoff.date} · {kickoff.time}</small>
+      {match.homePenalties !== null && match.awayPenalties !== null ? <em>пен. {match.homePenalties}:{match.awayPenalties}</em> : null}
+    </button>
+  );
+}
+
+function PlayoffBracket({ matches, onOpen }: { matches: Match[]; onOpen: (id: string) => void }) {
+  const byId = new Map(matches.map((match) => [match.id, match]));
+  const cards: Array<{ id: string; className: string }> = [];
+  for (let index = 1; index <= 8; index += 1) cards.push({ id: `r32-${index}`, className: `r32 left slot-${index}` });
+  for (let index = 1; index <= 4; index += 1) cards.push({ id: `r16-${index}`, className: `r16 left slot-${index}` });
+  for (let index = 1; index <= 2; index += 1) cards.push({ id: `qf-${index}`, className: `qf left slot-${index}` });
+  cards.push({ id: "sf-1", className: "sf left slot-1" });
+  for (let index = 9; index <= 16; index += 1) cards.push({ id: `r32-${index}`, className: `r32 right slot-${index - 8}` });
+  for (let index = 5; index <= 8; index += 1) cards.push({ id: `r16-${index}`, className: `r16 right slot-${index - 4}` });
+  for (let index = 3; index <= 4; index += 1) cards.push({ id: `qf-${index}`, className: `qf right slot-${index - 2}` });
+  cards.push({ id: "sf-2", className: "sf right slot-1" });
+  cards.push({ id: "final-1", className: "final-match" }, { id: "third-1", className: "third-match" });
+
+  return (
+    <div className="playoff-bracket-scroll" aria-label="Турнірна сітка плей-оф">
+      <div className="playoff-tree">
+        <svg className="playoff-connectors" viewBox="0 0 1560 900" aria-hidden="true">
+          {[0, 1, 2, 3].map((pair) => { const y1 = 70 + pair * 210; const y2 = y1 + 105; const parent = (y1 + y2) / 2; return <path key={`l1-${pair}`} d={`M155 ${y1}H180V${y2}M180 ${parent}H205M155 ${y2}H180`} />; })}
+          {[0, 1].map((pair) => { const y1 = 122.5 + pair * 420; const y2 = y1 + 210; const parent = (y1 + y2) / 2; return <path key={`l2-${pair}`} d={`M340 ${y1}H365V${y2}M365 ${parent}H390M340 ${y2}H365`} />; })}
+          <path d="M525 227.5H550V647.5M550 437.5H575M525 647.5H550" />
+          {[0, 1, 2, 3].map((pair) => { const y1 = 70 + pair * 210; const y2 = y1 + 105; const parent = (y1 + y2) / 2; return <path key={`r1-${pair}`} d={`M1405 ${y1}H1380V${y2}M1380 ${parent}H1355M1405 ${y2}H1380`} />; })}
+          {[0, 1].map((pair) => { const y1 = 122.5 + pair * 420; const y2 = y1 + 210; const parent = (y1 + y2) / 2; return <path key={`r2-${pair}`} d={`M1220 ${y1}H1195V${y2}M1195 ${parent}H1170M1220 ${y2}H1195`} />; })}
+          <path d="M1035 227.5H1010V647.5M1010 437.5H985M1035 647.5H1010" />
+          <path d="M710 437.5H740V345H705M850 437.5H820V345H855M710 437.5H740V605H705M850 437.5H820V605H855" />
+        </svg>
+        {cards.map(({ id, className }) => { const match = byId.get(id); return match ? <PlayoffCard key={id} match={match} className={className} onOpen={onOpen} /> : null; })}
+        <div className="bracket-champion"><Trophy size={42} /><strong>ПЕРЕМОЖЕЦЬ</strong></div>
+        {(["r32", "r16", "qf", "sf"] as const).flatMap((stage) => ["left", "right"].map((side) => (
+          <span className={`bracket-round-label ${side} ${stage}-label`} key={`${side}-${stage}`}>
+            {stage === "r32" ? "1/16 фіналу" : stage === "r16" ? "1/8 фіналу" : stage === "qf" ? "1/4 фіналу" : "1/2 фіналу"}
+          </span>
+        )))}
+      </div>
+    </div>
+  );
 }
 
 function TeamButton({ team, fallback, onSelect }: { team: Team | null; fallback: string; onSelect: (id: string) => void }) {
@@ -428,6 +497,7 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>(initialTab);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [selectedStadiumId, setSelectedStadiumId] = useState<string | null>(null);
+  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
 
   useEffect(() => {
     setActiveTab(initialTab);
@@ -435,6 +505,10 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
 
   const selectedTeam = teamProfiles.find((team) => team.id === selectedTeamId) ?? null;
   const selectedStadium = stadiums.find((stadium) => stadium.id === selectedStadiumId) ?? null;
+  const selectedMatch = matches.find((match) => match.id === selectedMatchId) ?? null;
+  const selectedMatchStadium = selectedMatch?.stadiumId
+    ? stadiums.find((stadium) => stadium.id === selectedMatch.stadiumId) ?? null
+    : null;
   const teamMatches = selectedTeam
     ? matches.filter((match) => match.home?.id === selectedTeam.id || match.away?.id === selectedTeam.id)
     : [];
@@ -558,36 +632,8 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
         <div className="match-center-section">
           <div className="section-heading">
             <div><p className="eyebrow">32 збірні</p><h2>Сітка плей-оф</h2></div>
-            <p>Учасники наступного раунду підставляються автоматично після появи результату.</p>
           </div>
-          <div className="playoff-bracket">
-            {Object.entries(stageTitles).map(([stage, title]) => (
-              <section className="playoff-stage" key={stage}>
-                <h3>{title}</h3>
-                <div className="playoff-stage-matches">
-                  {matches.filter((match) => match.stage === stage).map((match) => (
-                    <article className="playoff-match" key={match.id}>
-                      <div className="playoff-match-meta">
-                        <span>Матч {match.matchNo}</span>
-                        <time>{formatKickoff(match.kickoffAt)}</time>
-                      </div>
-                      <div className="playoff-side">
-                        <TeamButton team={match.home} fallback={match.homeLabel} onSelect={setSelectedTeamId} />
-                        <strong>{match.homeScore ?? "–"}</strong>
-                      </div>
-                      <div className="playoff-side">
-                        <TeamButton team={match.away} fallback={match.awayLabel} onSelect={setSelectedTeamId} />
-                        <strong>{match.awayScore ?? "–"}</strong>
-                      </div>
-                      {match.homePenalties !== null && match.awayPenalties !== null ? (
-                        <div className="penalty-note">Пенальті: {match.homePenalties}:{match.awayPenalties}</div>
-                      ) : null}
-                    </article>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
+          <PlayoffBracket matches={matches.filter((match) => match.stage !== "group")} onOpen={setSelectedMatchId} />
         </div>
       ) : null}
 
@@ -682,6 +728,31 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
                 </tbody>
               </table>
             </div>
+          </section>
+        </div>
+      ) : null}
+
+      {selectedMatch ? (
+        <div className="match-modal" role="dialog" aria-modal="true" aria-labelledby="playoff-match-title">
+          <button className="match-modal-backdrop" aria-label="Закрити" onClick={() => setSelectedMatchId(null)} type="button" />
+          <section className="match-modal-card playoff-match-dialog">
+            <header>
+              <div><p className="eyebrow">Матч #{selectedMatch.matchNo} · {stageTitles[selectedMatch.stage]}</p><h2 id="playoff-match-title">Деталі матчу</h2></div>
+              <button className="icon-button" aria-label="Закрити" onClick={() => setSelectedMatchId(null)} type="button"><X /></button>
+            </header>
+            <div className="playoff-dialog-score">
+              <PlayoffTeam team={selectedMatch.home} fallback={selectedMatch.homeLabel} score={selectedMatch.homeScore} />
+              <strong>{scoreText(selectedMatch)}</strong>
+              <PlayoffTeam team={selectedMatch.away} fallback={selectedMatch.awayLabel} score={selectedMatch.awayScore} />
+            </div>
+            <dl className="playoff-dialog-details">
+              <div><dt>Дата і час</dt><dd>{formatKickoff(selectedMatch.kickoffAt)}</dd></div>
+              <div><dt>Місто</dt><dd>{selectedMatch.city ?? selectedMatchStadium?.city ?? "Буде визначено"}</dd></div>
+              <div><dt>Стадіон</dt><dd>{selectedMatchStadium?.name ?? "Буде визначено"}</dd></div>
+              {selectedMatch.homePenalties !== null && selectedMatch.awayPenalties !== null ? (
+                <div><dt>Серія пенальті</dt><dd>{selectedMatch.homePenalties}:{selectedMatch.awayPenalties}</dd></div>
+              ) : null}
+            </dl>
           </section>
         </div>
       ) : null}

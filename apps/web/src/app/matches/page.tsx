@@ -108,6 +108,7 @@ export default async function MatchesPage({
               (match[3] === fixture.awayTeam.nameUk && match[4] === fixture.homeTeam.nameUk)),
         ),
       )?.id ?? null,
+    city: null,
   }));
   const knockoutMatches = resolvedPlayoff.map((match) => ({
     id: match.id,
@@ -125,6 +126,7 @@ export default async function MatchesPage({
     homePenalties: match.homePenalties,
     awayPenalties: match.awayPenalties,
     stadiumId: match.stadiumId,
+    city: stadiums.find((stadium) => stadium.id === match.stadiumId)?.city ?? null,
   }));
 
   return (
