@@ -11,6 +11,7 @@ import { applyAutoSubstitutions, resetAutoSubstitutions } from "../../lib/auto-s
 import { closeGameweekTransfers, createGameweekSnapshots, openGameweekTransfers } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
 import { refreshLeaderboards } from "../../lib/rankings";
+import { buildAllGroupStandings, resolvePlayoffMatches } from "../../lib/tournament";
 
 const playerPositions = new Set(["GK", "DEF", "MID", "FWD"]);
 const playerStatuses = new Set(["AVAILABLE", "DOUBTFUL", "OUT", "ELIMINATED"]);
@@ -31,6 +32,100 @@ function downstreamPlayoffIds(matchId: string) {
     }
   }
   return [...result];
+}
+
+function playoffGameweek(stage: string) {
+  if (stage === "r32") return 4;
+  if (stage === "r16") return 5;
+  if (stage === "qf") return 6;
+  return 7;
+}
+
+function playoffStageName(stage: string, label: string | null) {
+  if (label) return label;
+  if (stage === "r32") return "1/16 фіналу";
+  if (stage === "r16") return "1/8 фіналу";
+  if (stage === "qf") return "1/4 фіналу";
+  if (stage === "sf") return "1/2 фіналу";
+  return "Фінал";
+}
+
+async function resolvedPlayoffFromDatabase() {
+  const [teams, groupFixtures, scores] = await Promise.all([
+    prisma.nationalTeam.findMany(),
+    prisma.fixture.findMany({ where: { gameweek: { lte: 3 } } }),
+    prisma.playoffMatch.findMany({ orderBy: { matchNo: "asc" } }),
+  ]);
+  const tournamentTeams = teams.map((team) => ({
+    id: team.id,
+    nameUk: team.nameUk,
+    groupKey: team.groupKey,
+    flagPath: team.flagPath,
+    teamConductScore: team.teamConductScore,
+    fifaRank: team.fifaRank,
+  }));
+  const teamById = new Map(tournamentTeams.map((team) => [team.id, team]));
+  const standingsFixtures = groupFixtures.flatMap((fixture) => {
+    const homeTeam = teamById.get(fixture.homeTeamId);
+    const awayTeam = teamById.get(fixture.awayTeamId);
+    return homeTeam && awayTeam ? [{ ...fixture, homeTeam, awayTeam }] : [];
+  });
+  return resolvePlayoffMatches(buildAllGroupStandings(tournamentTeams, standingsFixtures), scores);
+}
+
+async function playoffFixturesWithPoints(playoffIds: string[]) {
+  if (!playoffIds.length) return 0;
+  return prisma.fixture.count({
+    where: {
+      playoffMatchId: { in: playoffIds },
+      playerPoints: { some: {} },
+    },
+  });
+}
+
+async function syncPlayoffFixtures(playoffIds?: string[]) {
+  const resolved = await resolvedPlayoffFromDatabase();
+  const targetIds = playoffIds ? new Set(playoffIds) : null;
+  const gameweeks = await prisma.gameweek.findMany({ where: { number: { in: [4, 5, 6, 7] } } });
+  const gameweekByNumber = new Map(gameweeks.map((gameweek) => [gameweek.number, gameweek.id]));
+  const definitionById = new Map<string, (typeof playoffMatches)[number]>(
+    playoffMatches.map((definition) => [definition.id, definition]),
+  );
+
+  for (const match of resolved) {
+    if (targetIds && !targetIds.has(match.id)) continue;
+    const existing = await prisma.fixture.findFirst({
+      where: { OR: [{ playoffMatchId: match.id }, { matchNo: match.matchNo }] },
+      include: { _count: { select: { playerPoints: true } } },
+    });
+    if (match.home.type !== "team" || match.away.type !== "team") {
+      if (existing?.playoffMatchId === match.id && existing._count.playerPoints === 0) {
+        await prisma.fixture.delete({ where: { id: existing.id } });
+      }
+      continue;
+    }
+
+    const definition = definitionById.get(match.id);
+    const gameweek = playoffGameweek(match.stage);
+    const data = {
+      playoffMatchId: match.id,
+      matchNo: match.matchNo,
+      homeTeamId: match.home.team.id,
+      awayTeamId: match.away.team.id,
+      gameweek,
+      gameweekId: gameweekByNumber.get(gameweek) ?? null,
+      groupName: playoffStageName(match.stage, match.label),
+      kickoffAt: match.kickoffAt,
+      city: definition?.city ?? null,
+      stadiumId: match.stadiumId,
+      homeScore: match.homeScore,
+      awayScore: match.awayScore,
+      homePenalties: match.homePenalties,
+      awayPenalties: match.awayPenalties,
+    };
+    if (existing) await prisma.fixture.update({ where: { id: existing.id }, data });
+    else await prisma.fixture.create({ data });
+  }
 }
 
 function splitCsvLine(line: string) {
@@ -396,15 +491,67 @@ export async function saveFixtureScore(formData: FormData) {
   const awayScoreRaw = String(formData.get("awayScore") ?? "").trim();
   const homeScore = Number.parseInt(homeScoreRaw, 10);
   const awayScore = Number.parseInt(awayScoreRaw, 10);
+  const homePenaltiesRaw = String(formData.get("homePenalties") ?? "").trim();
+  const awayPenaltiesRaw = String(formData.get("awayPenalties") ?? "").trim();
+  const homePenalties = homePenaltiesRaw === "" ? null : Number.parseInt(homePenaltiesRaw, 10);
+  const awayPenalties = awayPenaltiesRaw === "" ? null : Number.parseInt(awayPenaltiesRaw, 10);
 
   if (!fixtureId || Number.isNaN(homeScore) || Number.isNaN(awayScore) || homeScore < 0 || awayScore < 0) {
     redirect("/admin?error=score");
   }
 
-  await prisma.fixture.update({
-    where: { id: fixtureId },
-    data: { homeScore, awayScore },
-  });
+  const fixture = await prisma.fixture.findUnique({ where: { id: fixtureId } });
+  if (!fixture) redirect("/admin?error=score");
+
+  if (fixture.playoffMatchId) {
+    const invalidPenalties =
+      homeScore === awayScore &&
+      (homePenalties === null ||
+        awayPenalties === null ||
+        Number.isNaN(homePenalties) ||
+        Number.isNaN(awayPenalties) ||
+        homePenalties < 0 ||
+        awayPenalties < 0 ||
+        homePenalties === awayPenalties);
+    if (invalidPenalties) {
+      redirect(`/admin?fixtureId=${fixtureId}&error=playoff-score#fixture-points-modal`);
+    }
+    const downstreamIds = downstreamPlayoffIds(fixture.playoffMatchId);
+    if (await playoffFixturesWithPoints(downstreamIds)) {
+      redirect(`/admin?fixtureId=${fixtureId}&error=playoff-fixture-in-use#fixture-points-modal`);
+    }
+    await prisma.$transaction([
+      prisma.fixture.update({
+        where: { id: fixtureId },
+        data: {
+          homeScore,
+          awayScore,
+          homePenalties: homeScore === awayScore ? homePenalties : null,
+          awayPenalties: homeScore === awayScore ? awayPenalties : null,
+        },
+      }),
+      prisma.playoffMatch.update({
+        where: { id: fixture.playoffMatchId },
+        data: {
+          homeScore,
+          awayScore,
+          homePenalties: homeScore === awayScore ? homePenalties : null,
+          awayPenalties: homeScore === awayScore ? awayPenalties : null,
+        },
+      }),
+      ...(downstreamIds.length
+        ? [
+            prisma.playoffMatch.updateMany({
+              where: { id: { in: downstreamIds } },
+              data: { homeScore: null, awayScore: null, homePenalties: null, awayPenalties: null },
+            }),
+          ]
+        : []),
+    ]);
+    await syncPlayoffFixtures([fixture.playoffMatchId, ...downstreamIds]);
+  } else {
+    await prisma.fixture.update({ where: { id: fixtureId }, data: { homeScore, awayScore } });
+  }
 
   revalidatePath("/admin");
   revalidatePath("/tournament");
@@ -417,10 +564,28 @@ export async function resetFixtureScore(formData: FormData) {
   const fixtureId = String(formData.get("fixtureId") ?? "");
   if (!fixtureId) redirect("/admin?error=score");
 
-  await prisma.fixture.update({
-    where: { id: fixtureId },
-    data: { homeScore: null, awayScore: null },
-  });
+  const fixture = await prisma.fixture.findUnique({ where: { id: fixtureId } });
+  if (!fixture) redirect("/admin?error=score");
+
+  if (fixture.playoffMatchId) {
+    const downstreamIds = downstreamPlayoffIds(fixture.playoffMatchId);
+    if (await playoffFixturesWithPoints(downstreamIds)) {
+      redirect(`/admin?fixtureId=${fixtureId}&error=playoff-fixture-in-use#fixture-points-modal`);
+    }
+    await prisma.$transaction([
+      prisma.fixture.update({
+        where: { id: fixtureId },
+        data: { homeScore: null, awayScore: null, homePenalties: null, awayPenalties: null },
+      }),
+      prisma.playoffMatch.updateMany({
+        where: { id: { in: [fixture.playoffMatchId, ...downstreamIds] } },
+        data: { homeScore: null, awayScore: null, homePenalties: null, awayPenalties: null },
+      }),
+    ]);
+    await syncPlayoffFixtures([fixture.playoffMatchId, ...downstreamIds]);
+  } else {
+    await prisma.fixture.update({ where: { id: fixtureId }, data: { homeScore: null, awayScore: null } });
+  }
 
   revalidatePath("/admin");
   revalidatePath("/tournament");
@@ -459,6 +624,10 @@ export async function savePlayoffScore(formData: FormData) {
   }
 
   const downstreamIds = downstreamPlayoffIds(matchId);
+  const affectedIds = [matchId, ...downstreamIds];
+  if (await playoffFixturesWithPoints(affectedIds)) {
+    redirect(`/admin?playoffId=${matchId}&error=playoff-fixture-in-use#playoff-scores`);
+  }
   await prisma.$transaction([
     prisma.playoffMatch.update({
       where: { id: matchId },
@@ -478,6 +647,7 @@ export async function savePlayoffScore(formData: FormData) {
         ]
       : []),
   ]);
+  await syncPlayoffFixtures(affectedIds);
 
   revalidatePath("/admin");
   revalidatePath("/matches");
@@ -490,6 +660,9 @@ export async function resetPlayoffScore(formData: FormData) {
   if (!matchId) redirect("/admin?error=playoff-score#playoff-scores");
 
   const affectedIds = [matchId, ...downstreamPlayoffIds(matchId)];
+  if (await playoffFixturesWithPoints(affectedIds)) {
+    redirect(`/admin?playoffId=${matchId}&error=playoff-fixture-in-use#playoff-scores`);
+  }
   await prisma.playoffMatch.updateMany({
     where: { id: { in: affectedIds } },
     data: {
@@ -499,10 +672,172 @@ export async function resetPlayoffScore(formData: FormData) {
       awayPenalties: null,
     },
   });
+  await syncPlayoffFixtures(affectedIds);
 
   revalidatePath("/admin");
   revalidatePath("/matches");
   redirect(`/admin?playoffId=${matchId}&playoffScore=reset#playoff-scores`);
+}
+
+export async function saveConfirmedPlayoffTeams(formData: FormData) {
+  await requireAdmin();
+  const matchId = String(formData.get("matchId") ?? "");
+  const confirmedHomeTeamId = String(formData.get("confirmedHomeTeamId") ?? "").trim() || null;
+  const confirmedAwayTeamId = String(formData.get("confirmedAwayTeamId") ?? "").trim() || null;
+
+  const match = await prisma.playoffMatch.findUnique({ where: { id: matchId } });
+  if (!match || match.stage !== "r32") {
+    redirect(`/admin?playoffId=${matchId}&error=playoff-participants#playoff-scores`);
+  }
+  if (confirmedHomeTeamId && confirmedHomeTeamId === confirmedAwayTeamId) {
+    redirect(`/admin?playoffId=${matchId}&error=playoff-team-duplicate#playoff-scores`);
+  }
+
+  const selectedIds = [confirmedHomeTeamId, confirmedAwayTeamId].filter((id): id is string => Boolean(id));
+  if (selectedIds.length) {
+    const [existingTeams, duplicateMatch] = await Promise.all([
+      prisma.nationalTeam.count({ where: { id: { in: selectedIds } } }),
+      prisma.playoffMatch.findFirst({
+        where: {
+          stage: "r32",
+          id: { not: matchId },
+          OR: [
+            { confirmedHomeTeamId: { in: selectedIds } },
+            { confirmedAwayTeamId: { in: selectedIds } },
+          ],
+        },
+      }),
+    ]);
+    if (existingTeams !== selectedIds.length) {
+      redirect(`/admin?playoffId=${matchId}&error=playoff-participants#playoff-scores`);
+    }
+    if (duplicateMatch) {
+      redirect(`/admin?playoffId=${matchId}&error=playoff-team-duplicate#playoff-scores`);
+    }
+  }
+
+  if (
+    match.confirmedHomeTeamId === confirmedHomeTeamId &&
+    match.confirmedAwayTeamId === confirmedAwayTeamId
+  ) {
+    await syncPlayoffFixtures([matchId]);
+    revalidatePath("/admin");
+    revalidatePath("/matches");
+    redirect(`/admin?playoffId=${matchId}&playoffTeams=saved#playoff-scores`);
+  }
+
+  const downstreamIds = downstreamPlayoffIds(matchId);
+  const affectedIds = [matchId, ...downstreamIds];
+  if (await playoffFixturesWithPoints(affectedIds)) {
+    redirect(`/admin?playoffId=${matchId}&error=playoff-fixture-in-use#playoff-scores`);
+  }
+  await prisma.$transaction([
+    prisma.playoffMatch.update({
+      where: { id: matchId },
+      data: {
+        confirmedHomeTeamId,
+        confirmedAwayTeamId,
+        homeScore: null,
+        awayScore: null,
+        homePenalties: null,
+        awayPenalties: null,
+      },
+    }),
+    ...(downstreamIds.length
+      ? [
+          prisma.playoffMatch.updateMany({
+            where: { id: { in: downstreamIds } },
+            data: { homeScore: null, awayScore: null, homePenalties: null, awayPenalties: null },
+          }),
+        ]
+      : []),
+  ]);
+  await syncPlayoffFixtures(affectedIds);
+
+  revalidatePath("/admin");
+  revalidatePath("/matches");
+  redirect(`/admin?playoffId=${matchId}&playoffTeams=saved#playoff-scores`);
+}
+
+export async function resetConfirmedPlayoffTeams(formData: FormData) {
+  await requireAdmin();
+  const matchId = String(formData.get("matchId") ?? "");
+  const match = await prisma.playoffMatch.findUnique({ where: { id: matchId } });
+  if (!match || match.stage !== "r32") {
+    redirect(`/admin?playoffId=${matchId}&error=playoff-participants#playoff-scores`);
+  }
+
+  const affectedIds = [matchId, ...downstreamPlayoffIds(matchId)];
+  if (await playoffFixturesWithPoints(affectedIds)) {
+    redirect(`/admin?playoffId=${matchId}&error=playoff-fixture-in-use#playoff-scores`);
+  }
+  await prisma.$transaction([
+    prisma.playoffMatch.update({
+      where: { id: matchId },
+      data: {
+        confirmedHomeTeamId: null,
+        confirmedAwayTeamId: null,
+        homeScore: null,
+        awayScore: null,
+        homePenalties: null,
+        awayPenalties: null,
+      },
+    }),
+    ...(affectedIds.length > 1
+      ? [
+          prisma.playoffMatch.updateMany({
+            where: { id: { in: affectedIds.slice(1) } },
+            data: { homeScore: null, awayScore: null, homePenalties: null, awayPenalties: null },
+          }),
+        ]
+      : []),
+  ]);
+  await syncPlayoffFixtures(affectedIds);
+
+  revalidatePath("/admin");
+  revalidatePath("/matches");
+  redirect(`/admin?playoffId=${matchId}&playoffTeams=reset#playoff-scores`);
+}
+
+export async function deletePlayoffFixture(formData: FormData) {
+  await requireAdmin();
+  const fixtureId = String(formData.get("fixtureId") ?? "");
+  const fixture = await prisma.fixture.findUnique({
+    where: { id: fixtureId },
+    include: { _count: { select: { playerPoints: true } } },
+  });
+  if (!fixture?.playoffMatchId || fixture.gameweek !== 4) {
+    redirect(`/admin?fixtureId=${fixtureId}&error=playoff-fixture-delete#fixture-points-modal`);
+  }
+
+  const affectedPlayoffIds = [fixture.playoffMatchId, ...downstreamPlayoffIds(fixture.playoffMatchId)];
+  if (await playoffFixturesWithPoints(affectedPlayoffIds)) {
+    redirect(`/admin?fixtureId=${fixtureId}&error=playoff-fixture-in-use#fixture-points-modal`);
+  }
+
+  await prisma.$transaction([
+    prisma.fixture.deleteMany({ where: { playoffMatchId: { in: affectedPlayoffIds } } }),
+    prisma.playoffMatch.update({
+      where: { id: fixture.playoffMatchId },
+      data: {
+        confirmedHomeTeamId: null,
+        confirmedAwayTeamId: null,
+        homeScore: null,
+        awayScore: null,
+        homePenalties: null,
+        awayPenalties: null,
+      },
+    }),
+    prisma.playoffMatch.updateMany({
+      where: { id: { in: affectedPlayoffIds.slice(1) } },
+      data: { homeScore: null, awayScore: null, homePenalties: null, awayPenalties: null },
+    }),
+  ]);
+
+  revalidatePath("/admin");
+  revalidatePath("/matches");
+  revalidatePath("/squad");
+  redirect("/admin?gw=4&playoffFixture=deleted#points");
 }
 
 export async function updateTournamentTiebreaks(formData: FormData) {

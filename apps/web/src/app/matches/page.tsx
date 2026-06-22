@@ -57,7 +57,7 @@ export default async function MatchesPage({
     fifaRank: team.fifaRank,
   }));
   const teamById = new Map(tournamentTeams.map((team) => [team.id, team]));
-  const groupFixtures = fixtures.map((fixture) => ({
+  const groupFixtures = fixtures.filter((fixture) => fixture.gameweek <= 3).map((fixture) => ({
     ...fixture,
     homeTeam: teamById.get(fixture.homeTeamId)!,
     awayTeam: teamById.get(fixture.awayTeamId)!,

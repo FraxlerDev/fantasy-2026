@@ -8142,6 +8142,69 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
   grid-template-columns: repeat(4, minmax(120px, 1fr)) auto;
 }
 
+.playoff-participant-editor {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+}
+
+.playoff-participant-editor h3,
+.playoff-participant-editor p {
+  margin: 0;
+}
+
+.playoff-participant-form {
+  display: grid;
+  gap: 12px;
+}
+
+.playoff-participant-pickers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.playoff-team-picker {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.playoff-team-search {
+  position: relative;
+  display: block;
+}
+
+.playoff-team-search svg {
+  position: absolute;
+  z-index: 1;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.playoff-team-search .input {
+  width: 100%;
+  padding-left: 34px;
+}
+
+.playoff-team-picker select {
+  width: 100%;
+}
+
+@media (max-width: 700px) {
+  .playoff-participant-pickers {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-tiebreak-panel {
   margin-top: 18px;
   padding: 14px;

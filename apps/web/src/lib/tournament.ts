@@ -1,5 +1,4 @@
 import type { FixtureStatus } from "@prisma/client";
-import { annexeC } from "../data/annexe-c";
 import { playoffMatches, stadiums } from "../data/match-center";
 import { prisma } from "./prisma";
 
@@ -51,6 +50,8 @@ export type PlayoffScore = {
   label: string | null;
   kickoffAt: Date;
   stadiumId: string | null;
+  confirmedHomeTeamId: string | null;
+  confirmedAwayTeamId: string | null;
   homeScore: number | null;
   awayScore: number | null;
   homePenalties: number | null;
@@ -230,11 +231,6 @@ export async function ensurePlayoffMatches() {
   });
 }
 
-function teamParticipant(row: StandingRow | undefined, slot: string): PlayoffParticipant {
-  if (!row || row.played < 3) return { type: "slot", slot };
-  return { type: "team", team: row.team, slot };
-}
-
 function matchWinner(match: ResolvedPlayoffMatch) {
   if (match.home.type !== "team" || match.away.type !== "team") return null;
   if (match.homeScore === null || match.awayScore === null) return null;
@@ -256,36 +252,10 @@ export function resolvePlayoffMatches(
   scores: PlayoffScore[],
 ) {
   const scoreById = new Map(scores.map((score) => [score.id, score]));
-  const thirds = rankThirdPlacedTeams(tables)
-    .filter((entry) => entry.qualified && entry.row.played === 3)
-    .slice(0, 8);
-  const advancedKey = thirds.map((entry) => entry.group).sort().join("");
-  const annexRow = (annexeC as Record<string, Record<string, string>>)[advancedKey];
-  const thirdByGroup = new Map(thirds.map((entry) => [entry.group, entry.row]));
-  const thirdTargets: Record<string, string> = {
-    "r32-11": "1A",
-    "r32-15": "1B",
-    "r32-7": "1D",
-    "r32-1": "1E",
-    "r32-8": "1G",
-    "r32-2": "1I",
-    "r32-16": "1K",
-    "r32-12": "1L",
-  };
+  const teamById = new Map(
+    [...tables.values()].flat().map((row) => [row.team.id, row.team]),
+  );
   const resolved = new Map<string, ResolvedPlayoffMatch>();
-
-  const resolveGroupSlot = (slot: string, matchId: string): PlayoffParticipant => {
-    if (slot.includes("/")) {
-      const winnerSlot = thirdTargets[matchId];
-      const thirdGroup = annexRow?.[winnerSlot];
-      return thirdGroup
-        ? teamParticipant(thirdByGroup.get(thirdGroup), `${thirdGroup}3`)
-        : { type: "slot", slot };
-    }
-    const group = slot[0];
-    const place = Number(slot.slice(1));
-    return teamParticipant(tables.get(group)?.[place - 1], slot);
-  };
 
   for (const definition of playoffMatches) {
     const score = scoreById.get(definition.id);
@@ -294,8 +264,14 @@ export function resolvePlayoffMatches(
     let away: PlayoffParticipant;
 
     if ("slotA" in definition) {
-      home = resolveGroupSlot(definition.slotA, definition.id);
-      away = resolveGroupSlot(definition.slotB, definition.id);
+      const confirmedHome = score.confirmedHomeTeamId ? teamById.get(score.confirmedHomeTeamId) : null;
+      const confirmedAway = score.confirmedAwayTeamId ? teamById.get(score.confirmedAwayTeamId) : null;
+      home = confirmedHome
+        ? { type: "team", team: confirmedHome, slot: definition.slotA }
+        : { type: "slot", slot: definition.slotA };
+      away = confirmedAway
+        ? { type: "team", team: confirmedAway, slot: definition.slotB }
+        : { type: "slot", slot: definition.slotB };
     } else {
       const sourceHome = resolved.get(definition.fromA);
       const sourceAway = resolved.get(definition.fromB);

@@ -18,6 +18,8 @@ import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
 import { AdminPlayerPointInputs } from "../../components/admin-player-point-inputs";
 import { DeleteNationalTeamPlayersButton } from "../../components/delete-national-team-players-button";
+import { DeletePlayoffFixtureButton } from "../../components/delete-playoff-fixture-button";
+import { PlayoffParticipantForm } from "../../components/playoff-participant-form";
 import { ResetFixturePointsButton } from "../../components/reset-fixture-points-button";
 import { AppShell } from "../../components/shell";
 import { SnapshotSubmitButton } from "../../components/snapshot-submit-button";
@@ -32,9 +34,7 @@ import {
   createFixture,
   refreshRankingsAction,
   resetAutoSubstitutionsAction,
-  resetPlayoffScore,
   resetFixtureScore,
-  savePlayoffScore,
   saveFixturePoints,
   saveFixtureScore,
   setMaintenanceModeAction,
@@ -161,6 +161,10 @@ errorMessages.gameweek = "Не вдалося визначити GW.";
 errorMessages["open-gameweek"] = "Не вдалося відкрити трансфери: дедлайн цього GW уже закритий або GW не існує.";
 errorMessages["close-gameweek"] = "Не вдалося закрити трансфери для цього GW.";
 errorMessages["playoff-score"] = "Для нічиєї після додаткового часу потрібно ввести різний рахунок серії пенальті.";
+errorMessages["playoff-participants"] = "Не вдалося зберегти учасників матчу 1/16. Перевір обрані збірні.";
+errorMessages["playoff-team-duplicate"] = "Ця збірна вже призначена в іншому матчі 1/16 фіналу.";
+errorMessages["playoff-fixture-in-use"] = "Матч або залежний раунд уже має введені очки футболістів. Спочатку скинь ці очки.";
+errorMessages["playoff-fixture-delete"] = "Цей матч не можна видалити як матч 1/16 фіналу.";
 errorMessages.tiebreak = "Перевір дисциплінарні очки та місце збірної у рейтингу FIFA.";
 
 export default async function AdminPage({
@@ -183,6 +187,7 @@ export default async function AdminPage({
     closedGw?: string;
     playoffId?: string;
     playoffScore?: string;
+    playoffTeams?: string;
     tiebreak?: string;
   }>;
 }) {
@@ -248,7 +253,7 @@ export default async function AdminPage({
     fifaRank: team.fifaRank,
   }));
   const tournamentTeamById = new Map(tournamentTeams.map((team) => [team.id, team]));
-  const tournamentFixtures = allFixtures.map((fixture) => ({
+  const tournamentFixtures = allFixtures.filter((fixture) => fixture.gameweek <= 3).map((fixture) => ({
     ...fixture,
     homeTeam: tournamentTeamById.get(fixture.homeTeamId)!,
     awayTeam: tournamentTeamById.get(fixture.awayTeamId)!,
@@ -257,6 +262,9 @@ export default async function AdminPage({
   const resolvedPlayoff = resolvePlayoffMatches(tournamentTables, playoffScores);
   const activePlayoffId = params?.playoffId ?? resolvedPlayoff[0]?.id;
   const activePlayoff = resolvedPlayoff.find((match) => match.id === activePlayoffId) ?? resolvedPlayoff[0] ?? null;
+  const activePlayoffFixture = activePlayoff
+    ? allFixtures.find((fixture) => fixture.playoffMatchId === activePlayoff.id) ?? null
+    : null;
 
   const fixtures = selectedGameweek ? allFixtures.filter((fixture) => fixture.gameweek === selectedGameweek) : allFixtures;
   const activeFixtureId = params?.fixtureId;
@@ -937,6 +945,18 @@ export default async function AdminPage({
                     {activeFixture.awayTeam.nameUk}
                     <input className="input points-input" name="awayScore" type="number" min={0} step={1} defaultValue={activeFixture.awayScore ?? ""} required />
                   </label>
+                  {activeFixture.playoffMatchId ? (
+                    <>
+                      <label>
+                        Пенальті {activeFixture.homeTeam.nameUk}
+                        <input className="input points-input" name="homePenalties" type="number" min={0} step={1} defaultValue={activeFixture.homePenalties ?? ""} />
+                      </label>
+                      <label>
+                        Пенальті {activeFixture.awayTeam.nameUk}
+                        <input className="input points-input" name="awayPenalties" type="number" min={0} step={1} defaultValue={activeFixture.awayPenalties ?? ""} />
+                      </label>
+                    </>
+                  ) : null}
                   <button className="button primary" type="submit">Зберегти рахунок</button>
                 </form>
                 <form action={resetFixtureScore}>
@@ -946,6 +966,9 @@ export default async function AdminPage({
                     Скинути
                   </button>
                 </form>
+                {activeFixture.playoffMatchId && activeFixture.gameweek === 4 ? (
+                  <DeletePlayoffFixtureButton fixtureId={activeFixture.id} />
+                ) : null}
               </div>
 
               {activeFixture.homeTeam.players.length + activeFixture.awayTeam.players.length > 0 ? (
@@ -1004,7 +1027,7 @@ export default async function AdminPage({
           <div>
             <h2>Результати плей-оф</h2>
             <p className="muted">
-              Учасники підставляються з групових таблиць і попередніх раундів. Якщо після додаткового часу нічия, введи також рахунок серії пенальті.
+              Учасників 1/16 підтверджує адміністратор вручну. Наступні раунди формуються автоматично за результатами. Якщо після додаткового часу нічия, введи також рахунок серії пенальті.
             </p>
           </div>
         </div>
@@ -1055,35 +1078,28 @@ export default async function AdminPage({
               <span> · </span>
               {activePlayoff.away.type === "team" ? teamLabel(activePlayoff.away.team) : activePlayoff.away.slot}
             </h3>
-            <div className="score-actions">
-              <form action={savePlayoffScore} className="score-form playoff-score-form">
-                <input type="hidden" name="matchId" value={activePlayoff.id} />
-                <label>
-                  Голи господарів
-                  <input className="input points-input" name="homeScore" type="number" min={0} step={1} defaultValue={activePlayoff.homeScore ?? ""} required />
-                </label>
-                <label>
-                  Голи гостей
-                  <input className="input points-input" name="awayScore" type="number" min={0} step={1} defaultValue={activePlayoff.awayScore ?? ""} required />
-                </label>
-                <label>
-                  Пенальті господарів
-                  <input className="input points-input" name="homePenalties" type="number" min={0} step={1} defaultValue={activePlayoff.homePenalties ?? ""} />
-                </label>
-                <label>
-                  Пенальті гостей
-                  <input className="input points-input" name="awayPenalties" type="number" min={0} step={1} defaultValue={activePlayoff.awayPenalties ?? ""} />
-                </label>
-                <button className="button primary" type="submit">Зберегти результат</button>
-              </form>
-              <form action={resetPlayoffScore}>
-                <input type="hidden" name="matchId" value={activePlayoff.id} />
-                <button className="button warning" type="submit">
-                  <RotateCcw size={18} />
-                  Скинути результат
-                </button>
-              </form>
-            </div>
+            {activePlayoff.stage === "r32" ? (
+              <PlayoffParticipantForm
+                matchId={activePlayoff.id}
+                teams={teams.map((team) => ({
+                  id: team.id,
+                  code: team.code,
+                  nameUk: team.nameUk,
+                  groupKey: team.groupKey,
+                  flagPath: team.flagPath,
+                }))}
+                confirmedHomeTeamId={activePlayoff.confirmedHomeTeamId}
+                confirmedAwayTeamId={activePlayoff.confirmedAwayTeamId}
+                hasResult={activePlayoff.homeScore !== null || activePlayoff.awayScore !== null}
+              />
+            ) : null}
+            {activePlayoffFixture ? (
+              <a className="button primary" href={`/admin?fixtureId=${activePlayoffFixture.id}&gw=${activePlayoffFixture.gameweek}#fixture-points-modal`}>
+                Відкрити матч у GW{activePlayoffFixture.gameweek}
+              </a>
+            ) : (
+              <p className="muted">Звичайний матч GW буде створено після визначення обох збірних.</p>
+            )}
           </div>
         ) : null}
 

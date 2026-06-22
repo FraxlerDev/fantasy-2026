@@ -406,14 +406,19 @@ model LeagueChatRead {
 model Fixture {
   id          String        @id @default(cuid())
   matchNo     Int?          @unique
+  playoffMatchId String?
   homeTeamId  String
   awayTeamId  String
   gameweek    Int
   gameweekId  String?
   groupName   String?
   kickoffAt   DateTime
+  city        String?
+  stadiumId   String?
   homeScore   Int?
   awayScore   Int?
+  homePenalties Int?
+  awayPenalties Int?
   status      FixtureStatus @default(SCHEDULED)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -427,6 +432,7 @@ model Fixture {
   @@index([gameweekId])
   @@index([homeTeamId])
   @@index([awayTeamId])
+  @@index([playoffMatchId])
 }
 
 model PlayoffMatch {
@@ -439,6 +445,8 @@ model PlayoffMatch {
   label         String?
   kickoffAt     DateTime
   stadiumId     String?
+  confirmedHomeTeamId String?
+  confirmedAwayTeamId String?
   homeScore     Int?
   awayScore     Int?
   homePenalties Int?
@@ -449,6 +457,8 @@ model PlayoffMatch {
 
   @@index([stage])
   @@index([kickoffAt])
+  @@index([confirmedHomeTeamId])
+  @@index([confirmedAwayTeamId])
 }
 
 model Gameweek {
