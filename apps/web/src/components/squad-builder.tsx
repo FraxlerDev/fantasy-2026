@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { DragEvent, FormEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { saveSquad, updateSquadProfile } from "../app/actions/squad-actions";
+import { maxPlayersPerNationForGameweek } from "../lib/roster-limits";
 import { ShareSquadButton } from "./share-squad-button";
 
 export interface SquadPlayer {
@@ -93,7 +94,7 @@ const errorMessages: Record<string, string> = {
   "deadline-closed": "Дедлайн найближчого туру вже закрито.",
   "transfer-limit": "Після першого збереження можна замінити максимум 3 гравців на тур.",
   "transfer-limit-locked": "Ліміт трансферів цього GW уже використано. Можна міняти лише старт, лавку, схему і капітана.",
-  "max-players-per-nation": "Не можна взяти більше 2 футболістів однієї збірної.",
+  "max-players-per-nation": "У складі забагато футболістів з однієї збірної для поточного GW.",
   "budget-exceeded": "Загальна вартість команди не може перевищувати 100 монет.",
   username: "Нік має містити 3-24 символи: літери, цифри, пробіли, дефіс або нижнє підкреслення.",
   "username-taken": "Цей нік уже використовує інший користувач.",
@@ -251,6 +252,7 @@ export function SquadBuilder({
   const benchPlayers = bench.map((id) => playerById.get(id)).filter(Boolean) as SquadPlayer[];
   const budgetUsed = selectedPlayers.reduce((sum, player) => sum + player.price, 0);
   const balance = 100 - budgetUsed;
+  const maxPlayersPerNation = maxPlayersPerNationForGameweek(currentGameweek);
   const selectedNationCodes = new Set(selectedPlayers.map((player) => player.nationCode));
   const transferBaseIds = useMemo(() => new Set(transferBasePlayerIds), [transferBasePlayerIds]);
   const initialSelectedIds = useMemo(() => new Set(initialRoster.map((entry) => entry.playerId)), [initialRoster]);
@@ -277,7 +279,7 @@ export function SquadBuilder({
     { label: "15 гравців у складі", ok: selectedIds.size === 15 },
     { label: `Старт під схему ${formation}: 1 воротар, ${currentStarterLimits.DEF} захисники, ${currentStarterLimits.MID} півзахисники, ${currentStarterLimits.FWD} нападники`, ok: starterShapeOk },
     { label: "Бюджет не більше 100 монет", ok: budgetUsed <= 100 },
-    { label: "Не більше 2 гравців з однієї збірної", ok: [...nationCounts.values()].every((count) => count <= 2) },
+    { label: `Не більше ${maxPlayersPerNation} гравців з однієї збірної`, ok: [...nationCounts.values()].every((count) => count <= maxPlayersPerNation) },
     { label: "Капітан обраний зі старту", ok: Boolean(captainId && starters.includes(captainId)) },
   ];
   const canSubmit = isSignedIn && hasProfile && validationItems.every((item) => item.ok);
@@ -395,8 +397,9 @@ export function SquadBuilder({
     }
 
     const currentNationCount = selectedPlayers.filter((selectedPlayer) => selectedPlayer.nationCode === player.nationCode).length;
-    if (currentNationCount >= 2) {
-      setPopupMessage(`Не можна взяти більше 2 гравців зі збірної ${player.nationName}.`);
+    if (currentNationCount >= maxPlayersPerNation) {
+      const gameweekLabel = currentGameweek ? `GW${currentGameweek}` : "поточному GW";
+      setPopupMessage(`У ${gameweekLabel} не можна взяти більше ${maxPlayersPerNation} гравців зі збірної ${player.nationName}.`);
       return;
     }
 

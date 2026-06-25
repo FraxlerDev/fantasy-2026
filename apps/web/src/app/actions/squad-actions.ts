@@ -8,6 +8,7 @@ import path from "node:path";
 import { auth } from "../../auth";
 import { getEditableGameweek } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
+import { maxPlayersPerNationForGameweek } from "../../lib/roster-limits";
 import { isValidUsername } from "../../lib/username";
 
 const formations: Record<string, { DEF: number; MID: number; FWD: number }> = {
@@ -195,7 +196,8 @@ export async function saveSquad(formData: FormData) {
   for (const player of players) {
     nationCounts.set(player.nationalTeam.code, (nationCounts.get(player.nationalTeam.code) ?? 0) + 1);
   }
-  if ([...nationCounts.values()].some((count) => count > 2)) {
+  const maxPlayersPerNation = maxPlayersPerNationForGameweek(nextOpenGameweek.number);
+  if ([...nationCounts.values()].some((count) => count > maxPlayersPerNation)) {
     redirect("/squad?error=max-players-per-nation");
   }
 

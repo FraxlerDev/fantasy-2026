@@ -1680,6 +1680,91 @@ h3 {
   font-weight: 800;
 }
 
+.admin-price-manager {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.admin-price-team-panel,
+.admin-price-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.search-input {
+  position: relative;
+  display: block;
+}
+
+.search-input svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.search-input .input {
+  width: 100%;
+  padding-left: 38px;
+}
+
+.search-input.compact {
+  min-width: min(320px, 100%);
+}
+
+.admin-price-team-list {
+  display: grid;
+  max-height: 560px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.admin-price-team-list button {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-price-team-list button:last-child {
+  border-bottom: 0;
+}
+
+.admin-price-team-list button:hover,
+.admin-price-team-list button.active {
+  background: var(--surface-strong);
+}
+
+.admin-price-team-list button.active {
+  box-shadow: inset 4px 0 0 var(--green);
+}
+
+.admin-price-team-list span,
+.admin-price-team-list small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-price-table td:last-child,
+.admin-price-table th:last-child {
+  width: 140px;
+}
+
+.admin-price-actions {
+  justify-content: flex-end;
+}
+
 .petition-notifications {
   display: grid;
   gap: 8px;
@@ -9082,9 +9167,10 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
 
   .league-ranking-table .leaderboard-team-link > span:last-of-type,
   .league-ranking-table td:nth-child(2) > a {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    word-break: break-word;
   }
 
   .league-ranking-table .leaderboard-team-photo {
@@ -9944,13 +10030,27 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
     display: none;
   }
 
+  .league-ranking-table.leaderboard-table .leaderboard-team-main {
+    padding-left: 0;
+  }
+
   .league-ranking-table.leaderboard-table .leaderboard-team-link {
-    display: block;
+    align-items: center;
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: 8px;
+    min-width: 0;
+  }
+
+  .league-ranking-table.leaderboard-table .leaderboard-team-link .leaderboard-team-photo {
+    position: static;
+    transform: none;
   }
 
   .league-ranking-table.leaderboard-table .leaderboard-mobile-manager {
     display: block;
-    margin-left: 0;
+    margin-left: 36px;
+    text-align: left;
   }
 
   .league-ranking-table.leaderboard-table .league-owner-actions-column {
@@ -9962,5 +10062,25 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
     min-height: 28px;
     padding-inline: 4px;
     font-size: 9px;
+  }
+
+  .admin-price-manager {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-price-team-list {
+    max-height: 260px;
+  }
+
+  .admin-price-editor .section-heading-row {
+    display: grid;
+  }
+
+  .admin-price-actions {
+    justify-content: stretch;
+  }
+
+  .admin-price-actions .button {
+    width: 100%;
   }
 }

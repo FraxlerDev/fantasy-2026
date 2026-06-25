@@ -1,5 +1,6 @@
 import type { Prisma, RosterSlot } from "@prisma/client";
 import { prisma } from "./prisma";
+import { maxPlayersPerNationForGameweek } from "./roster-limits";
 
 const formations: Record<string, { DEF: number; MID: number; FWD: number }> = {
   "4-3-3": { DEF: 4, MID: 3, FWD: 3 },
@@ -68,7 +69,7 @@ export async function ensureDefaultGameweeks() {
   });
 }
 
-export function validateRosterForSnapshot(entries: RosterEntryForValidation[], formation: string) {
+export function validateRosterForSnapshot(entries: RosterEntryForValidation[], formation: string, gameweekNumber?: number | null) {
   const starters = entries.filter((entry) => entry.slot === "STARTER");
   const bench = entries.filter((entry) => entry.slot === "BENCH");
   const selectedIds = new Set(entries.map((entry) => entry.playerId));
@@ -85,7 +86,10 @@ export function validateRosterForSnapshot(entries: RosterEntryForValidation[], f
   for (const entry of entries) {
     nationCounts.set(entry.player.nationalTeamId, (nationCounts.get(entry.player.nationalTeamId) ?? 0) + 1);
   }
-  if ([...nationCounts.values()].some((count) => count > 2)) return "У складі більше 2 гравців з однієї збірної.";
+  const maxPlayersPerNation = maxPlayersPerNationForGameweek(gameweekNumber);
+  if ([...nationCounts.values()].some((count) => count > maxPlayersPerNation)) {
+    return `У складі більше ${maxPlayersPerNation} гравців з однієї збірної.`;
+  }
 
   const starterCounts = {
     GK: starters.filter((entry) => entry.player.position === "GK").length,
@@ -134,7 +138,7 @@ export async function createGameweekSnapshots(
     }
 
     for (const team of teams) {
-      const reason = validateRosterForSnapshot(team.rosterEntries, team.formation);
+      const reason = validateRosterForSnapshot(team.rosterEntries, team.formation, gameweekNumber);
 
       if (reason) {
         failed += 1;

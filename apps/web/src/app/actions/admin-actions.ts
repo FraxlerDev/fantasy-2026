@@ -182,6 +182,34 @@ export async function updatePlayerPrice(formData: FormData) {
   redirect("/admin?price=updated");
 }
 
+export async function updatePlayerPricesBatch(updates: Array<{ id: string; price: string }>) {
+  await requireAdmin();
+  const normalized = updates.map((update) => ({
+    id: update.id,
+    price: Number(String(update.price).replace(",", ".")),
+  }));
+
+  if (normalized.some((update) => !update.id || Number.isNaN(update.price))) {
+    return { ok: false, error: "price" };
+  }
+
+  await prisma.$transaction(
+    normalized.map((update) =>
+      prisma.player.update({
+        where: { id: update.id },
+        data: { price: update.price },
+      }),
+    ),
+  );
+
+  revalidatePath("/admin");
+  revalidatePath("/squad");
+  revalidatePath("/player-points");
+  revalidatePath("/player-rankings");
+  revalidatePath("/tournament");
+  return { ok: true };
+}
+
 export async function deletePlayer(formData: FormData) {
   await requireAdmin();
   const playerId = String(formData.get("playerId") ?? "");

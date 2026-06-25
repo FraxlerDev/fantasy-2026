@@ -1,0 +1,225 @@
+{
+  "sourcePath": "C:\\Users\\Tereshenko\\Desktop\\player_table.sql",
+  "exportPath": "exports\\player-prices-adjusted-from-player-table-2026-06-25.sql",
+  "totalParsed": 1237,
+  "totalUpdatedLocally": 1236,
+  "totalInServerSql": 1237,
+  "missingLocally": [
+    {
+      "id": "cmqlsc9cd0fmkctjihk1vpy0t",
+      "name": "(Вр.) Едерсон",
+      "position": "GK",
+      "sourcePrice": 5.5,
+      "newPrice": 4.5
+    }
+  ],
+  "formula": {
+    "GK": -1,
+    "DEF": -1,
+    "MID": -1.5,
+    "FWD": -2
+  },
+  "updatedAt": "2026-06-25T05:58:52.352Z",
+  "sample": [
+    {
+      "id": "cmpnrydp000cvlbe846067wqw",
+      "name": "Возінья",
+      "team": "Кабо-Верде",
+      "position": "GK",
+      "oldPrice": 5.5,
+      "sourcePrice": 4,
+      "newPrice": 3,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnyhtgf00e7lb44ir40a03c",
+      "name": "Кріс Брейді",
+      "team": "США",
+      "position": "GK",
+      "oldPrice": 3,
+      "sourcePrice": 4.5,
+      "newPrice": 3.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnyhsxl00e3lb444ou7ypxy",
+      "name": "Метт Тернер",
+      "team": "США",
+      "position": "GK",
+      "oldPrice": 4,
+      "sourcePrice": 5,
+      "newPrice": 4,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnyhtg500e5lb4408exmlod",
+      "name": "Метт Фріз",
+      "team": "США",
+      "position": "GK",
+      "oldPrice": 4,
+      "sourcePrice": 4.5,
+      "newPrice": 3.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnyhthq00ehlb44c1fre8h3",
+      "name": "Алекс Фрімен",
+      "team": "США",
+      "position": "DEF",
+      "oldPrice": 2,
+      "sourcePrice": 5.5,
+      "newPrice": 4.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnyhtjz00enlb44paxejtls",
+      "name": "Джозеф Скелі",
+      "team": "США",
+      "position": "DEF",
+      "oldPrice": 4,
+      "sourcePrice": 5.5,
+      "newPrice": 4.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnyhth300eblb44qj437o5m",
+      "name": "Ентоні Робінсон",
+      "team": "США",
+      "position": "DEF",
+      "oldPrice": 5,
+      "sourcePrice": 6,
+      "newPrice": 5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzfl6900g1lb44ybisdlwo",
+      "name": "Jiovany Ramos",
+      "team": "Панама",
+      "position": "DEF",
+      "oldPrice": 3.5,
+      "sourcePrice": 4.5,
+      "newPrice": 3.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzfl4d00fllb44m1avt67k",
+      "name": "Луїс Мехія",
+      "team": "Панама",
+      "position": "GK",
+      "oldPrice": 4,
+      "sourcePrice": 4.5,
+      "newPrice": 3.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzfl5c00fplb4448aikmhz",
+      "name": "Орландо Москера",
+      "team": "Панама",
+      "position": "GK",
+      "oldPrice": 3,
+      "sourcePrice": 4.5,
+      "newPrice": 3.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzfl5600fnlb44q8x0s8w4",
+      "name": "Сесар Самудіо",
+      "team": "Панама",
+      "position": "GK",
+      "oldPrice": 3,
+      "sourcePrice": 4,
+      "newPrice": 3,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzfl5m00ftlb44e1jrqm6r",
+      "name": "Андрес Андраде",
+      "team": "Панама",
+      "position": "DEF",
+      "oldPrice": 2.5,
+      "sourcePrice": 5,
+      "newPrice": 4,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzfl6e00g3lb44qb9b0dqn",
+      "name": "Ерік Девіс",
+      "team": "Панама",
+      "position": "DEF",
+      "oldPrice": 3.5,
+      "sourcePrice": 4.5,
+      "newPrice": 3.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnrydou00ctlbe8lep6xea5",
+      "name": "Сі-Джей Дос Сантос",
+      "team": "Кабо-Верде",
+      "position": "GK",
+      "oldPrice": 5,
+      "sourcePrice": 4,
+      "newPrice": 3,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzzb0s00h5lb44e28l9eqb",
+      "name": "Ахмед Таньяті",
+      "team": "Марокко",
+      "position": "GK",
+      "oldPrice": 3.5,
+      "sourcePrice": 4,
+      "newPrice": 3,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzzb0p00h3lb441t3sc3ee",
+      "name": "Мунір Мохамеді",
+      "team": "Марокко",
+      "position": "GK",
+      "oldPrice": 4,
+      "sourcePrice": 4.5,
+      "newPrice": 3.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzzazm00h1lb44l2t4dtoi",
+      "name": "Яссін Буну",
+      "team": "Марокко",
+      "position": "GK",
+      "oldPrice": 7,
+      "sourcePrice": 5.5,
+      "newPrice": 4.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzzb1000h7lb447lhhpf8m",
+      "name": "Анасс Салах-Еддін",
+      "team": "Марокко",
+      "position": "DEF",
+      "oldPrice": 4,
+      "sourcePrice": 5.5,
+      "newPrice": 4.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzzb1v00hllb44xstdyhyt",
+      "name": "Ашраф Хакімі",
+      "team": "Марокко",
+      "position": "DEF",
+      "oldPrice": 4.5,
+      "sourcePrice": 6.5,
+      "newPrice": 5.5,
+      "existsLocally": true
+    },
+    {
+      "id": "cmpnzzb1700h9lb44e6rhwtkl",
+      "name": "Закарія Ель-Уахді",
+      "team": "Марокко",
+      "position": "DEF",
+      "oldPrice": 4,
+      "sourcePrice": 5,
+      "newPrice": 4,
+      "existsLocally": true
+    }
+  ]
+}

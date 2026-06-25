@@ -1,0 +1,154 @@
+{
+  "csvRows": 1248,
+  "validRows": 1248,
+  "invalidRows": [],
+  "matchedPlayerUpdates": 1405,
+  "changedPlayerUpdates": 198,
+  "unmatchedRows": [
+    {
+      "rowNumber": 16,
+      "team": "Австралія",
+      "player": "Luongo",
+      "price": "4.5"
+    },
+    {
+      "rowNumber": 53,
+      "team": "Австрія",
+      "player": "Ljubicic",
+      "price": "6.0"
+    },
+    {
+      "rowNumber": 97,
+      "team": "Аргентина",
+      "player": "Senesi",
+      "price": "4.5"
+    },
+    {
+      "rowNumber": 175,
+      "team": "Бразилія",
+      "player": "Est?v?o",
+      "price": "5.5"
+    },
+    {
+      "rowNumber": 207,
+      "team": "ДР Конго",
+      "player": "Bongonda",
+      "price": "6.0"
+    },
+    {
+      "rowNumber": 261,
+      "team": "Канада",
+      "player": "Nelson",
+      "price": "5.0"
+    },
+    {
+      "rowNumber": 278,
+      "team": "Колумбія",
+      "player": "C?rdoba",
+      "price": "5.0"
+    },
+    {
+      "rowNumber": 368,
+      "team": "Іран",
+      "player": "Mohebi",
+      "price": "5.5"
+    },
+    {
+      "rowNumber": 388,
+      "team": "Іран",
+      "player": "Dargahi",
+      "price": "5.0"
+    },
+    {
+      "rowNumber": 423,
+      "team": "Кюрасао",
+      "player": "Rosaria",
+      "price": "4.5"
+    },
+    {
+      "rowNumber": 425,
+      "team": "Кюрасао",
+      "player": "Gobitez",
+      "price": "3.5"
+    },
+    {
+      "rowNumber": 504,
+      "team": "Чехія",
+      "player": "Cerny",
+      "price": "6.0"
+    },
+    {
+      "rowNumber": 547,
+      "team": "Англія",
+      "player": "Chalobah",
+      "price": "5.0"
+    },
+    {
+      "rowNumber": 573,
+      "team": "Гаїті",
+      "player": "Metusala",
+      "price": "3.5"
+    },
+    {
+      "rowNumber": 638,
+      "team": "Парагвай",
+      "player": "Romero",
+      "price": "4.5"
+    },
+    {
+      "rowNumber": 816,
+      "team": "Марокко",
+      "player": "Bouchadi",
+      "price": "4.5"
+    },
+    {
+      "rowNumber": 828,
+      "team": "Марокко",
+      "player": "Saiss",
+      "price": "4.5"
+    },
+    {
+      "rowNumber": 829,
+      "team": "Марокко",
+      "player": "Igamane",
+      "price": "9.0"
+    },
+    {
+      "rowNumber": 831,
+      "team": "Марокко",
+      "player": "Hilali",
+      "price": "5.0"
+    },
+    {
+      "rowNumber": 856,
+      "team": "Нідерланди",
+      "player": "Wijnaldum",
+      "price": "2.5"
+    },
+    {
+      "rowNumber": 936,
+      "team": "Панама",
+      "player": "Fari?a",
+      "price": "2.0"
+    },
+    {
+      "rowNumber": 972,
+      "team": "Узбекистан",
+      "player": "Jiyanov",
+      "price": "4.5"
+    },
+    {
+      "rowNumber": 1160,
+      "team": "Швейцарія",
+      "player": "Hefti",
+      "price": "6.0"
+    },
+    {
+      "rowNumber": 1211,
+      "team": "Туреччина",
+      "player": "Cifci",
+      "price": "4.5"
+    }
+  ],
+  "exportPath": "exports\\player-prices-all-2026-06-24.sql"
+}

@@ -7,7 +7,6 @@ import {
   Goal,
   ListChecks,
   RotateCcw,
-  Save,
   Trophy,
   Upload,
   UserRoundCog,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
+import { AdminPlayerPriceManager } from "../../components/admin-player-price-manager";
 import { AdminPlayerPointInputs } from "../../components/admin-player-point-inputs";
 import { DeleteNationalTeamPlayersButton } from "../../components/delete-national-team-players-button";
 import { DeletePlayoffFixtureButton } from "../../components/delete-playoff-fixture-button";
@@ -39,7 +39,6 @@ import {
   saveFixtureScore,
   setMaintenanceModeAction,
   updateTournamentTiebreaks,
-  updatePlayerPrice,
 } from "../actions/admin-actions";
 
 export const metadata: Metadata = createMetadata({
@@ -786,21 +785,17 @@ export default async function AdminPage({
 
       <section className="panel" style={{ marginTop: 16 }} id="player-price">
         <h2>Редагувати ціну гравця</h2>
-        <form action={updatePlayerPrice} className="form-inline">
-          <select className="input" name="playerId" required>
-            <option value="">Обери гравця</option>
-            {players.map((player) => (
-              <option key={player.id} value={player.id}>
-                {player.name} | {player.nationalTeam.nameUk} | {player.position} | {player.club ?? "-"} | {Number(player.price).toFixed(1)}
-              </option>
-            ))}
-          </select>
-          <input className="input points-input" name="price" type="number" step="0.1" min="0.1" required />
-          <button className="button primary" type="submit" disabled={players.length === 0}>
-            <Save size={18} />
-            Зберегти ціну
-          </button>
-        </form>
+        <AdminPlayerPriceManager
+          players={players.map((player) => ({
+            id: player.id,
+            name: player.name,
+            position: player.position,
+            price: Number(player.price),
+            nationalTeamId: player.nationalTeamId,
+            nationalTeamName: player.nationalTeam.nameUk,
+            groupKey: player.nationalTeam.groupKey,
+          }))}
+        />
       </section>
 
       <section className="panel" style={{ marginTop: 16 }} id="players-list">
