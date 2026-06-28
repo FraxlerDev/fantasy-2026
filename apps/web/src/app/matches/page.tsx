@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { MatchCenter } from "../../components/match-center";
 import { AppShell } from "../../components/shell";
 import { stadiums } from "../../data/match-center";
@@ -22,7 +23,7 @@ const validTabs = new Set(["groups", "playoff", "calendar", "stadiums"]);
 export default async function MatchesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ tab?: string }>;
+  searchParams?: Promise<{ tab?: string; stage?: string }>;
 }) {
   const query = await searchParams;
   const initialTab = validTabs.has(query?.tab ?? "") ? query?.tab as "groups" | "playoff" | "calendar" | "stadiums" : "playoff";
@@ -128,11 +129,34 @@ export default async function MatchesPage({
     stadiumId: match.stadiumId,
     city: stadiums.find((stadium) => stadium.id === match.stadiumId)?.city ?? null,
   }));
+  const allMatches = [...groupMatches, ...knockoutMatches].sort(
+    (a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime() || a.matchNo - b.matchNo,
+  );
+  const calendarStageKeys = ["gw1", "gw2", "gw3", "r32", "r16", "qf", "sf", "third", "final"] as const;
+  const stageForMatch = (match: (typeof allMatches)[number]) => {
+    if (match.gameweek && match.gameweek <= 3) return `gw${match.gameweek}`;
+    if (match.id === "third-1") return "third";
+    if (match.id === "final-1") return "final";
+    return match.stage;
+  };
+  const now = new Date();
+  const currentCalendarStage = calendarStageKeys.reduce<string>(
+    (current, stage) => allMatches.some((match) => stageForMatch(match) === stage && new Date(match.kickoffAt) <= now) ? stage : current,
+    "gw1",
+  );
+  const validCalendarStages = new Set(["all", ...calendarStageKeys]);
+  const initialCalendarStage = (
+    validCalendarStages.has(query?.stage ?? "") ? query!.stage! : currentCalendarStage
+  ) as "all" | (typeof calendarStageKeys)[number];
+  if (initialTab === "calendar" && !validCalendarStages.has(query?.stage ?? "")) {
+    redirect(`/matches?tab=calendar&stage=${initialCalendarStage}`);
+  }
 
   return (
     <AppShell active="/matches">
       <MatchCenter
         initialTab={initialTab}
+        initialCalendarStage={initialCalendarStage}
         groups={[...tables.entries()].map(([key, rows]) => ({ key, rows }))}
         thirds={rankThirdPlacedTeams(tables).map(({ group, row, rank, qualified }) => ({
           ...row,
@@ -140,9 +164,7 @@ export default async function MatchesPage({
           rank,
           qualified,
         }))}
-        matches={[...groupMatches, ...knockoutMatches].sort(
-          (a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime() || a.matchNo - b.matchNo,
-        )}
+        matches={allMatches}
         stadiums={stadiums.map((stadium) => ({
           id: stadium.id,
           country: stadium.country,

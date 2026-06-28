@@ -84,6 +84,7 @@ type Props = {
   teamProfiles: TeamProfile[];
   stadiums: Stadium[];
   initialTab?: (typeof tabs)[number]["id"];
+  initialCalendarStage?: CalendarStage;
 };
 
 const tabs = [
@@ -92,6 +93,29 @@ const tabs = [
   { id: "calendar", label: "Календар", icon: CalendarDays },
   { id: "stadiums", label: "Стадіони", icon: MapPin },
 ] as const;
+
+const calendarStageTabs = [
+  { id: "all", label: "Усі матчі" },
+  { id: "gw1", label: "1 тур" },
+  { id: "gw2", label: "2 тур" },
+  { id: "gw3", label: "3 тур" },
+  { id: "r32", label: "1/16 фіналу" },
+  { id: "r16", label: "1/8 фіналу" },
+  { id: "qf", label: "1/4 фіналу" },
+  { id: "sf", label: "1/2 фіналу" },
+  { id: "third", label: "Матч за 3-тє місце" },
+  { id: "final", label: "Фінал" },
+] as const;
+
+type CalendarStage = (typeof calendarStageTabs)[number]["id"];
+
+function calendarStageForMatch(match: Match): CalendarStage | null {
+  if (match.gameweek && match.gameweek >= 1 && match.gameweek <= 3) return `gw${match.gameweek}` as CalendarStage;
+  if (match.id === "third-1") return "third";
+  if (match.id === "final-1") return "final";
+  if (["r32", "r16", "qf", "sf"].includes(match.stage)) return match.stage as CalendarStage;
+  return null;
+}
 
 const stageTitles: Record<string, string> = {
   r32: "1/16 фіналу",
@@ -498,9 +522,18 @@ function ReferenceStadiumMap({
   );
 }
 
-export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, initialTab = "playoff" }: Props) {
+export function MatchCenter({
+  groups,
+  thirds,
+  matches,
+  teamProfiles,
+  stadiums,
+  initialTab = "playoff",
+  initialCalendarStage = "all",
+}: Props) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>(initialTab);
+  const [calendarStage, setCalendarStage] = useState<CalendarStage>(initialCalendarStage);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [selectedStadiumId, setSelectedStadiumId] = useState<string | null>(null);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
@@ -508,6 +541,10 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
   useEffect(() => {
     setActiveTab(initialTab);
   }, [initialTab]);
+
+  useEffect(() => {
+    setCalendarStage(initialCalendarStage);
+  }, [initialCalendarStage]);
 
   const selectedTeam = teamProfiles.find((team) => team.id === selectedTeamId) ?? null;
   const selectedStadium = stadiums.find((stadium) => stadium.id === selectedStadiumId) ?? null;
@@ -525,7 +562,10 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
 
   const calendarDays = useMemo(() => {
     const map = new Map<string, Match[]>();
-    for (const match of matches) {
+    const calendarMatches = calendarStage === "all"
+      ? matches
+      : matches.filter((match) => calendarStageForMatch(match) === calendarStage);
+    for (const match of calendarMatches) {
       const day = new Date(match.kickoffAt).toLocaleDateString("uk-UA", {
         timeZone: "Europe/Kyiv",
         day: "2-digit",
@@ -535,7 +575,7 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
       map.set(day, [...(map.get(day) ?? []), match]);
     }
     return [...map.entries()];
-  }, [matches]);
+  }, [calendarStage, matches]);
 
   return (
     <>
@@ -559,7 +599,10 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
             key={tab.id}
             onClick={() => {
               setActiveTab(tab.id);
-              router.replace(`/matches?tab=${tab.id}`, { scroll: false });
+              router.replace(
+                tab.id === "calendar" ? `/matches?tab=calendar&stage=${calendarStage}` : `/matches?tab=${tab.id}`,
+                { scroll: false },
+              );
             }}
             type="button"
           >
@@ -648,7 +691,22 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
           <div className="section-heading">
             <div><p className="eyebrow">11 червня – 19 липня</p><h2>Календар 104 матчів</h2></div>
           </div>
-          <div className="match-calendar">
+          <nav className="calendar-stage-tabs" aria-label="Етапи календаря">
+            {calendarStageTabs.map((stage) => (
+              <button
+                className={calendarStage === stage.id ? "active" : ""}
+                key={stage.id}
+                onClick={() => {
+                  setCalendarStage(stage.id);
+                  router.replace(`/matches?tab=calendar&stage=${stage.id}`, { scroll: false });
+                }}
+                type="button"
+              >
+                {stage.label}
+              </button>
+            ))}
+          </nav>
+          {calendarDays.length > 0 ? <div className="match-calendar">
             {calendarDays.map(([day, dayMatches]) => (
               <section className="calendar-day" key={day}>
                 <h3>{day}</h3>
@@ -670,7 +728,7 @@ export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, i
                 ))}
               </section>
             ))}
-          </div>
+          </div> : <div className="calendar-empty-stage">Матчі цього етапу ще не визначено.</div>}
         </div>
       ) : null}
 
