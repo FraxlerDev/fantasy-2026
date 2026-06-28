@@ -993,3 +993,18 @@ export async function setMaintenanceModeAction(formData: FormData) {
   revalidatePath("/admin");
   redirect(`/admin?maintenance=${enabled ? "on" : "off"}#maintenance`);
 }
+
+export async function setPublicTeamStatisticsVisibilityAction(formData: FormData) {
+  await requireAdmin();
+  const enabled = String(formData.get("enabled") ?? "") === "1";
+
+  await prisma.systemSetting.upsert({
+    where: { key: "publicTeamStatistics" },
+    create: { key: "publicTeamStatistics", value: enabled ? "on" : "off" },
+    update: { value: enabled ? "on" : "off" },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/teams/[id]", "page");
+  redirect(`/admin?teamStatistics=${enabled ? "on" : "off"}#team-statistics`);
+}

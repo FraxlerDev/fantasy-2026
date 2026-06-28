@@ -38,6 +38,7 @@ import {
   saveFixturePoints,
   saveFixtureScore,
   setMaintenanceModeAction,
+  setPublicTeamStatisticsVisibilityAction,
   updateTournamentTiebreaks,
 } from "../actions/admin-actions";
 
@@ -210,7 +211,7 @@ export default async function AdminPage({
 
   const params = await searchParams;
   const selectedGameweek = params?.gw ? Number(params.gw) : undefined;
-  const [teams, players, allFixtures, gameweeks, fantasyTeams, maintenanceSetting] = await Promise.all([
+  const [teams, players, allFixtures, gameweeks, fantasyTeams, maintenanceSetting, teamStatisticsSetting] = await Promise.all([
     prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }] }),
     prisma.player.findMany({
       include: { nationalTeam: true },
@@ -240,8 +241,10 @@ export default async function AdminPage({
       orderBy: [{ createdAt: "asc" }],
     }),
     prisma.systemSetting.findUnique({ where: { key: "maintenanceMode" } }),
+    prisma.systemSetting.findUnique({ where: { key: "publicTeamStatistics" } }),
   ]);
   const maintenanceEnabled = maintenanceSetting?.value === "on";
+  const teamStatisticsEnabled = teamStatisticsSetting?.value === "on";
   const playoffScores = await prisma.playoffMatch.findMany({ orderBy: { matchNo: "asc" } });
   const tournamentTeams = teams.map((team) => ({
     id: team.id,
@@ -644,6 +647,27 @@ export default async function AdminPage({
             <input type="hidden" name="enabled" value="0" />
             <button className="button primary" type="submit">
               Завершити технічні роботи
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section className="panel" id="team-statistics" style={{ marginBottom: 16 }}>
+        <h2>Статистика публічних команд</h2>
+        <p className="muted">
+          Поточний статус: <strong>{teamStatisticsEnabled ? "увімкнено" : "вимкнено"}</strong>. Перемикач керує всім статистичним блоком на індивідуальних сторінках команд.
+        </p>
+        <div className="toolbar">
+          <form action={setPublicTeamStatisticsVisibilityAction}>
+            <input type="hidden" name="enabled" value="1" />
+            <button className="button primary" disabled={teamStatisticsEnabled} type="submit">
+              Увімкнути статистику
+            </button>
+          </form>
+          <form action={setPublicTeamStatisticsVisibilityAction}>
+            <input type="hidden" name="enabled" value="0" />
+            <button className="button" disabled={!teamStatisticsEnabled} type="submit">
+              Вимкнути статистику
             </button>
           </form>
         </div>

@@ -240,7 +240,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
 
   if (!team) notFound();
 
-  const [fixtures, gameweeks, rankedTeams, autoSubstitutions, autoSubstitutionSettings] = await Promise.all([
+  const [fixtures, gameweeks, rankedTeams, autoSubstitutions, autoSubstitutionSettings, teamStatisticsSetting, rankingsGameweekSetting] = await Promise.all([
     prisma.fixture.findMany({
       include: { homeTeam: true, awayTeam: true, playerPoints: true },
       orderBy: [{ gameweek: "asc" }, { kickoffAt: "asc" }, { matchNo: "asc" }],
@@ -251,6 +251,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
       select: {
         id: true,
         name: true,
+        rosterEntries: { select: { playerId: true } },
         lineupSnapshots: {
           select: {
             gameweek: true,
@@ -268,6 +269,8 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
     prisma.systemSetting.findMany({
       where: { key: { startsWith: "autoSubstitutionsCalculated:" } },
     }),
+    prisma.systemSetting.findUnique({ where: { key: "publicTeamStatistics" } }),
+    prisma.systemSetting.findUnique({ where: { key: "rankingsCurrentGameweek" } }),
   ]);
 
   const currentGameweek =
@@ -455,6 +458,111 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
   const overallRankIndex = overallOrder.findIndex((item) => item.id === team.id);
   const overallRank = overallRankIndex >= 0 ? overallRankIndex + 1 : null;
 
+  const showTeamStatistics = teamStatisticsSetting?.value === "on";
+  const statisticsThroughGameweek = Math.max(0, Math.min(7, Number(rankingsGameweekSetting?.value ?? 0) || 0));
+  const statisticsSnapshots = team.lineupSnapshots.filter((snapshot) => snapshot.gameweek <= statisticsThroughGameweek);
+  const statisticsGwRows = statisticsSnapshots.map((snapshot) => ({
+    gameweek: snapshot.gameweek,
+    points: teamPointsByGameweek.get(snapshot.gameweek) ?? 0,
+  }));
+  const bestGameweek = [...statisticsGwRows].sort((a, b) => b.points - a.points || a.gameweek - b.gameweek)[0] ?? null;
+  const averagePoints = statisticsGwRows.length > 0
+    ? statisticsGwRows.reduce((sum, row) => sum + row.points, 0) / statisticsGwRows.length
+    : null;
+
+  const playerById = new Map(
+    [...team.rosterEntries, ...team.lineupSnapshots.flatMap((snapshot) => snapshot.entries)]
+      .map((entry) => [entry.playerId, entry.player] as const),
+  );
+  const creditedPointsByPlayer = new Map<string, number>();
+  const positionPoints: Record<PlayerPosition, number> = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
+  let bestCaptain: { playerId: string; name: string; photoUrl: string | null; gameweek: number; points: number } | null = null;
+
+  for (const snapshot of statisticsSnapshots) {
+    const gwPoints = pointsByGameweek.get(snapshot.gameweek) ?? new Map<string, number>();
+    const snapshotStarters = snapshot.entries.filter((entry) => entry.slot === "STARTER");
+    for (const entry of snapshotStarters) {
+      const points = gwPoints.get(entry.playerId) ?? 0;
+      creditedPointsByPlayer.set(entry.playerId, (creditedPointsByPlayer.get(entry.playerId) ?? 0) + points);
+      positionPoints[entry.player.position] += points;
+      if (entry.isCaptain) {
+        creditedPointsByPlayer.set(entry.playerId, (creditedPointsByPlayer.get(entry.playerId) ?? 0) + points);
+        positionPoints[entry.player.position] += points;
+        const captainPoints = points * 2;
+        if (!bestCaptain || captainPoints > bestCaptain.points) {
+          bestCaptain = {
+            playerId: entry.playerId,
+            name: entry.player.name,
+            photoUrl: entry.player.photoUrl,
+            gameweek: snapshot.gameweek,
+            points: captainPoints,
+          };
+        }
+      }
+    }
+    for (const substitution of autoSubstitutions.filter(
+      (item) => item.fantasyTeamId === team.id && item.gameweek === snapshot.gameweek,
+    )) {
+      const player = playerById.get(substitution.inPlayerId);
+      if (!player) continue;
+      creditedPointsByPlayer.set(
+        substitution.inPlayerId,
+        (creditedPointsByPlayer.get(substitution.inPlayerId) ?? 0) + substitution.points,
+      );
+      positionPoints[player.position] += substitution.points;
+    }
+  }
+
+  const topPlayerEntry = [...creditedPointsByPlayer.entries()]
+    .map(([playerId, points]) => ({ playerId, points, player: playerById.get(playerId) }))
+    .filter((item): item is typeof item & { player: NonNullable<typeof item.player> } => Boolean(item.player))
+    .sort((a, b) => b.points - a.points || a.player.name.localeCompare(b.player.name, "uk"))[0] ?? null;
+
+  let successfulTransferPoints = 0;
+  let successfulTransferPlayers = 0;
+  for (let index = 1; index < statisticsSnapshots.length; index += 1) {
+    const previousIds = new Set(statisticsSnapshots[index - 1].entries.map((entry) => entry.playerId));
+    const incoming = statisticsSnapshots[index].entries.filter((entry) => !previousIds.has(entry.playerId));
+    const gwPoints = pointsByGameweek.get(statisticsSnapshots[index].gameweek) ?? new Map<string, number>();
+    successfulTransferPlayers += incoming.length;
+    successfulTransferPoints += incoming.reduce((sum, entry) => sum + (gwPoints.get(entry.playerId) ?? 0), 0);
+  }
+
+  const totalAutoSubPoints = autoSubstitutions
+    .filter((item) => item.fantasyTeamId === team.id && item.gameweek <= statisticsThroughGameweek)
+    .reduce((sum, item) => sum + item.points, 0);
+  const fullCurrentTeams = rankedTeams.filter((rankedTeam) => rankedTeam.rosterEntries.length === 15);
+  const ownershipByPlayer = new Map<string, number>();
+  for (const rankedTeam of fullCurrentTeams) {
+    for (const entry of rankedTeam.rosterEntries) {
+      ownershipByPlayer.set(entry.playerId, (ownershipByPlayer.get(entry.playerId) ?? 0) + 1);
+    }
+  }
+  const uniquePlayers = team.rosterEntries
+    .map((entry) => ({
+      player: entry.player,
+      percentage: fullCurrentTeams.length > 0
+        ? ((ownershipByPlayer.get(entry.playerId) ?? 0) / fullCurrentTeams.length) * 100
+        : 0,
+    }))
+    .filter((item) => item.percentage < 5)
+    .sort((a, b) => a.percentage - b.percentage || a.player.name.localeCompare(b.player.name, "uk"));
+  const rankDynamics = statisticsGwRows
+    .map((row) => ({ gameweek: row.gameweek, rank: rankDataByGameweek.get(row.gameweek)?.cumulativeRank ?? null }))
+    .filter((row): row is { gameweek: number; rank: number } => row.rank !== null);
+  const rankChartWidth = 560;
+  const rankChartHeight = 150;
+  const rankChartPadding = 22;
+  const maximumRank = Math.max(1, ...rankDynamics.map((row) => row.rank));
+  const rankChartPoints = rankDynamics.map((row, index) => ({
+    ...row,
+    x: rankDynamics.length <= 1
+      ? rankChartWidth / 2
+      : rankChartPadding + (index * (rankChartWidth - rankChartPadding * 2)) / (rankDynamics.length - 1),
+    y: rankChartPadding + ((row.rank - 1) * (rankChartHeight - rankChartPadding * 2)) / Math.max(1, maximumRank - 1),
+  }));
+  const maxPositionPoints = Math.max(1, ...Object.values(positionPoints).map((points) => Math.max(0, points)));
+
   return (
     <AppShell active="/leaderboard">
       <>
@@ -614,6 +722,121 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
             </div>
           </section>
         </section>
+
+        {showTeamStatistics ? (
+          <section className="panel public-team-statistics">
+            <div className="public-team-section-heading">
+              <div>
+                <p className="eyebrow">Статистика команди</p>
+                <h2>Показники за завершеними турами</h2>
+              </div>
+              <span>Після оновлення рейтингу до GW{statisticsThroughGameweek || "—"}</span>
+            </div>
+
+            <div className="team-statistics-cards">
+              <article className="team-stat-card">
+                <span>Найкращий GW</span>
+                <strong>{bestGameweek ? `GW${bestGameweek.gameweek} · ${bestGameweek.points} оч.` : "—"}</strong>
+              </article>
+              <article className="team-stat-card">
+                <span>Середні очки за GW</span>
+                <strong>{averagePoints === null ? "—" : averagePoints.toFixed(1)}</strong>
+                <small>{statisticsGwRows.length} турів участі</small>
+              </article>
+              <article className="team-stat-card team-stat-player-card">
+                <span>Найкращий капітан</span>
+                {bestCaptain ? (
+                  <div>
+                    {bestCaptain.photoUrl ? <img alt="" src={bestCaptain.photoUrl} /> : <span className="team-stat-player-placeholder" />}
+                    <p><strong>{bestCaptain.name}</strong><small>GW{bestCaptain.gameweek} · {bestCaptain.points} подвоєних очок</small></p>
+                  </div>
+                ) : <strong>—</strong>}
+              </article>
+              <article className="team-stat-card">
+                <span>Вдалі трансфери</span>
+                <strong>{successfulTransferPoints >= 0 ? "+" : ""}{successfulTransferPoints} оч.</strong>
+                <small>{successfulTransferPlayers} нових гравців</small>
+              </article>
+              <article className="team-stat-card">
+                <span>Очки автозамін</span>
+                <strong>{totalAutoSubPoints >= 0 ? "+" : ""}{totalAutoSubPoints}</strong>
+              </article>
+              <article className="team-stat-card team-stat-player-card">
+                <span>Найрезультативніший гравець</span>
+                {topPlayerEntry ? (
+                  <div>
+                    {topPlayerEntry.player.photoUrl ? <img alt="" src={topPlayerEntry.player.photoUrl} /> : <span className="team-stat-player-placeholder" />}
+                    <p><strong>{topPlayerEntry.player.name}</strong><small>{topPlayerEntry.points} очок для команди</small></p>
+                  </div>
+                ) : <strong>—</strong>}
+              </article>
+            </div>
+
+            <div className="team-statistics-details">
+              <article className="team-stat-detail-card">
+                <h3>Розподіл очок за позиціями</h3>
+                <div className="position-points-chart">
+                  {(["GK", "DEF", "MID", "FWD"] as PlayerPosition[]).map((position) => (
+                    <div key={position}>
+                      <span>{positionLabels[position]}</span>
+                      <span className="position-points-track"><i style={{ width: `${Math.max(0, positionPoints[position]) / maxPositionPoints * 100}%` }} /></span>
+                      <strong>{positionPoints[position]}</strong>
+                    </div>
+                  ))}
+                </div>
+              </article>
+
+              <article className="team-stat-detail-card">
+                <h3>Динаміка місця</h3>
+                {rankChartPoints.length > 0 ? (
+                  <div className="team-rank-chart">
+                    <svg aria-label="Зміна місця команди після кожного GW" viewBox={`0 0 ${rankChartWidth} ${rankChartHeight}`}>
+                      <polyline points={rankChartPoints.map((point) => `${point.x},${point.y}`).join(" ")} />
+                      {rankChartPoints.map((point) => (
+                        <g key={point.gameweek}>
+                          <circle cx={point.x} cy={point.y} r="5"><title>GW{point.gameweek}: місце {point.rank}</title></circle>
+                          <text x={point.x} y={rankChartHeight - 3}>GW{point.gameweek}</text>
+                          <text className="rank-value" x={point.x} y={Math.max(12, point.y - 10)}>{point.rank}</text>
+                        </g>
+                      ))}
+                    </svg>
+                  </div>
+                ) : <p className="muted">Дані з’являться після оновлення рейтингу.</p>}
+              </article>
+
+              <article className="team-stat-detail-card unique-players-card">
+                <h3>Унікальні гравці <span>менше ніж у 5% команд</span></h3>
+                {uniquePlayers.length > 0 ? (
+                  <>
+                    <div className="unique-player-list">
+                      {uniquePlayers.slice(0, 5).map((item) => (
+                        <div key={item.player.id}>
+                          {item.player.photoUrl ? <img alt="" src={item.player.photoUrl} /> : <span className="team-stat-player-placeholder" />}
+                          <strong>{item.player.name}</strong>
+                          <small>{item.percentage.toFixed(1)}%</small>
+                        </div>
+                      ))}
+                    </div>
+                    {uniquePlayers.length > 5 ? (
+                      <details>
+                        <summary>Показати всіх ({uniquePlayers.length})</summary>
+                        <div className="unique-player-list expanded">
+                          {uniquePlayers.slice(5).map((item) => (
+                            <div key={item.player.id}>
+                              {item.player.photoUrl ? <img alt="" src={item.player.photoUrl} /> : <span className="team-stat-player-placeholder" />}
+                              <strong>{item.player.name}</strong>
+                              <small>{item.percentage.toFixed(1)}%</small>
+                            </div>
+                          ))}
+                        </div>
+                      </details>
+                    ) : null}
+                  </>
+                ) : <p className="muted">У поточному складі немає гравців із вибором менше ніж 5%.</p>}
+              </article>
+            </div>
+          </section>
+        ) : null}
 
         <section className="panel public-team-fixtures">
           <h2>Матчі гравців</h2>
