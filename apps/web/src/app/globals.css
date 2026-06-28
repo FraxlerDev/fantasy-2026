@@ -7930,6 +7930,38 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
   text-align: center;
 }
 
+.bracket-special-label {
+  display: block;
+  margin: -7px -8px 4px;
+  padding: 3px 5px;
+  background: #edf3ed;
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.bracket-match.final-match {
+  border-color: #d6b84a;
+  box-shadow: inset 0 3px 0 #e1c34f;
+}
+
+.bracket-match.final-match .bracket-special-label {
+  background: #fff7cf;
+  color: #6d5700;
+}
+
+.bracket-match.third-match {
+  border-color: #bf8a61;
+  box-shadow: inset 0 3px 0 #bf8a61;
+}
+
+.bracket-match.third-match .bracket-special-label {
+  background: #f6e8dc;
+  color: #744520;
+}
+
 .bracket-match.r32.left { left: 20px; }
 .bracket-match.r16.left { left: 205px; }
 .bracket-match.qf.left { left: 390px; }
@@ -7985,6 +8017,106 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
 .bracket-round-label.qf-label.right { left: 1035px; }
 .bracket-round-label.r16-label.right { left: 1220px; }
 .bracket-round-label.r32-label.right { left: 1405px; }
+
+@media (min-width: 981px) {
+  .playoff-bracket-scroll {
+    overflow-x: hidden;
+  }
+
+  .playoff-tree {
+    container-type: inline-size;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1560 / 900;
+  }
+
+  .bracket-match {
+    width: 8.654%;
+    min-height: clamp(56px, 5.65cqw, 88px);
+    padding: clamp(4px, 0.45cqw, 7px) clamp(4px, 0.52cqw, 8px);
+    border-radius: clamp(5px, 0.52cqw, 8px);
+  }
+
+  .bracket-team {
+    min-height: clamp(17px, 1.61cqw, 25px);
+  }
+
+  .bracket-team-name {
+    gap: clamp(2px, 0.32cqw, 5px);
+    font-size: clamp(8px, 0.71cqw, 11px);
+  }
+
+  .bracket-team .flag,
+  .bracket-placeholder {
+    width: clamp(13px, 1.29cqw, 20px);
+    height: clamp(13px, 1.29cqw, 20px);
+    flex-basis: clamp(13px, 1.29cqw, 20px);
+  }
+
+  .bracket-match > small,
+  .bracket-match > em {
+    margin-top: clamp(1px, 0.26cqw, 4px);
+    font-size: clamp(7px, 0.65cqw, 10px);
+  }
+
+  .bracket-special-label {
+    margin: clamp(-7px, -0.45cqw, -4px) clamp(-8px, -0.52cqw, -4px) 3px;
+    padding: 2px 3px;
+    font-size: clamp(7px, 0.58cqw, 9px);
+  }
+
+  .bracket-match.r32.left { left: 1.282%; }
+  .bracket-match.r16.left { left: 13.141%; }
+  .bracket-match.qf.left { left: 25%; }
+  .bracket-match.sf.left { left: 36.859%; }
+  .bracket-match.sf.right { left: 54.487%; }
+  .bracket-match.qf.right { left: 66.346%; }
+  .bracket-match.r16.right { left: 78.205%; }
+  .bracket-match.r32.right { left: 90.064%; }
+  .bracket-match.r32.slot-1 { top: 2.889%; }
+  .bracket-match.r32.slot-2 { top: 14.556%; }
+  .bracket-match.r32.slot-3 { top: 26.222%; }
+  .bracket-match.r32.slot-4 { top: 37.889%; }
+  .bracket-match.r32.slot-5 { top: 49.556%; }
+  .bracket-match.r32.slot-6 { top: 61.222%; }
+  .bracket-match.r32.slot-7 { top: 72.889%; }
+  .bracket-match.r32.slot-8 { top: 84.556%; }
+  .bracket-match.r16.slot-1 { top: 8.778%; }
+  .bracket-match.r16.slot-2 { top: 32.111%; }
+  .bracket-match.r16.slot-3 { top: 55.444%; }
+  .bracket-match.r16.slot-4 { top: 78.778%; }
+  .bracket-match.qf.slot-1 { top: 20.444%; }
+  .bracket-match.qf.slot-2 { top: 67.111%; }
+  .bracket-match.sf.slot-1 { top: 43.778%; }
+  .bracket-match.final-match { left: 45.192%; top: 33.444%; width: 9.615%; }
+  .bracket-match.third-match { left: 45.192%; top: 62.333%; width: 9.615%; }
+
+  .bracket-champion {
+    left: 44.231%;
+    top: 47.222%;
+    width: 11.538%;
+    font-size: clamp(8px, 0.77cqw, 12px);
+  }
+
+  .bracket-champion svg {
+    width: clamp(28px, 2.7cqw, 42px);
+    height: clamp(28px, 2.7cqw, 42px);
+  }
+
+  .bracket-round-label {
+    top: 0.556%;
+    font-size: clamp(7px, 0.65cqw, 10px);
+  }
+
+  .bracket-round-label.r32-label.left { left: 1.282%; }
+  .bracket-round-label.r16-label.left { left: 13.141%; }
+  .bracket-round-label.qf-label.left { left: 25%; }
+  .bracket-round-label.sf-label.left { left: 36.859%; }
+  .bracket-round-label.sf-label.right { left: 54.487%; }
+  .bracket-round-label.qf-label.right { left: 66.346%; }
+  .bracket-round-label.r16-label.right { left: 78.205%; }
+  .bracket-round-label.r32-label.right { left: 90.064%; }
+}
 
 .playoff-match-dialog {
   width: min(620px, calc(100vw - 24px));

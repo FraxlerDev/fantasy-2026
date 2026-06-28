@@ -87,8 +87,8 @@ type Props = {
 };
 
 const tabs = [
-  { id: "groups", label: "Групи", icon: Users },
   { id: "playoff", label: "Плей-оф", icon: Trophy },
+  { id: "groups", label: "Групи", icon: Users },
   { id: "calendar", label: "Календар", icon: CalendarDays },
   { id: "stadiums", label: "Стадіони", icon: MapPin },
 ] as const;
@@ -164,8 +164,14 @@ function PlayoffTeam({ team, fallback, score }: { team: Team | null; fallback: s
 
 function PlayoffCard({ match, className, onOpen }: { match: Match; className: string; onOpen: (id: string) => void }) {
   const kickoff = compactKickoff(match.kickoffAt);
+  const specialLabel = className.includes("final-match")
+    ? "Фінал"
+    : className.includes("third-match")
+      ? "Матч за 3-тє місце"
+      : null;
   return (
     <button className={`bracket-match ${className}`} type="button" onClick={() => onOpen(match.id)}>
+      {specialLabel ? <span className="bracket-special-label">{specialLabel}</span> : null}
       <PlayoffTeam team={match.home} fallback={match.homeLabel} score={match.homeScore} />
       <PlayoffTeam team={match.away} fallback={match.awayLabel} score={match.awayScore} />
       <small>{kickoff.date} · {kickoff.time}</small>
@@ -492,7 +498,7 @@ function ReferenceStadiumMap({
   );
 }
 
-export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, initialTab = "groups" }: Props) {
+export function MatchCenter({ groups, thirds, matches, teamProfiles, stadiums, initialTab = "playoff" }: Props) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>(initialTab);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);

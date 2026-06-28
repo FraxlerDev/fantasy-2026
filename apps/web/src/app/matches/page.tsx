@@ -25,7 +25,7 @@ export default async function MatchesPage({
   searchParams?: Promise<{ tab?: string }>;
 }) {
   const query = await searchParams;
-  const initialTab = validTabs.has(query?.tab ?? "") ? query?.tab as "groups" | "playoff" | "calendar" | "stadiums" : "groups";
+  const initialTab = validTabs.has(query?.tab ?? "") ? query?.tab as "groups" | "playoff" | "calendar" | "stadiums" : "playoff";
   await ensurePlayoffMatches();
 
   const [teams, fixtures, playoffScores] = await Promise.all([
