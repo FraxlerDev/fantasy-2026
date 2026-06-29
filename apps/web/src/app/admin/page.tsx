@@ -39,6 +39,7 @@ import {
   saveFixtureScore,
   setMaintenanceModeAction,
   setPublicTeamStatisticsVisibilityAction,
+  setSeasonReviewVisibilityAction,
   updateTournamentTiebreaks,
 } from "../actions/admin-actions";
 
@@ -211,7 +212,7 @@ export default async function AdminPage({
 
   const params = await searchParams;
   const selectedGameweek = params?.gw ? Number(params.gw) : undefined;
-  const [teams, players, allFixtures, gameweeks, fantasyTeams, maintenanceSetting, teamStatisticsSetting] = await Promise.all([
+  const [teams, players, allFixtures, gameweeks, fantasyTeams, maintenanceSetting, teamStatisticsSetting, seasonReviewSetting] = await Promise.all([
     prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }] }),
     prisma.player.findMany({
       include: { nationalTeam: true },
@@ -242,9 +243,11 @@ export default async function AdminPage({
     }),
     prisma.systemSetting.findUnique({ where: { key: "maintenanceMode" } }),
     prisma.systemSetting.findUnique({ where: { key: "publicTeamStatistics" } }),
+    prisma.systemSetting.findUnique({ where: { key: "publicSeasonReview" } }),
   ]);
   const maintenanceEnabled = maintenanceSetting?.value === "on";
   const teamStatisticsEnabled = teamStatisticsSetting?.value === "on";
+  const seasonReviewEnabled = seasonReviewSetting?.value === "on";
   const playoffScores = await prisma.playoffMatch.findMany({ orderBy: { matchNo: "asc" } });
   const tournamentTeams = teams.map((team) => ({
     id: team.id,
@@ -670,6 +673,22 @@ export default async function AdminPage({
               Вимкнути статистику
             </button>
           </form>
+        </div>
+      </section>
+
+      <section className="panel" id="season-review" style={{ marginBottom: 16 }}>
+        <h2>Підсумки турніру</h2>
+        <p className="muted">
+          Публічна сторінка зараз <strong>{seasonReviewEnabled ? "увімкнена" : "вимкнена"}</strong>. Дані оновлюються разом із рейтингами.
+        </p>
+        <div className="toolbar">
+          <form action={setSeasonReviewVisibilityAction}>
+            <input type="hidden" name="enabled" value={seasonReviewEnabled ? "0" : "1"} />
+            <button className={`button ${seasonReviewEnabled ? "" : "primary"}`} type="submit">
+              {seasonReviewEnabled ? "Вимкнути сторінку" : "Увімкнути сторінку"}
+            </button>
+          </form>
+          <a className="button" href="/season-review?preview=1" target="_blank" rel="noreferrer">Попередній перегляд</a>
         </div>
       </section>
 

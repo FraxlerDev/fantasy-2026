@@ -22,7 +22,8 @@ const adminItem = { href: "/admin", label: "Адмін", icon: Wrench };
 export async function Sidebar({ active = "/" }: { active?: string }) {
   const session = await auth();
   const adminEmail = process.env.ADMIN_EMAIL ?? "terintention@gmail.com";
-  const visibleItems = session?.user?.email === adminEmail ? [...items, adminItem] : items;
+  const publicItems = items;
+  const visibleItems = session?.user?.email === adminEmail ? [...publicItems, adminItem] : publicItems;
 
   return (
     <aside className="sidebar">

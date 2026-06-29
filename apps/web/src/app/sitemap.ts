@@ -14,10 +14,11 @@ const publicRoutes = [
   { path: "/player-points", priority: 0.7, changeFrequency: "hourly" as const },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const routes = publicRoutes;
 
-  return publicRoutes.map((route) => ({
+  return routes.map((route) => ({
     url: `${siteUrl}${route.path}`,
     lastModified: now,
     changeFrequency: route.changeFrequency,

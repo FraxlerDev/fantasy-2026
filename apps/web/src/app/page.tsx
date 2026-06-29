@@ -20,14 +20,24 @@ import { getPlayerRanking } from "../lib/player-rankings";
 import { prisma } from "../lib/prisma";
 import { createMetadata } from "../lib/seo";
 import { startFromPromo } from "./actions/promo-actions";
+import { SeasonReviewView } from "./season-review/page";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = createMetadata({
-  title: "Фентезі до ЧС-2026",
-  description: "Фентезі-футбол до ЧС-2026 українською: збери склад, обери капітана, грай у лігах з друзями та глобальному рейтингу.",
-  path: "/",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const seasonReviewSetting = await prisma.systemSetting.findUnique({ where: { key: "publicSeasonReview" } }).catch(() => null);
+  return seasonReviewSetting?.value === "on"
+    ? createMetadata({
+        title: "Фентезі до ЧС-2026: підсумки турніру",
+        description: "Переможці, фінальний рейтинг, рекорди та команда турніру у Фентезі до ЧС-2026.",
+        path: "/",
+      })
+    : createMetadata({
+        title: "Фентезі до ЧС-2026",
+        description: "Фентезі-футбол до ЧС-2026 українською: збери склад, обери капітана, грай у лігах з друзями та глобальному рейтингу.",
+        path: "/",
+      });
+}
 
 function formatDate(date: Date) {
   return date.toLocaleString("uk-UA", {
@@ -40,6 +50,9 @@ function formatDate(date: Date) {
 }
 
 export default async function HomePage() {
+  const seasonReviewSetting = await prisma.systemSetting.findUnique({ where: { key: "publicSeasonReview" } }).catch(() => null);
+  if (seasonReviewSetting?.value === "on") return <SeasonReviewView active="/" />;
+
   const [session, rosterCounts, nextGameweek] = await Promise.all([
     auth(),
     prisma.rosterEntry.groupBy({

@@ -894,6 +894,7 @@ export async function refreshRankingsAction() {
   await refreshLeaderboards();
   revalidatePath("/leaderboard");
   revalidatePath("/leagues");
+  revalidatePath("/season-review");
   revalidatePath("/admin");
   redirect("/admin?rankings=updated");
 }
@@ -1007,4 +1008,21 @@ export async function setPublicTeamStatisticsVisibilityAction(formData: FormData
   revalidatePath("/admin");
   revalidatePath("/teams/[id]", "page");
   redirect(`/admin?teamStatistics=${enabled ? "on" : "off"}#team-statistics`);
+}
+
+export async function setSeasonReviewVisibilityAction(formData: FormData) {
+  await requireAdmin();
+  const enabled = String(formData.get("enabled") ?? "") === "1";
+
+  await prisma.systemSetting.upsert({
+    where: { key: "publicSeasonReview" },
+    create: { key: "publicSeasonReview", value: enabled ? "on" : "off" },
+    update: { value: enabled ? "on" : "off" },
+  });
+
+  revalidatePath("/", "layout");
+  revalidatePath("/season-review");
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/admin");
+  redirect(`/admin?seasonReview=${enabled ? "on" : "off"}#season-review`);
 }
