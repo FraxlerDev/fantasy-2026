@@ -14,9 +14,7 @@ export function SnapshotSubmitButton({
   return (
     <form
       action={createGameweekSnapshotsAction}
-      onSubmit={(event) => {
-        if (!window.confirm(confirmMessage)) event.preventDefault();
-      }}
+      data-confirm={confirmMessage}
     >
       <input type="hidden" name="gameweek" value={gameweek} />
       <button className="button" type="submit">

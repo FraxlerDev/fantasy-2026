@@ -85,11 +85,7 @@ export function PlayoffParticipantForm({
       <form
         action={saveConfirmedPlayoffTeams}
         className="playoff-participant-form"
-        onSubmit={(event) => {
-          if (hasResult && !window.confirm("Зміна учасників скине результат цього матчу та залежних матчів. Продовжити?")) {
-            event.preventDefault();
-          }
-        }}
+        data-confirm={hasResult ? "Зміна учасників скине результат цього матчу та залежних матчів. Продовжити?" : undefined}
       >
         <input name="matchId" type="hidden" value={matchId} />
         <div className="playoff-participant-pickers">
@@ -100,9 +96,7 @@ export function PlayoffParticipantForm({
       </form>
       <form
         action={resetConfirmedPlayoffTeams}
-        onSubmit={(event) => {
-          if (!window.confirm("Скинути обидві збірні, результат матчу та всі залежні результати?")) event.preventDefault();
-        }}
+        data-confirm="Скинути обидві збірні, результат матчу та всі залежні результати?"
       >
         <input name="matchId" type="hidden" value={matchId} />
         <button className="button warning" type="submit"><RotateCcw size={17} />Скинути пару цього матчу</button>

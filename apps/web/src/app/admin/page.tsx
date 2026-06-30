@@ -17,6 +17,8 @@ import { AdminPlayerImport } from "../../components/admin-player-import";
 import { AdminPlayerActions } from "../../components/admin-player-actions";
 import { AdminPlayerPriceManager } from "../../components/admin-player-price-manager";
 import { AdminPlayerPointInputs } from "../../components/admin-player-point-inputs";
+import { AdminAjaxController } from "../../components/admin-ajax-controller";
+import { AdminSettingsToggles } from "../../components/admin-settings-toggles";
 import { DeleteNationalTeamPlayersButton } from "../../components/delete-national-team-players-button";
 import { DeletePlayoffFixtureButton } from "../../components/delete-playoff-fixture-button";
 import { PlayoffParticipantForm } from "../../components/playoff-participant-form";
@@ -37,9 +39,6 @@ import {
   resetFixtureScore,
   saveFixturePoints,
   saveFixtureScore,
-  setMaintenanceModeAction,
-  setPublicTeamStatisticsVisibilityAction,
-  setSeasonReviewVisibilityAction,
   updateTournamentTiebreaks,
 } from "../actions/admin-actions";
 
@@ -212,7 +211,7 @@ export default async function AdminPage({
 
   const params = await searchParams;
   const selectedGameweek = params?.gw ? Number(params.gw) : undefined;
-  const [teams, players, allFixtures, gameweeks, fantasyTeams, maintenanceSetting, teamStatisticsSetting, seasonReviewSetting] = await Promise.all([
+  const [teams, players, allFixtures, gameweeks, fantasyTeams, maintenanceSetting, teamStatisticsSetting, seasonReviewSetting, autoSubstitutionSettings] = await Promise.all([
     prisma.nationalTeam.findMany({ orderBy: [{ groupKey: "asc" }, { nameUk: "asc" }] }),
     prisma.player.findMany({
       include: { nationalTeam: true },
@@ -244,10 +243,17 @@ export default async function AdminPage({
     prisma.systemSetting.findUnique({ where: { key: "maintenanceMode" } }),
     prisma.systemSetting.findUnique({ where: { key: "publicTeamStatistics" } }),
     prisma.systemSetting.findUnique({ where: { key: "publicSeasonReview" } }),
+    prisma.systemSetting.findMany({
+      where: { key: { startsWith: "autoSubstitutionsCalculated:GW" } },
+      orderBy: { key: "asc" },
+    }),
   ]);
   const maintenanceEnabled = maintenanceSetting?.value === "on";
   const teamStatisticsEnabled = teamStatisticsSetting?.value === "on";
   const seasonReviewEnabled = seasonReviewSetting?.value === "on";
+  const autoSubstitutionStatus = new Map(
+    autoSubstitutionSettings.map((setting) => [Number(setting.key.replace("autoSubstitutionsCalculated:GW", "")), setting.value]),
+  );
   const playoffScores = await prisma.playoffMatch.findMany({ orderBy: { matchNo: "asc" } });
   const tournamentTeams = teams.map((team) => ({
     id: team.id,
@@ -363,6 +369,7 @@ export default async function AdminPage({
 
   return (
     <AppShell active="/admin">
+      <AdminAjaxController />
       <div className="topbar admin-heading" id="admin-top">
         <div>
           <p className="eyebrow">Панель керування</p>
@@ -449,7 +456,9 @@ export default async function AdminPage({
       </section>
 
       <section className="panel" id="gameweeks" style={{ marginBottom: 16 }}>
-        <h2>Gameweeks, дедлайни і трансфери</h2>
+        <div className="section-heading-row admin-section-heading">
+          <div><p className="eyebrow">Керування турніром</p><h2>GW, дедлайни і трансфери</h2></div>
+        </div>
         <p className="muted">До дедлайну snapshot можна оновлювати вручну необмежену кількість разів. У момент дедлайну система примусово перезаписує його поточними складами та фіксує як фінальний. Ручне відкриття або закриття трансферів snapshot не змінює.</p>
         <table className="table compact-table">
           <thead>
@@ -601,96 +610,69 @@ export default async function AdminPage({
         </div>
       </section>
 
-      <section className="panel" id="autosubs" style={{ marginBottom: 16 }}>
-        <h2>Автозаміни</h2>
-        <p className="muted">
-          Підрахунок автозамін перезаписує автозаміни вибраного GW, додає їх до очок команд і одразу оновлює рейтинг.
-          Скидання прибирає автозаміни цього GW і також перераховує рейтинг без них.
-        </p>
-        <div className="admin-action-grid">
+      <details className="panel admin-section-accordion admin-settings-panel" id="autosubs">
+        <summary className="admin-section-summary">
+          <span><span className="eyebrow">Очки та рейтинг</span><strong>Автозаміни</strong></span>
+          <span className="badge">7 GW</span>
+        </summary>
+        <div className="admin-section-body">
+        <div className="section-heading-row">
+          <div>
+            <p className="muted admin-settings-intro">
+              Підрахунок перезаписує автозаміни вибраного GW, додає їх до очок команд і оновлює рейтинг. Скидання прибирає автозаміни цього GW та перераховує рейтинг без них.
+            </p>
+          </div>
+        </div>
+        <div className="admin-settings-list admin-autosubs-list">
           {gameweeks.map((gameweek) => (
-            <div className="card stat" key={`autosub-${gameweek.id}`}>
-              <span className="badge">GW{gameweek.number}</span>
-              <strong>{gameweek.stage ?? gameweek.name}</strong>
-              <div className="toolbar" style={{ marginTop: 12 }}>
+            <div className="admin-autosub-row" key={`autosub-${gameweek.id}`}>
+              <span className="admin-setting-icon"><Calculator size={20} /></span>
+              <span className="admin-setting-copy">
+                <strong>GW{gameweek.number} · {gameweek.stage ?? gameweek.name}</strong>
+                {autoSubstitutionStatus.has(gameweek.number) ? (
+                  <small className="admin-autosub-status calculated">
+                    Пораховано
+                    {autoSubstitutionStatus.get(gameweek.number)
+                      ? ` · ${new Date(autoSubstitutionStatus.get(gameweek.number)!).toLocaleString("uk-UA", {
+                          timeZone: "Europe/Kyiv",
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}`
+                      : ""}
+                  </small>
+                ) : (
+                  <small className="admin-autosub-status pending">Ще не пораховано</small>
+                )}
+              </span>
+              <div className="admin-autosub-actions">
                 <form action={calculateAutoSubstitutionsAction}>
                   <input type="hidden" name="gameweek" value={gameweek.number} />
                   <button className="button primary" type="submit">
                     <Calculator size={16} />
-                    Підрахунок автозамін GW{gameweek.number}
+                    Підрахувати
                   </button>
                 </form>
                 <form action={resetAutoSubstitutionsAction}>
                   <input type="hidden" name="gameweek" value={gameweek.number} />
-                  <button className="button" type="submit">
+                  <button className="button warning" type="submit">
                     <RotateCcw size={16} />
-                    Скинути GW{gameweek.number}
+                    Скинути
                   </button>
                 </form>
               </div>
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="panel" id="maintenance" style={{ marginBottom: 16 }}>
-        <h2>Технічні роботи</h2>
-        <p className="muted">
-          Поточний статус: <strong>{maintenanceEnabled ? "увімкнено" : "вимкнено"}</strong>. Для адміна адмінка і логін залишаються доступними.
-        </p>
-        <div className="toolbar">
-          <form action={setMaintenanceModeAction}>
-            <input type="hidden" name="enabled" value="1" />
-            <button className="button" type="submit">
-              <Wrench size={16} />
-              Технічні роботи
-            </button>
-          </form>
-          <form action={setMaintenanceModeAction}>
-            <input type="hidden" name="enabled" value="0" />
-            <button className="button primary" type="submit">
-              Завершити технічні роботи
-            </button>
-          </form>
         </div>
-      </section>
+      </details>
 
-      <section className="panel" id="team-statistics" style={{ marginBottom: 16 }}>
-        <h2>Статистика публічних команд</h2>
-        <p className="muted">
-          Поточний статус: <strong>{teamStatisticsEnabled ? "увімкнено" : "вимкнено"}</strong>. Перемикач керує всім статистичним блоком на індивідуальних сторінках команд.
-        </p>
-        <div className="toolbar">
-          <form action={setPublicTeamStatisticsVisibilityAction}>
-            <input type="hidden" name="enabled" value="1" />
-            <button className="button primary" disabled={teamStatisticsEnabled} type="submit">
-              Увімкнути статистику
-            </button>
-          </form>
-          <form action={setPublicTeamStatisticsVisibilityAction}>
-            <input type="hidden" name="enabled" value="0" />
-            <button className="button" disabled={!teamStatisticsEnabled} type="submit">
-              Вимкнути статистику
-            </button>
-          </form>
-        </div>
-      </section>
-
-      <section className="panel" id="season-review" style={{ marginBottom: 16 }}>
-        <h2>Підсумки турніру</h2>
-        <p className="muted">
-          Публічна сторінка зараз <strong>{seasonReviewEnabled ? "увімкнена" : "вимкнена"}</strong>. Дані оновлюються разом із рейтингами.
-        </p>
-        <div className="toolbar">
-          <form action={setSeasonReviewVisibilityAction}>
-            <input type="hidden" name="enabled" value={seasonReviewEnabled ? "0" : "1"} />
-            <button className={`button ${seasonReviewEnabled ? "" : "primary"}`} type="submit">
-              {seasonReviewEnabled ? "Вимкнути сторінку" : "Увімкнути сторінку"}
-            </button>
-          </form>
-          <a className="button" href="/season-review?preview=1" target="_blank" rel="noreferrer">Попередній перегляд</a>
-        </div>
-      </section>
+      <AdminSettingsToggles
+        maintenanceEnabled={maintenanceEnabled}
+        teamStatisticsEnabled={teamStatisticsEnabled}
+        seasonReviewEnabled={seasonReviewEnabled}
+      />
 
       {teamsWithRoster.map((team) => {
         const diagnostics = rosterDiagnostics(team);
@@ -764,9 +746,13 @@ export default async function AdminPage({
         );
       })}
 
-      <section className="grid cols-2" id="matches">
-        <div className="panel">
-          <h2>Створити матч</h2>
+      <section className="grid cols-2 admin-tools-grid" id="matches">
+        <details className="panel admin-section-accordion">
+          <summary className="admin-section-summary">
+            <span><span className="eyebrow">Матчі</span><strong>Створити матч</strong></span>
+            <Goal size={19} />
+          </summary>
+          <div className="admin-section-body">
           <form action={createFixture} className="form-stack">
             <label>
               Gameweek
@@ -804,10 +790,15 @@ export default async function AdminPage({
             </label>
             <button className="button primary" type="submit">Створити матч</button>
           </form>
-        </div>
+          </div>
+        </details>
 
-        <div className="panel" id="players">
-          <h2>Імпорт гравців CSV</h2>
+        <details className="panel admin-section-accordion" id="players">
+          <summary className="admin-section-summary">
+            <span><span className="eyebrow">Гравці</span><strong>Імпорт CSV</strong></span>
+            <Upload size={19} />
+          </summary>
+          <div className="admin-section-body">
           <AdminPlayerImport />
           <table className="table compact-table" style={{ marginTop: 14 }}>
             <thead><tr><th>Приклад з бази</th><th>Збірна</th><th>Поз.</th><th>Клуб</th><th>Ціна</th></tr></thead>
@@ -823,11 +814,16 @@ export default async function AdminPage({
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </details>
       </section>
 
-      <section className="panel" style={{ marginTop: 16 }} id="player-price">
-        <h2>Редагувати ціну гравця</h2>
+      <details className="panel admin-section-accordion" style={{ marginTop: 16 }} id="player-price">
+        <summary className="admin-section-summary">
+          <span><span className="eyebrow">Гравці</span><strong>Редагування цін</strong></span>
+          <Calculator size={19} />
+        </summary>
+        <div className="admin-section-body">
         <AdminPlayerPriceManager
           players={players.map((player) => ({
             id: player.id,
@@ -839,10 +835,15 @@ export default async function AdminPage({
             groupKey: player.nationalTeam.groupKey,
           }))}
         />
-      </section>
+        </div>
+      </details>
 
-      <section className="panel" style={{ marginTop: 16 }} id="players-list">
-        <h2>Редагувати гравців</h2>
+      <details className="panel admin-section-accordion" style={{ marginTop: 16 }} id="players-list">
+        <summary className="admin-section-summary">
+          <span><span className="eyebrow">База даних</span><strong>Редагування гравців</strong></span>
+          <span className="badge">{players.length}</span>
+        </summary>
+        <div className="admin-section-body">
         <p className="muted">Гравці згруповані за групами і збірними. Фото: JPG, PNG або WebP до 200 КБ.</p>
         <div className="admin-player-groups">
           {[...playersByGroup.entries()].map(([groupName, groupTeams]) => (
@@ -908,11 +909,13 @@ export default async function AdminPage({
             </details>
           ))}
         </div>
-      </section>
+        </div>
+      </details>
 
       <section className="panel" style={{ marginTop: 16 }} id="points">
         <div className="topbar" style={{ marginBottom: 12 }}>
           <div>
+            <p className="eyebrow">Очки та рейтинг</p>
             <h2>Ручні очки матчу</h2>
             <p className="muted">Обери GW, групу і матч. Потім введи fantasy-очки гравців та окремо онови рейтинги.</p>
           </div>
@@ -1060,7 +1063,12 @@ export default async function AdminPage({
         ) : null}
       </section>
 
-      <section className="panel" style={{ marginTop: 16 }} id="playoff-scores">
+      <details className="panel admin-section-accordion" style={{ marginTop: 16 }} id="playoff-scores" open={Boolean(activePlayoff)}>
+        <summary className="admin-section-summary">
+          <span><span className="eyebrow">Керування турніром</span><strong>Результати плей-оф</strong></span>
+          <Trophy size={19} />
+        </summary>
+        <div className="admin-section-body">
         <div className="topbar" style={{ marginBottom: 12 }}>
           <div>
             <h2>Результати плей-оф</h2>
@@ -1164,12 +1172,9 @@ export default async function AdminPage({
             ))}
           </div>
         </details>
-      </section>
+        </div>
+      </details>
 
-      <section className="panel" style={{ marginTop: 16 }} id="rankings">
-        <h2>Рейтинги</h2>
-        <p className="muted">Після введення очок натисни “Оновити рейтинги”, щоб перерахувати глобальну таблицю і приватні ліги.</p>
-      </section>
     </AppShell>
   );
 }

@@ -6,11 +6,7 @@ export function DeletePlayerButton({ playerId, playerName }: { playerId: string;
   return (
     <form
       action={deletePlayer}
-      onSubmit={(event) => {
-        if (!window.confirm(`Видалити гравця ${playerName}? Якщо він є у складах користувачів, система не дозволить видалення.`)) {
-          event.preventDefault();
-        }
-      }}
+      data-confirm={`Видалити гравця ${playerName}? Якщо він є у складах користувачів, система не дозволить видалення.`}
     >
       <input type="hidden" name="playerId" value={playerId} />
       <button className="button warning" type="submit">Видалити</button>

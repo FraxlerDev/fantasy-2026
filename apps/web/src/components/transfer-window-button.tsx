@@ -20,9 +20,7 @@ export function TransferWindowButton({
   return (
     <form
       action={isOpenAction ? openGameweekTransfersAction : closeGameweekTransfersAction}
-      onSubmit={(event) => {
-        if (!window.confirm(confirmMessage)) event.preventDefault();
-      }}
+      data-confirm={confirmMessage}
     >
       <input type="hidden" name="gameweek" value={gameweek} />
       <button className={isOpenAction ? "button primary" : "button"} type="submit" disabled={disabled}>

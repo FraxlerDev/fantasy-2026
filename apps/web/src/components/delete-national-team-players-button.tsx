@@ -14,15 +14,7 @@ export function DeleteNationalTeamPlayersButton({
   return (
     <form
       action={deleteNationalTeamPlayers}
-      onSubmit={(event) => {
-        if (
-          !window.confirm(
-            `Видалити весь склад збірної ${teamName} (${playerCount} гравців)? Якщо хтось із них уже є у складах користувачів, система не дозволить видалення.`,
-          )
-        ) {
-          event.preventDefault();
-        }
-      }}
+      data-confirm={`Видалити весь склад збірної ${teamName} (${playerCount} гравців)? Якщо хтось із них уже є у складах користувачів, система не дозволить видалення.`}
     >
       <input type="hidden" name="nationalTeamId" value={nationalTeamId} />
       <button className="button warning" type="submit" disabled={playerCount === 0}>
