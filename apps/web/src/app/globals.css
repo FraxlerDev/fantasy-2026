@@ -78,32 +78,61 @@
 @keyframes season-pulse { 50% { opacity: .35; transform: scale(1.12); } }
 
 @media (max-width: 760px) {
-  .season-review-page { gap: 10px; }
-  .season-review-hero { min-height: 560px; padding: 28px 20px; background-position: 62% bottom; background-size: auto 58%; }
-  .season-review-hero::after { background: linear-gradient(180deg, rgba(5,25,19,.99) 0 53%, rgba(5,25,19,.1) 82%); }
-  .season-review-hero h1 { font-size: 38px; }
-  .season-review-hero > p:not(.eyebrow) { font-size: 16px; }
-  .season-winner { margin-top: 18px; }
-  .season-section, .season-thanks { padding: 18px; }
-  .season-podium { display: grid; grid-template-columns: 1fr; }
-  .season-podium-card.place-1, .season-podium-card.place-2, .season-podium-card.place-3 { grid-column: 1; min-height: 180px; }
-  .season-podium-card.place-1 { grid-row: 1; }
-  .season-podium-card.place-2 { grid-row: 2; }
-  .season-podium-card.place-3 { grid-row: 3; }
+  .season-review-page { width: 100%; min-width: 0; gap: 10px; overflow: hidden; }
+  .season-review-hero { min-height: 500px; padding: 24px 16px; background-position: 61% bottom; background-size: auto 54%; }
+  .season-review-hero::after { background: linear-gradient(180deg, rgba(5,25,19,.99) 0 55%, rgba(5,25,19,.18) 79%, rgba(5,25,19,.04)); }
+  .season-review-hero h1 { max-width: 100%; margin-top: 5px; font-size: 34px; line-height: 1.05; overflow-wrap: anywhere; }
+  .season-review-hero > p:not(.eyebrow) { max-width: 100%; margin: 8px 0; font-size: 15px; line-height: 1.4; }
+  .season-winner { width: 100%; margin-top: 14px; padding: 12px 14px; }
+  .season-winner svg { width: 34px; height: 34px; }
+  .season-winner strong { min-width: 0; font-size: 20px; overflow-wrap: anywhere; }
+  .season-confetti { display: none; }
+  .season-section, .season-thanks { min-width: 0; padding: 16px 14px; border-radius: 6px; }
+  .season-heading { align-items: flex-start; gap: 9px; margin-bottom: 14px; }
+  .season-heading svg { width: 22px; height: 22px; flex: 0 0 auto; }
+  .season-heading h2 { font-size: 22px; line-height: 1.15; }
+  .season-podium { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .season-podium-card.place-1 { grid-column: 1 / -1; grid-row: 1; min-height: 160px; }
+  .season-podium-card.place-2 { grid-column: 1; grid-row: 2; }
+  .season-podium-card.place-3 { grid-column: 2; grid-row: 2; }
+  .season-podium-card.place-1, .season-podium-card.place-2, .season-podium-card.place-3 { min-height: 150px; padding: 24px 8px 12px; }
+  .season-place { top: 7px; left: 8px; font-size: 19px; }
+  .season-team-photo { width: 54px; height: 54px; }
+  .season-podium-card strong { max-width: 100%; font-size: 15px; overflow-wrap: anywhere; }
+  .season-podium-card span:not(.season-place), .season-podium-card b { font-size: 12px; text-align: center; }
   .season-stats { grid-template-columns: repeat(2, 1fr); }
-  .season-stats > div { padding: 16px; border-bottom: 1px solid rgba(255,255,255,.15); }
+  .season-stats > div { min-width: 0; padding: 13px 12px; border-bottom: 1px solid rgba(255,255,255,.15); }
+  .season-stats span { font-size: 12px; line-height: 1.25; }
+  .season-stats strong { font-size: 23px; }
   .season-stats > div:last-child { grid-column: 1 / -1; }
   .season-two-column { grid-template-columns: 1fr; gap: 10px; }
-  .season-chart-wrap { overflow-x: auto; }
-  .season-chart { min-width: 680px; }
-  .season-dream-team { min-height: 0; padding: 20px 3px; }
+  .season-ranking li { grid-template-columns: 26px minmax(0, 1fr) auto; gap: 7px; padding: 10px 0; }
+  .season-ranking a, .season-gw-winners span { min-width: 0; overflow-wrap: anywhere; }
+  .season-gw-winners a { grid-template-columns: 42px minmax(0, 1fr) auto; padding: 10px; }
+  .season-chart-wrap { width: 100%; overflow: hidden; }
+  .season-chart { width: 100%; min-width: 0; min-height: 180px; height: auto; }
+  .season-chart text { font-size: 15px; }
+  .season-chart-legend { gap: 8px 12px; font-size: 12px; }
+  .season-dream-team { width: 100%; max-width: 430px; min-height: 0; padding: 18px 2px; gap: 8px; }
+  .season-dream-line { justify-content: space-evenly; gap: 2px; min-width: 0; }
   .season-player { min-width: 0; }
-  .season-player > img:not(.season-player-flag), .season-player > span { width: 48px; height: 48px; }
-  .season-player strong { max-width: 86px; padding: 3px 4px; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .season-player > img:not(.season-player-flag), .season-player > span { width: 44px; height: 44px; }
+  .season-player strong { width: min(76px, 20vw); max-width: 76px; padding: 3px; font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .season-player b { font-size: 10px; }
-  .season-player .season-player-flag { top: 34px; right: 3px; width: 19px; height: 12px; }
+  .season-player .season-player-flag { top: 31px; right: 2px; width: 18px; height: 11px; }
   .season-position-leaders, .season-records { grid-template-columns: 1fr 1fr; }
-  .season-thanks { padding: 32px 20px; }
+  .season-position-leaders > div, .season-records > div { min-width: 0; padding: 11px; }
+  .season-position-leaders strong, .season-records strong { overflow-wrap: anywhere; }
+  .season-thanks { padding: 28px 16px; }
+  .season-thanks h2 { font-size: 24px; line-height: 1.15; }
+  .season-thanks p:not(.eyebrow) { font-size: 15px; line-height: 1.5; }
+  .season-thanks .button { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 390px) {
+  .season-review-hero h1 { font-size: 30px; }
+  .season-position-leaders, .season-records { grid-template-columns: 1fr; }
+  .season-podium-card.place-2, .season-podium-card.place-3 { min-height: 142px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
