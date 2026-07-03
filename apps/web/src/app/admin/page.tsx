@@ -29,6 +29,7 @@ import { TransferWindowButton } from "../../components/transfer-window-button";
 import { requireAdmin } from "../../lib/admin";
 import { ensureDefaultGameweeks } from "../../lib/gameweeks";
 import { prisma } from "../../lib/prisma";
+import { maxPlayersPerNationForGameweek } from "../../lib/roster-limits";
 import { createMetadata } from "../../lib/seo";
 import { buildAllGroupStandings, ensurePlayoffMatches, resolvePlayoffMatches } from "../../lib/tournament";
 import {
@@ -107,7 +108,7 @@ function rosterDiagnostics(team: {
       nationalTeam: { nameUk: string };
     };
   }>;
-}) {
+}, gameweekNumber?: number | null) {
   const total = team.rosterEntries.length;
   const starters = team.rosterEntries.filter((entry) => entry.slot === "STARTER");
   const budget = team.rosterEntries.reduce((sum, entry) => sum + Number(entry.player.price), 0);
@@ -127,7 +128,8 @@ function rosterDiagnostics(team: {
     map.set(entry.player.nationalTeam.nameUk, (map.get(entry.player.nationalTeam.nameUk) ?? 0) + 1);
     return map;
   }, new Map());
-  const overloadedNations = [...nationCounts.entries()].filter(([, count]) => count > 2);
+  const maxPlayersPerNation = maxPlayersPerNationForGameweek(gameweekNumber);
+  const overloadedNations = [...nationCounts.entries()].filter(([, count]) => count > maxPlayersPerNation);
   const formationParts = team.formation.split("-").map((part) => Number(part));
   const formationOk =
     starterCounts.GK === 1 &&
@@ -254,6 +256,7 @@ export default async function AdminPage({
   const autoSubstitutionStatus = new Map(
     autoSubstitutionSettings.map((setting) => [Number(setting.key.replace("autoSubstitutionsCalculated:GW", "")), setting.value]),
   );
+  const rosterLimitGameweek = gameweeks.find((gameweek) => gameweek.transfersOpen && gameweek.deadlineAt > new Date())?.number;
   const playoffScores = await prisma.playoffMatch.findMany({ orderBy: { matchNo: "asc" } });
   const tournamentTeams = teams.map((team) => ({
     id: team.id,
@@ -675,7 +678,7 @@ export default async function AdminPage({
       />
 
       {teamsWithRoster.map((team) => {
-        const diagnostics = rosterDiagnostics(team);
+        const diagnostics = rosterDiagnostics(team, rosterLimitGameweek);
         const starters = team.rosterEntries.filter((entry) => entry.slot === "STARTER");
         const bench = team.rosterEntries.filter((entry) => entry.slot !== "STARTER");
 

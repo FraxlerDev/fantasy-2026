@@ -176,7 +176,7 @@ export default async function SquadPage({
       : null;
 
   const validationReason = fantasyTeam
-    ? validateRosterForSnapshot(fantasyTeam.rosterEntries, fantasyTeam.formation)
+    ? validateRosterForSnapshot(fantasyTeam.rosterEntries, fantasyTeam.formation, editableGameweek?.number)
     : null;
   const isValid = Boolean(fantasyTeam && !validationReason);
   const previousIds = new Set(transferBaseSnapshot?.entries.map((entry) => entry.playerId) ?? []);
