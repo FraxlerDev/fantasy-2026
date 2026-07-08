@@ -34,7 +34,7 @@ function serializeMessage(message: {
   } | null;
   likes: { id: string }[];
   _count: { likes: number };
-}) {
+}, isAdmin = false, viewCount = 0) {
   return {
     id: message.id,
     body: message.body,
@@ -55,6 +55,7 @@ function serializeMessage(message: {
     },
     likeCount: message._count.likes,
     likedByCurrentUser: message.likes.length > 0,
+    ...(isAdmin ? { viewCount } : {}),
   };
 }
 
@@ -78,11 +79,28 @@ function messageInclude(currentUserId?: string) {
   } as const;
 }
 
+async function loadMessageViewCounts(messageIds: string[]) {
+  if (messageIds.length === 0) return new Map<string, number>();
+
+  try {
+    const counts = await prisma.chatMessageView.groupBy({
+      by: ["messageId"],
+      where: { messageId: { in: messageIds } },
+      _count: { _all: true },
+    });
+
+    return new Map(counts.map((count) => [count.messageId, count._count._all]));
+  } catch {
+    return new Map<string, number>();
+  }
+}
+
 export async function GET(request: Request) {
   const session = await auth();
   const { searchParams } = new URL(request.url);
   const after = searchParams.get("after");
   const afterDate = after ? new Date(after) : null;
+  const isAdmin = isAdminEmail(session?.user?.email);
 
   const hasAfter = Boolean(afterDate && !Number.isNaN(afterDate.getTime()));
   const [messages, reactionMessages] = await Promise.all([
@@ -137,14 +155,22 @@ export async function GET(request: Request) {
       ])
     : [false, 0];
 
+  const viewCounts = isAdmin
+    ? await loadMessageViewCounts([
+        ...messages.map((message) => message.id),
+        ...reactionMessages.map((message) => message.id),
+      ])
+    : new Map<string, number>();
+
   return NextResponse.json({
-    messages: messages.reverse().map(serializeMessage),
+    messages: messages.reverse().map((message) => serializeMessage(message, isAdmin, viewCounts.get(message.id) ?? 0)),
     reactions: reactionMessages.map((message) => ({
       id: message.id,
       body: message.body,
       edited: message.updatedAt.getTime() > message.createdAt.getTime() + 10,
       likeCount: message._count.likes,
       likedByCurrentUser: message.likes.length > 0,
+      ...(isAdmin ? { viewCount: viewCounts.get(message.id) ?? 0 } : {}),
     })),
     unreadCount,
     currentUser: session?.user?.id
@@ -164,6 +190,30 @@ export async function PATCH() {
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Увійди, щоб позначити повідомлення прочитаними." }, { status: 401 });
+  }
+
+  const viewedMessages = await prisma.chatMessage.findMany({
+    where: {
+      isDeleted: false,
+      authorId: { not: session.user.id },
+    },
+    select: { id: true },
+    orderBy: { createdAt: "desc" },
+    take: 80,
+  });
+
+  if (viewedMessages.length > 0) {
+    try {
+      await prisma.chatMessageView.createMany({
+        data: viewedMessages.map((message) => ({
+          messageId: message.id,
+          userId: session.user.id,
+        })),
+        skipDuplicates: true,
+      });
+    } catch {
+      // The chat must keep working even before the optional views table is applied.
+    }
   }
 
   await prisma.user.update({
@@ -214,5 +264,5 @@ export async function POST(request: Request) {
     include: messageInclude(session.user.id),
   });
 
-  return NextResponse.json({ message: serializeMessage(message) }, { status: 201 });
+  return NextResponse.json({ message: serializeMessage(message, isAdminEmail(session.user.email), 0) }, { status: 201 });
 }

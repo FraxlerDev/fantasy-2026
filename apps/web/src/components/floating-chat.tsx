@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, Heart, Pencil, Reply, Save, Send, Smile, Trash2, X } from "lucide-react";
+import { Ban, Eye, Heart, Pencil, Reply, Save, Send, Smile, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type ChatMessage = {
@@ -21,6 +21,7 @@ type ChatMessage = {
   };
   likeCount: number;
   likedByCurrentUser: boolean;
+  viewCount?: number;
 };
 
 type CurrentUser = {
@@ -103,6 +104,7 @@ export function FloatingChat() {
         edited: boolean;
         likeCount: number;
         likedByCurrentUser: boolean;
+        viewCount?: number;
       }[];
     };
     setCurrentUser(data.currentUser);
@@ -456,6 +458,12 @@ export function FloatingChat() {
                         <span className="chat-like-button readonly">
                           <Heart size={15} fill="currentColor" />
                           <span>{message.likeCount}</span>
+                        </span>
+                      ) : null}
+                      {currentUser?.isAdmin && typeof message.viewCount === "number" ? (
+                        <span className="chat-view-count" title="Перегляди повідомлення">
+                          <Eye size={15} />
+                          <span>{message.viewCount}</span>
                         </span>
                       ) : null}
                     </div>

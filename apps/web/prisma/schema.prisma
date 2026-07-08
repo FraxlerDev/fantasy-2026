@@ -78,6 +78,7 @@ model User {
   auditLogs   AuditLog[] @relation("AuditActor")
   chatMessages ChatMessage[] @relation("ChatMessageAuthor")
   chatMessageLikes ChatMessageLike[]
+  chatMessageViews ChatMessageView[]
   chatBans ChatBan[] @relation("ChatBannedUser")
   createdChatBans ChatBan[] @relation("ChatBanCreator")
   forumTopics ForumTopic[]
@@ -131,6 +132,7 @@ model ChatMessage {
   replyTo ChatMessage? @relation("ChatMessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
   replies ChatMessage[] @relation("ChatMessageReplies")
   likes ChatMessageLike[]
+  views ChatMessageView[]
 
   @@index([createdAt])
   @@index([authorId])
@@ -142,6 +144,20 @@ model ChatMessageLike {
   messageId String
   userId    String
   createdAt DateTime @default(now())
+
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+}
+
+model ChatMessageView {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  viewedAt  DateTime @default(now())
 
   message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
   user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)

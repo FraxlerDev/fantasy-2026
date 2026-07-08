@@ -142,7 +142,7 @@ function rosterDiagnostics(team: {
     { label: "15 гравців у складі", ok: total === 15, value: `${total}/15` },
     { label: "2 GK, 5 DEF, 5 MID, 3 FWD", ok: counts.GK === 2 && counts.DEF === 5 && counts.MID === 5 && counts.FWD === 3, value: `${counts.GK}/${counts.DEF}/${counts.MID}/${counts.FWD}` },
     { label: "Бюджет не більше 100", ok: budget <= 100, value: budget.toFixed(1) },
-    { label: "Не більше 2 з однієї збірної", ok: overloadedNations.length === 0, value: overloadedNations.length ? overloadedNations.map(([name, count]) => `${name}: ${count}`).join(", ") : "OK" },
+    { label: `Не більше ${maxPlayersPerNation} з однієї збірної`, ok: overloadedNations.length === 0, value: overloadedNations.length ? overloadedNations.map(([name, count]) => `${name}: ${count}`).join(", ") : "OK" },
     { label: `Старт відповідає схемі ${team.formation}`, ok: formationOk, value: `${starterCounts.DEF}-${starterCounts.MID}-${starterCounts.FWD}` },
     { label: "Капітан обраний зі старту", ok: captainOk, value: captainOk ? "OK" : "Немає" },
   ];
