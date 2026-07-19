@@ -6711,6 +6711,10 @@ details.autosub-info-popover:not([open]) .autosub-rules-popover {
   color: #111;
 }
 
+.football-lineup-board .player-photo-points.match-points-2 {
+  left: 22px;
+}
+
 .football-lineup-board .captain-points-mark,
 .football-lineup-board .match-status-mark {
   width: 24px;

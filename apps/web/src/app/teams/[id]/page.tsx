@@ -158,12 +158,13 @@ function playerCard(
   autoSubInByPlayer: Map<string, AutoSubstitutionDisplay>,
   label = positionLabels[entry.player.position],
   isBench = false,
+  matchPoints: number[] = [],
 ) {
   const basePoints = points.get(entry.playerId) ?? 0;
-  const displayedPoints = entry.isCaptain ? basePoints * 2 : basePoints;
   const matchStatus = statuses.get(entry.playerId);
   const hasResult = statuses.has(entry.playerId);
   const autoSubIn = autoSubInByPlayer.get(entry.playerId);
+  const scoreBadges = matchPoints.length > 0 ? matchPoints : hasResult ? [basePoints] : [];
 
   return (
     <div
@@ -173,14 +174,22 @@ function playerCard(
       <span className="player-photo-wrap">
         {entry.player.photoUrl ? <img alt="" className="player-photo" src={entry.player.photoUrl} /> : <span className="player-photo placeholder" />}
       </span>
-      {hasResult ? (
+      {scoreBadges.map((score, index) => {
+        const displayedScore = entry.isCaptain ? score * 2 : score;
+        return (
         <span
-          className={`player-photo-points ${entry.isCaptain ? "captain-points" : ""}`}
-          title={entry.isCaptain ? `Очки подвоєні за капітанство: ${basePoints} × 2 = ${displayedPoints}` : `${displayedPoints} очок`}
+          className={`player-photo-points ${entry.isCaptain ? "captain-points" : ""} ${scoreBadges.length > 1 ? `match-points-${index + 1}` : ""}`}
+          key={`${entry.playerId}-score-${index}`}
+          title={
+            entry.isCaptain
+              ? `${scoreBadges.length > 1 ? `Матч ${index + 1}: ` : ""}очки подвоєні за капітанство: ${score} × 2 = ${displayedScore}`
+              : `${scoreBadges.length > 1 ? `Матч ${index + 1}: ` : ""}${displayedScore} очок`
+          }
         >
-          {displayedPoints}
+          {displayedScore}
         </span>
-      ) : null}
+        );
+      })}
       {entry.isCaptain ? (
         <span className="captain-points-mark" title={`Капітан. Очки подвоєні: ${basePoints} × 2`}>
           <img alt="" src="/fire.png" />
@@ -304,17 +313,24 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
     .sort((a, b) => (a.benchOrder ?? 99) - (b.benchOrder ?? 99));
 
   const pointsByGameweek = new Map<number, Map<string, number>>();
+  const matchPointsByGameweek = new Map<number, Map<string, number[]>>();
   const statusesByGameweek = new Map<number, Map<string, PlayerGameweekStatus>>();
   const scoredFixturesByGameweek = new Map<number, number>();
 
   for (const fixture of fixtures) {
     const pointMap = pointsByGameweek.get(fixture.gameweek) ?? new Map<string, number>();
+    const matchPointMap = matchPointsByGameweek.get(fixture.gameweek) ?? new Map<string, number[]>();
     const statusMap = statusesByGameweek.get(fixture.gameweek) ?? new Map<string, PlayerGameweekStatus>();
     if (fixture.playerPoints.length > 0) {
       scoredFixturesByGameweek.set(fixture.gameweek, (scoredFixturesByGameweek.get(fixture.gameweek) ?? 0) + 1);
     }
     for (const point of fixture.playerPoints) {
       pointMap.set(point.playerId, (pointMap.get(point.playerId) ?? 0) + point.points);
+      if (fixture.gameweek === 7) {
+        const playerMatchPoints = matchPointMap.get(point.playerId) ?? [];
+        playerMatchPoints.push(point.points);
+        matchPointMap.set(point.playerId, playerMatchPoints);
+      }
       const currentStatus = statusMap.get(point.playerId);
       statusMap.set(point.playerId, {
         didPlay: Boolean(currentStatus?.didPlay || point.didPlay),
@@ -322,6 +338,7 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
       });
     }
     pointsByGameweek.set(fixture.gameweek, pointMap);
+    matchPointsByGameweek.set(fixture.gameweek, matchPointMap);
     statusesByGameweek.set(fixture.gameweek, statusMap);
   }
 
@@ -397,6 +414,9 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
   }
 
   const selectedPoints = pointsByGameweek.get(requestedGameweek) ?? new Map<string, number>();
+  const selectedMatchPoints = requestedGameweek === 7
+    ? matchPointsByGameweek.get(requestedGameweek) ?? new Map<string, number[]>()
+    : new Map<string, number[]>();
   const selectedStatuses = statusesByGameweek.get(requestedGameweek) ?? new Map<string, PlayerGameweekStatus>();
   const selectedGwPoints = selectedSnapshot ? teamPointsByGameweek.get(requestedGameweek) ?? 0 : null;
   const selectedStarterPoints = selectedSnapshot
@@ -582,7 +602,16 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
                         {Array.from({ length: row.slots }, (_, index) => {
                           const entry = rowPlayers[index];
                           return entry
-                            ? playerCard(entry, selectedPoints, selectedStatuses, selectedAutoSubOutIds, selectedAutoSubInByPlayer)
+                            ? playerCard(
+                                entry,
+                                selectedPoints,
+                                selectedStatuses,
+                                selectedAutoSubOutIds,
+                                selectedAutoSubInByPlayer,
+                                positionLabels[entry.player.position],
+                                false,
+                                selectedMatchPoints.get(entry.playerId) ?? [],
+                              )
                             : <div className="fantasy-shirt empty public-empty-slot" key={`${row.position}-${index}`} />;
                         })}
                       </div>
@@ -593,7 +622,16 @@ export default async function PublicTeamPage({ params, searchParams }: PublicTea
                   {Array.from({ length: 4 }, (_, index) => {
                     const entry = bench[index];
                     return entry
-                      ? playerCard(entry, selectedPoints, selectedStatuses, selectedAutoSubOutIds, selectedAutoSubInByPlayer, positionLabels[entry.player.position], true)
+                      ? playerCard(
+                          entry,
+                          selectedPoints,
+                          selectedStatuses,
+                          selectedAutoSubOutIds,
+                          selectedAutoSubInByPlayer,
+                          positionLabels[entry.player.position],
+                          true,
+                          selectedMatchPoints.get(entry.playerId) ?? [],
+                        )
                       : <div className="fantasy-shirt empty public-empty-slot" key={`bench-${index}`} />;
                   })}
                 </div>
